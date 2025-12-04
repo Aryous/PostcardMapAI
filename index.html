@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MapPostcard AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.18.3/dist/leaflet-geoman.css"
+    />
+    <style>
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      .leaflet-container {
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+
+      /* 3D Perspective for Animation */
+      .perspective-1000 {
+        perspective: 1000px;
+      }
+      
+      .preserve-3d {
+        transform-style: preserve-3d;
+      }
+
+      .backface-hidden {
+        backface-visibility: hidden;
+      }
+
+      .rotate-y-180 {
+        transform: rotateY(180deg);
+      }
+
+      /* Realistic Shadow for Postcard */
+      .postcard-shadow {
+        box-shadow: 
+          0 1px 2px rgba(0,0,0,0.05), 
+          0 4px 16px rgba(0,0,0,0.1),
+          0 8px 32px rgba(0,0,0,0.1);
+      }
+
+      /* Paper Texture Effect */
+      .paper-texture {
+        background-color: #fdfbf7;
+        background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+      }
+
+      /* Envelope Animations */
+      @keyframes envelope-in {
+        0% { transform: translateY(120%) rotate(-5deg); opacity: 0; }
+        100% { transform: translateY(0) rotate(-5deg); opacity: 1; }
+      }
+
+      @keyframes flap-open {
+        0% { transform: rotateX(0deg); }
+        100% { transform: rotateX(180deg); z-index: 0; }
+      }
+
+      @keyframes card-eject {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-150px); }
+      }
+
+      @keyframes envelope-drop {
+        0% { transform: translateY(0) rotate(-5deg); opacity: 1; }
+        100% { transform: translateY(120%) rotate(-5deg); opacity: 0; }
+      }
+      
+      @keyframes card-settle {
+        0% { transform: translateY(-150px) scale(0.9); }
+        100% { transform: translateY(0) rotate(2deg) scale(1); }
+      }
+
+      /* 3D Dice Styles - Revised */
+      .dice-scene {
+        perspective: 800px;
+        width: 64px;
+        height: 64px;
+      }
+      .dice-cube {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .dice-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: inset 0 0 15px rgba(0,0,0,0.03);
+        backface-visibility: hidden;
+      }
+      .dice-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        box-shadow: inset 1px 1px 3px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.8);
+      }
+      .dot-red { background: #ef4444; }
+      .dot-blue { background: #3b82f6; }
+      .dot-dark { background: #334155; }
+
+      /* Cube Faces Layout (64px / 2 = 32px translate) */
+      .face-1 { transform: rotateY(0deg) translateZ(32px); }
+      .face-2 { transform: rotateY(90deg) translateZ(32px); }
+      .face-3 { transform: rotateY(180deg) translateZ(32px); }
+      .face-4 { transform: rotateY(-90deg) translateZ(32px); }
+      .face-5 { transform: rotateX(90deg) translateZ(32px); }
+      .face-6 { transform: rotateX(-90deg) translateZ(32px); }
+      
+      @keyframes spin-dice-infinite {
+        0% { transform: rotateX(0) rotateY(0); }
+        100% { transform: rotateX(360deg) rotateY(720deg); }
+      }
+      @keyframes float-dice {
+        0%, 100% { transform: translateY(0) rotateX(-10deg) rotateY(-10deg); }
+        50% { transform: translateY(-8px) rotateX(-5deg) rotateY(-15deg); }
+      }
+
+      .animate-spin-dice {
+        animation: spin-dice-infinite 1.2s linear infinite;
+      }
+      .animate-float-dice {
+        animation: float-dice 4s ease-in-out infinite;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "react-leaflet": "https://aistudiocdn.com/react-leaflet@^5.0.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react-dom/client": "https://aistudiocdn.com/react-dom@^19.2.0/client",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
+    "leaflet": "https://aistudiocdn.com/leaflet@^1.9.4",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "html2canvas": "https://aistudiocdn.com/html2canvas@^1.4.1",
+    "@geoman-io/leaflet-geoman-free": "https://aistudiocdn.com/@geoman-io/leaflet-geoman-free@^2.18.3",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-50 text-slate-900 antialiased overflow-hidden">
+    <div id="root" class="h-screen w-screen flex flex-col"></div>
+  </body>
+</html>

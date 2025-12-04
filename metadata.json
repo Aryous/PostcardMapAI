@@ -1,0 +1,7 @@
+{
+  "name": "MapPostcard AI",
+  "description": "Create exquisite, AI-generated postcards from any location on the map using Gemini 2.5 Flash Image. Draw your area, style it with text, and share.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
