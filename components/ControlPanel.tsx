@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { MapPin, Wand2, RefreshCw, Palette, Zap, Sparkles, History, Upload, X, User, MousePointer2, RectangleHorizontal, RectangleVertical, Square, Settings, ChevronDown, ChevronUp, Type, Loader2 } from 'lucide-react';
+import { MapPin, Wand2, RefreshCw, Palette, Zap, Sparkles, History, Upload, X, User, MousePointer2, RectangleHorizontal, RectangleVertical, Square, Settings, ChevronDown, ChevronUp, Type, Loader2, Coins } from 'lucide-react';
 import { AppState, Language, ModelType, AspectRatio, DevConfig } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
 
@@ -50,6 +50,7 @@ interface ControlPanelProps {
   setDevConfig: (config: DevConfig) => void;
   locationName: string;
   setLocationName: (name: string) => void;
+  sessionCost: number;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -69,7 +70,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   devConfig,
   setDevConfig,
   locationName,
-  setLocationName
+  setLocationName,
+  sessionCost
 }) => {
   const [selectedStyleId, setSelectedStyleId] = useState(STYLE_DEFS[0].id);
   
@@ -146,13 +148,21 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         
         {/* Header - Always Visible */}
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-md z-10">
-          <div 
-            className="flex items-center gap-2 text-indigo-700 cursor-pointer select-none active:scale-95 transition-transform"
-            onClick={handleTitleClick}
-            title={isDevEnabled ? "Developer Mode Active" : "MapPostcard AI"}
-          >
-            <MapPin className="w-4 h-4" />
-            <span className="font-bold text-sm tracking-tight">{t.title}</span>
+          <div className="flex flex-col">
+            <div 
+                className="flex items-center gap-2 text-indigo-700 cursor-pointer select-none active:scale-95 transition-transform"
+                onClick={handleTitleClick}
+                title={isDevEnabled ? "Developer Mode Active" : "MapPostcard AI"}
+            >
+                <MapPin className="w-4 h-4" />
+                <span className="font-bold text-sm tracking-tight">{t.title}</span>
+            </div>
+            {sessionCost > 0 && (
+                <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                    <Coins className="w-3 h-3 text-amber-500" />
+                    <span>{t.sessionCost}: ${sessionCost.toFixed(3)}</span>
+                </div>
+            )}
           </div>
           
           <div className="flex items-center gap-2">

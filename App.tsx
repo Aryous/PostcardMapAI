@@ -5,7 +5,7 @@ import ControlPanel, { STYLE_DEFS } from './components/ControlPanel';
 import PostcardResult from './components/PostcardResult';
 import HistoryPanel from './components/HistoryPanel';
 import LuckyDice from './components/LuckyDice';
-import { AppState, Language, ModelType, HistoryItem, AspectRatio, DevConfig } from './types';
+import { AppState, Language, ModelType, HistoryItem, AspectRatio, DevConfig, UsageStats } from './types';
 import { generatePostcard, generatePostcardBack } from './services/geminiService';
 import { captureMapElement } from './utils/mapUtils';
 import { getRandomLocation } from './utils/locations';
@@ -15,6 +15,9 @@ export default function App() {
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   const [generatedImage, setGeneratedImage] = useState<string | undefined>(undefined);
   const [generatedBackImage, setGeneratedBackImage] = useState<string | undefined>(undefined);
+  const [currentUsageStats, setCurrentUsageStats] = useState<UsageStats | undefined>(undefined);
+  const [sessionCost, setSessionCost] = useState<number>(0);
+
   const [error, setError] = useState<string | undefined>(undefined);
   const [language, setLanguage] = useState<Language>('zh');
   const [targetLocation, setTargetLocation] = useState<{lat: number, lng: number, zoom: number} | undefined>(undefined);
@@ -59,11 +62,8 @@ export default function App() {
     }
   };
 
-  // Called when user finishes drawing a box on the map
-  // NOW ACCEPTS THE DETECTED NAME AUTOMATICALLY
   const handleMapSelection = useCallback((detectedName: string) => {
     setAppState(AppState.REVIEWING);
-    // Auto-fill the detected name from Nominatim
     setLocationName(detectedName); 
     setError(undefined);
   }, []);
@@ -73,6 +73,7 @@ export default function App() {
       setAppState(AppState.GENERATING);
       setError(undefined);
       setSkipAnimation(false);
+      setCurrentUsageStats(undefined);
 
       if (model === 'gemini-3-pro-image-preview') {
          const hasKey = await (window as any).aistudio?.hasSelectedApiKey();
@@ -86,7 +87,6 @@ export default function App() {
       const mapBase64 = await captureMapElement('map-container');
 
       // 2. Determine Name
-      // Use override if provided, otherwise state
       const nameToUse = overrideLocationName !== undefined ? overrideLocationName : locationName;
 
       // 3. Generate
@@ -95,17 +95,35 @@ export default function App() {
         generatePostcardBack(styleId, model, aspectRatio)
       ]);
       
-      setGeneratedImage(frontResult);
-      setGeneratedBackImage(backResult || undefined);
+      setGeneratedImage(frontResult.imageUrl);
+      setGeneratedBackImage(backResult?.imageUrl || undefined);
+
+      // 4. Calculate Combined Cost (Front + Back)
+      const frontUsage = frontResult.usage;
+      const backUsage = backResult?.usage;
+
+      const combinedStats: UsageStats = {
+        promptTokens: frontUsage.promptTokens + (backUsage?.promptTokens || 0),
+        candidatesTokens: frontUsage.candidatesTokens + (backUsage?.candidatesTokens || 0),
+        inputCost: frontUsage.inputCost + (backUsage?.inputCost || 0),
+        outputCost: frontUsage.outputCost + (backUsage?.outputCost || 0),
+        totalCost: frontUsage.totalCost + (backUsage?.totalCost || 0),
+        currency: 'USD'
+      };
+
+      setCurrentUsageStats(combinedStats);
+      setSessionCost(prev => prev + combinedStats.totalCost);
+
       setAppState(AppState.COMPLETE);
 
       const newItem: HistoryItem = {
         id: Date.now().toString(),
-        imageUrl: frontResult,
-        backImageUrl: backResult || undefined,
+        imageUrl: frontResult.imageUrl,
+        backImageUrl: backResult?.imageUrl || undefined,
         timestamp: Date.now(),
         styleId: styleId,
-        model: model
+        model: model,
+        cost: combinedStats
       };
       saveHistory([newItem, ...history]);
 
@@ -127,19 +145,17 @@ export default function App() {
   }, [model, language, history, userImage, aspectRatio, devConfig, locationName]);
 
   const handleLucky = useCallback(async () => {
-    // 1. Logic for Lucky Mode
     const loc = getRandomLocation();
     setTargetLocation(loc);
     
-    // Update state for UI immediately
     setLocationName(loc.name);
     
     setGeneratedImage(undefined);
     setGeneratedBackImage(undefined);
+    setCurrentUsageStats(undefined);
     setError(undefined);
     setAppState(AppState.IDLE);
 
-    // 2. Delay for fly animation + tile loading
     setTimeout(async () => {
         const randomStyle = STYLE_DEFS[Math.floor(Math.random() * STYLE_DEFS.length)];
         await handleGenerate(randomStyle.prompt, randomStyle.id, loc.name);
@@ -151,6 +167,7 @@ export default function App() {
     setAppState(AppState.DRAWING);
     setGeneratedImage(undefined);
     setGeneratedBackImage(undefined);
+    setCurrentUsageStats(undefined);
     setError(undefined);
     setLocationName(""); 
   }, []);
@@ -163,6 +180,7 @@ export default function App() {
   const handleSelectHistory = useCallback((item: HistoryItem) => {
     setGeneratedImage(item.imageUrl);
     setGeneratedBackImage(item.backImageUrl);
+    setCurrentUsageStats(item.cost);
     setSkipAnimation(true);
     setShowHistory(false);
   }, []);
@@ -199,6 +217,7 @@ export default function App() {
         setDevConfig={setDevConfig}
         locationName={locationName}
         setLocationName={setLocationName}
+        sessionCost={sessionCost}
       />
 
       <LuckyDice 
@@ -225,6 +244,7 @@ export default function App() {
           skipAnimation={skipAnimation}
           aspectRatio={aspectRatio}
           locationName={locationName}
+          usageStats={currentUsageStats}
         />
       )}
     </div>

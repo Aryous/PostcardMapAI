@@ -31,10 +31,25 @@ export interface HistoryItem {
   timestamp: number;
   styleId: string;
   model: ModelType;
+  cost?: UsageStats;
 }
 
 export interface DevConfig {
   useCustomPrompt: boolean;
   customSystemInstruction: string;
   useV2Prompt: boolean; // Toggle for the new "Strict No Border" prompt logic
+}
+
+export interface UsageStats {
+  promptTokens: number;
+  candidatesTokens: number;
+  inputCost: number;
+  outputCost: number;
+  totalCost: number;
+  currency: string;
+}
+
+export interface GenerationResult {
+  imageUrl: string;
+  usage: UsageStats;
 }

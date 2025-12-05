@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Download, RotateCw } from 'lucide-react';
-import { Language, AspectRatio } from '../types';
+import { X, Download, RotateCw, Coins } from 'lucide-react';
+import { Language, AspectRatio, UsageStats } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
 
 interface PostcardResultProps {
@@ -12,6 +12,7 @@ interface PostcardResultProps {
   skipAnimation?: boolean;
   aspectRatio?: AspectRatio;
   locationName?: string;
+  usageStats?: UsageStats;
 }
 
 const PostcardResult: React.FC<PostcardResultProps> = ({ 
@@ -21,7 +22,8 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
   language, 
   skipAnimation = false, 
   aspectRatio = '4:3',
-  locationName = 'MapPostcard'
+  locationName = 'MapPostcard',
+  usageStats
 }) => {
   const [animationStage, setAnimationStage] = useState<'envelope' | 'opening' | 'revealing' | 'settling' | 'done'>('envelope');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -181,7 +183,6 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
         <div className={`relative w-full h-full transition-transform duration-700 transform-style-3d preserve-3d shadow-2xl ${isFlipped ? 'rotate-y-180' : ''}`}>
             
             {/* FRONT SIDE */}
-            {/* Full Bleed: Removed p-2 pb-6 and paper-texture */}
             <div className="absolute inset-0 backface-hidden postcard-shadow bg-white">
                 <div className="relative w-full h-full overflow-hidden group flex items-center justify-center">
                     <img 
@@ -219,10 +220,30 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
                                 </button>
                             )}
                         </div>
+                        
+                        {/* Cost Display Overlay - Top Left */}
+                        {usageStats && isExpanded && (
+                          <div className="absolute top-2 left-2 pointer-events-auto">
+                            <div className="bg-black/60 backdrop-blur-md rounded-lg p-2 text-white text-[10px] space-y-1 shadow-lg border border-white/10 transition-opacity hover:opacity-100 opacity-80">
+                               <div className="flex items-center gap-1.5 border-b border-white/20 pb-1 mb-1">
+                                  <Coins className="w-3 h-3 text-amber-400" />
+                                  <span className="font-bold text-amber-100 uppercase tracking-wide">{t.cost}</span>
+                               </div>
+                               <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+                                  <span className="text-slate-300">{t.input}:</span>
+                                  <span className="text-right font-mono">${usageStats.inputCost.toFixed(4)}</span>
+                                  <span className="text-slate-300">{t.output}:</span>
+                                  <span className="text-right font-mono">${usageStats.outputCost.toFixed(4)}</span>
+                                  <div className="col-span-2 border-t border-white/20 my-0.5"></div>
+                                  <span className="font-bold text-white">{t.total}:</span>
+                                  <span className="text-right font-mono font-bold text-green-300">${usageStats.totalCost.toFixed(4)}</span>
+                               </div>
+                            </div>
+                          </div>
+                        )}
                     </div>
                 </div>
 
-                {/* Footer overlays - Adjusted for visibility on full bleed images (white text + shadow) */}
                 <div className="absolute bottom-1.5 right-3 text-[8px] sm:text-[10px] text-white/90 font-serif italic tracking-wider select-none drop-shadow-md">
                     {t.footer}
                 </div>
