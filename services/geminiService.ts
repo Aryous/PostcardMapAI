@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { DevConfig } from "../types";
 
@@ -7,6 +8,20 @@ const getClient = () => {
     throw new Error("API Key is missing. Please set process.env.API_KEY.");
   }
   return new GoogleGenAI({ apiKey });
+};
+
+// Helper to map UI aspect ratios to API supported ratios
+// API typically supports: "1:1", "3:4", "4:3", "9:16", "16:9"
+// "3:2" and "2:3" cause 500 errors if passed directly.
+const sanitizeAspectRatio = (ratio: string): string => {
+  const supported = ['1:1', '3:4', '4:3', '16:9', '9:16'];
+  if (supported.includes(ratio)) return ratio;
+  
+  switch(ratio) {
+    case '3:2': return '4:3'; // Map to closest supported, let CSS crop
+    case '2:3': return '3:4';
+    default: return '4:3';
+  }
 };
 
 export const generatePostcard = async (
@@ -36,7 +51,13 @@ export const generatePostcard = async (
 
     // 1. Developer Custom Override
     if (devConfig?.useCustomPrompt && devConfig.customSystemInstruction) {
-      systemInstruction = devConfig.customSystemInstruction;
+      // Allow the Custom Prompt to be the primary instruction, BUT append the style details from the buttons
+      // so the user's style selection is still respected.
+      systemInstruction = `${devConfig.customSystemInstruction}\n\nSPECIFIC STYLE INSTRUCTIONS:\n${userPrompt}`;
+      
+      if (hasLocationName) {
+        systemInstruction += `\n\nLOCATION CONTEXT:\n${locationName}`;
+      }
     } 
     // 2. V3 "Map as Wireframe" Logic
     else if (devConfig?.useV2Prompt) {
@@ -77,14 +98,16 @@ export const generatePostcard = async (
         Output ONLY the raw image file content.
        `;
     }
-    // 3. Fallback
+    // 3. Fallback (Artistic Mode)
     else {
       systemInstruction = `Create a postcard. ${hasLocationName ? `Location: ${locationName}` : ''}. Style: ${userPrompt}. Use the map as background.`;
     }
 
+    const safeAspectRatio = sanitizeAspectRatio(aspectRatio);
+
     const config: any = {
       imageConfig: {
-        aspectRatio: aspectRatio
+        aspectRatio: safeAspectRatio
       }
     };
 
@@ -96,7 +119,7 @@ export const generatePostcard = async (
       { text: systemInstruction },
       {
         inlineData: {
-          mimeType: 'image/png',
+          mimeType: 'image/png', // Maps might be captured as PNG or JPEG, API accepts both in inlineData
           data: cleanMapBase64
         }
       }
@@ -173,9 +196,11 @@ export const generatePostcardBack = async (
         styleDetails = "Standard off-white cardstock texture.";
     }
 
+    const safeAspectRatio = sanitizeAspectRatio(aspectRatio);
+
     const config: any = {
       imageConfig: {
-        aspectRatio: aspectRatio
+        aspectRatio: safeAspectRatio
       }
     };
 

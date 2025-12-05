@@ -30,7 +30,7 @@ export default function App() {
   // Developer Mode Config
   const [devConfig, setDevConfig] = useState<DevConfig>({
     useCustomPrompt: false,
-    customSystemInstruction: "",
+    customSystemInstruction: "创建一张精美的明信片，要有aa高级感，人物aa自然融入明信片中，适当调整人物表情、服装和姿势，以便更好的融入明信片风格。明信片中需要自然融入当地风光和背景aa地图。",
     useV2Prompt: false // Default to Non-Strict (Artistic Mode)
   });
   
