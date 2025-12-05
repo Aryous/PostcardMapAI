@@ -199,6 +199,27 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               <button onClick={() => setShowDevMode(false)}><ChevronUp className="w-3 h-3 text-slate-400" /></button>
             </div>
             
+            {/* Location Name Input (Moved to Dev Mode) */}
+            <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                  <Type className="w-3 h-3" /> {language === 'zh' ? '地点名称 (调试)' : 'Location Name (Debug)'}
+                </label>
+                <div className="relative">
+                    <input 
+                    type="text" 
+                    value={locationName}
+                    onChange={(e) => setLocationName(e.target.value)}
+                    placeholder={isAreaSelected && !locationName ? (language === 'zh' ? '正在识别...' : 'Detecting...') : (language === 'zh' ? '手动输入' : 'Manual Input')}
+                    className="w-full px-3 py-2 text-xs border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 bg-white"
+                    />
+                    {isAreaSelected && !locationName && (
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                            <Loader2 className="w-3 h-3 text-indigo-500 animate-spin" />
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {/* V2 Prompt Toggle */}
             <label className="flex items-center justify-between p-2 bg-white rounded border border-slate-200 cursor-pointer hover:border-indigo-300">
                <span className="text-xs text-slate-600 font-medium">{t.v2Prompt}</span>
@@ -238,26 +259,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
         <div className="p-4 space-y-4">
           
-          {/* Location Name Input */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              <Type className="w-3 h-3" /> {language === 'zh' ? '地点名称 (自动识别)' : 'Location Name (Auto-detected)'}
-            </label>
-            <div className="relative">
-                <input 
-                type="text" 
-                value={locationName}
-                onChange={(e) => setLocationName(e.target.value)}
-                placeholder={isAreaSelected && !locationName ? (language === 'zh' ? '正在识别...' : 'Detecting...') : (language === 'zh' ? '例如: 北京故宫' : 'e.g. Forbidden City')}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all pr-8"
-                />
-                {isAreaSelected && !locationName && (
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                        <Loader2 className="w-3 h-3 text-indigo-500 animate-spin" />
-                    </div>
-                )}
-            </div>
-          </div>
+          {/* Location Name Input MOVED TO DEV PANEL ABOVE */}
 
           {/* 1. Model Selection */}
           <div className="space-y-2">

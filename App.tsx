@@ -31,7 +31,7 @@ export default function App() {
   const [devConfig, setDevConfig] = useState<DevConfig>({
     useCustomPrompt: false,
     customSystemInstruction: "",
-    useV2Prompt: true
+    useV2Prompt: false // Default to Non-Strict (Artistic Mode)
   });
   
   const [history, setHistory] = useState<HistoryItem[]>([]);
