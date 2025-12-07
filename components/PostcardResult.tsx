@@ -175,6 +175,56 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
   // Final Result Card with Flip
   return (
     <div className={containerClasses} onClick={() => isExpanded && setIsExpanded(false)}>
+      
+      {/* Cost Breakdown Panel - Separate UI */}
+      {isExpanded && usageStats && (
+        <div 
+            className="absolute top-4 left-4 z-[2100] bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl p-4 min-w-[220px] border border-white/50 animate-in slide-in-from-left-4 fade-in duration-500 cursor-default"
+            onClick={(e) => e.stopPropagation()}
+        >
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+                <div className="p-1.5 bg-amber-100 text-amber-600 rounded-full shadow-sm">
+                    <Coins className="w-4 h-4" />
+                </div>
+                <span className="font-bold text-slate-800 text-xs uppercase tracking-wide">{t.cost}</span>
+            </div>
+
+            {/* Details */}
+            <div className="space-y-3">
+                {/* Input */}
+                <div className="flex flex-col gap-0.5">
+                    <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase font-medium">
+                        <span>{t.input}</span>
+                        <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{usageStats.promptTokens.toLocaleString()} tks</span>
+                    </div>
+                    <div className="text-right font-mono text-xs text-slate-700 font-medium tracking-tight">
+                        ${usageStats.inputCost.toFixed(5)}
+                    </div>
+                </div>
+
+                {/* Output */}
+                <div className="flex flex-col gap-0.5">
+                    <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase font-medium">
+                        <span>{t.output}</span>
+                        <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{usageStats.candidatesTokens.toLocaleString()} tks</span>
+                    </div>
+                    <div className="text-right font-mono text-xs text-slate-700 font-medium tracking-tight">
+                        ${usageStats.outputCost.toFixed(5)}
+                    </div>
+                </div>
+
+                {/* Total */}
+                <div className="pt-2 border-t border-slate-200 flex justify-between items-end">
+                    <span className="text-xs font-bold text-slate-800">{t.total}</span>
+                    <span className="font-mono text-sm font-bold text-emerald-600 tracking-tight">
+                        ${usageStats.totalCost.toFixed(5)}
+                    </span>
+                </div>
+            </div>
+        </div>
+      )}
+
       <div 
         className={`${cardContainerClasses}`}
         onClick={(e) => !isExpanded && setIsExpanded(true)}
@@ -220,27 +270,6 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
                                 </button>
                             )}
                         </div>
-                        
-                        {/* Cost Display Overlay - Top Left */}
-                        {usageStats && isExpanded && (
-                          <div className="absolute top-2 left-2 pointer-events-auto">
-                            <div className="bg-black/60 backdrop-blur-md rounded-lg p-2 text-white text-[10px] space-y-1 shadow-lg border border-white/10 transition-opacity hover:opacity-100 opacity-80">
-                               <div className="flex items-center gap-1.5 border-b border-white/20 pb-1 mb-1">
-                                  <Coins className="w-3 h-3 text-amber-400" />
-                                  <span className="font-bold text-amber-100 uppercase tracking-wide">{t.cost}</span>
-                               </div>
-                               <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
-                                  <span className="text-slate-300">{t.input}:</span>
-                                  <span className="text-right font-mono">${usageStats.inputCost.toFixed(4)}</span>
-                                  <span className="text-slate-300">{t.output}:</span>
-                                  <span className="text-right font-mono">${usageStats.outputCost.toFixed(4)}</span>
-                                  <div className="col-span-2 border-t border-white/20 my-0.5"></div>
-                                  <span className="font-bold text-white">{t.total}:</span>
-                                  <span className="text-right font-mono font-bold text-green-300">${usageStats.totalCost.toFixed(4)}</span>
-                               </div>
-                            </div>
-                          </div>
-                        )}
                     </div>
                 </div>
 

@@ -39,17 +39,6 @@ const calculateCost = (model: string, promptTokens: number, candidatesTokens: nu
   };
 };
 
-const sanitizeAspectRatio = (ratio: string): string => {
-  const supported = ['1:1', '3:4', '4:3', '16:9', '9:16'];
-  if (supported.includes(ratio)) return ratio;
-  
-  switch(ratio) {
-    case '3:2': return '4:3';
-    case '2:3': return '3:4';
-    default: return '4:3';
-  }
-};
-
 export const generatePostcard = async (
   mapImageBase64: string,
   userPrompt: string,
@@ -74,6 +63,7 @@ export const generatePostcard = async (
       : `3. TYPOGRAPHY: Do NOT add specific location text if you don't know it. You may add generic artistic text like "Greetings" or "Travel" ONLY if it fits the style, otherwise keep it text-free.`;
 
     if (devConfig?.useCustomPrompt && devConfig.customSystemInstruction) {
+      // Append the style instructions to the custom prompt so the style buttons still work
       systemInstruction = `${devConfig.customSystemInstruction}\n\nSPECIFIC STYLE INSTRUCTIONS:\n${userPrompt}`;
       
       if (hasLocationName) {
@@ -122,11 +112,10 @@ export const generatePostcard = async (
       systemInstruction = `Create a postcard. ${hasLocationName ? `Location: ${locationName}` : ''}. Style: ${userPrompt}. Use the map as background.`;
     }
 
-    const safeAspectRatio = sanitizeAspectRatio(aspectRatio);
-
+    // Pass the aspect ratio directly as requested
     const config: any = {
       imageConfig: {
-        aspectRatio: safeAspectRatio
+        aspectRatio: aspectRatio
       }
     };
 
@@ -223,11 +212,10 @@ export const generatePostcardBack = async (
         styleDetails = "Standard off-white cardstock texture.";
     }
 
-    const safeAspectRatio = sanitizeAspectRatio(aspectRatio);
-
+    // Pass the aspect ratio directly as requested
     const config: any = {
       imageConfig: {
-        aspectRatio: safeAspectRatio
+        aspectRatio: aspectRatio
       }
     };
 
