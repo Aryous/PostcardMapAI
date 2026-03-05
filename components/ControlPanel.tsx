@@ -1,36 +1,11 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { MapPin, Wand2, RefreshCw, Palette, Zap, Sparkles, History, Upload, X, User, MousePointer2, RectangleHorizontal, RectangleVertical, Square, Settings, ChevronDown, ChevronUp, Type, Loader2, Coins } from 'lucide-react';
+import { MapPin, Wand2, RefreshCw, Palette, Zap, Sparkles, History, Upload, X, User, MousePointer2, RectangleHorizontal, RectangleVertical, Square, Settings, ChevronUp, Type, Loader2, Coins } from 'lucide-react';
 import { AppState, Language, ModelType, AspectRatio, DevConfig } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
+import { STYLE_DEFS } from '../utils/styles';
 
-// REFACTORED STYLE DEFINITIONS: Focus on Medium, Mood, and Lighting.
-export const STYLE_DEFS = [
-  { 
-    id: 'vintage', 
-    prompt: 'Style: 1950s Travel Poster. Medium: Lithograph / Screen Print. Features: Bold flat colors, grain texture, heavy retro typography header, nostalgic golden hour lighting. The map roads become charming winding streets.' 
-  },
-  { 
-    id: 'ink', 
-    prompt: 'Style: Traditional Chinese "Shan-Shui" & Architectural Art. Medium: Ink wash on aged Rice Paper. Features: Axonometric projection, delicate line work, desaturated earth tones (sage, ochre), red seal stamps. Atmospheric and poetic.' 
-  },
-  { 
-    id: 'watercolor', 
-    prompt: 'Style: Urban Sketching / Plein Air. Medium: Watercolor & Ink. Features: Loose wet-on-wet washes, paint splatters, unfinished edges, handwritten calligraphy typography. Dreamy, airy, and artistic.' 
-  },
-  { 
-    id: 'cyberpunk', 
-    prompt: 'Style: Sci-Fi Concept Art. Medium: Digital Painting. Features: Neon-soaked night, holographic map interface overlaying real city structures, glowing road networks, rain reflections, "Blade Runner" atmosphere.' 
-  },
-  { 
-    id: 'sketch', 
-    prompt: 'Style: Renaissance Architectural Study. Medium: Sepia Ink & Graphite on Parchment. Features: Detailed cross-hatching, construction lines, technical annotations, Da Vinci aesthetic. Precision meets art.' 
-  },
-  { 
-    id: 'oil', 
-    prompt: 'Style: Impressionist Masterpiece. Medium: Oil on Canvas. Features: Thick impasto texture (palette knife), visible brush strokes, vibrant light vibration, emotional landscape. Like a Van Gogh or Monet painting.' 
-  },
-];
+export { STYLE_DEFS };
 
 interface ControlPanelProps {
   appState: AppState;
@@ -113,9 +88,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   const currentStyles = useMemo(() => {
     return STYLE_DEFS.map(def => ({
       ...def,
-      label: t.styles[def.id as keyof typeof t.styles]
+      label: def.label[language]
     }));
-  }, [language, t]);
+  }, [language]);
 
   const selectedStyle = currentStyles.find(s => s.id === selectedStyleId) || currentStyles[0];
 
@@ -230,33 +205,40 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 </div>
             </div>
 
-            {/* V2 Prompt Toggle */}
-            <label className="flex items-center justify-between p-2 bg-white rounded border border-slate-200 cursor-pointer hover:border-indigo-300">
-               <span className="text-xs text-slate-600 font-medium">{t.v2Prompt}</span>
-               <div className={`w-8 h-4 rounded-full p-0.5 transition-colors ${devConfig.useV2Prompt ? 'bg-indigo-500' : 'bg-slate-300'}`}>
-                  <div className={`w-3 h-3 bg-white rounded-full shadow-sm transform transition-transform ${devConfig.useV2Prompt ? 'translate-x-4' : 'translate-x-0'}`} 
-                       onClick={(e) => {
-                         e.preventDefault();
-                         setDevConfig({...devConfig, useV2Prompt: !devConfig.useV2Prompt});
-                       }}
-                  />
-               </div>
-            </label>
-
-            {/* Custom Prompt Toggle */}
-            <div className="space-y-1">
-              <label className="flex items-center gap-2">
-                <input 
-                  type="checkbox" 
-                  checked={devConfig.useCustomPrompt}
-                  onChange={(e) => setDevConfig({...devConfig, useCustomPrompt: e.target.checked})}
-                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <span className="text-xs text-slate-600">{t.customPrompt}</span>
+            {/* Prompt Mode Tabs */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                {language === 'zh' ? '提示词模式' : 'Prompt Mode'}
               </label>
-              
+              <div className="flex bg-slate-100 rounded-lg p-1">
+                {([
+                  { id: 'default', label: language === 'zh' ? '默认' : 'Default' },
+                  { id: 'v2',      label: 'V2' },
+                  { id: 'custom',  label: language === 'zh' ? '自定义' : 'Custom' },
+                ] as const).map(({ id, label }) => {
+                  const active = devConfig.useCustomPrompt ? 'custom' : devConfig.useV2Prompt ? 'v2' : 'default';
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => setDevConfig({
+                        ...devConfig,
+                        useV2Prompt: id === 'v2',
+                        useCustomPrompt: id === 'custom',
+                      })}
+                      className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
+                        active === id
+                          ? 'bg-white text-indigo-600 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+
               {devConfig.useCustomPrompt && (
-                <textarea 
+                <textarea
                   value={devConfig.customSystemInstruction}
                   onChange={(e) => setDevConfig({...devConfig, customSystemInstruction: e.target.value})}
                   className="w-full h-24 text-[10px] p-2 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 font-mono"
@@ -399,7 +381,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                // COMPLETE STATE
                <div className="space-y-2 animate-in fade-in">
                   <button
-                    onClick={() => onGenerate(selectedStyle.prompt, selectedStyleId)} 
+                    onClick={() => onGenerate(selectedStyle.frontPrompt, selectedStyleId)} 
                     className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
                   >
                     <RefreshCw className="w-4 h-4" /> {t.retry}
@@ -417,7 +399,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                // IDLE, DRAWING, or REVIEWING STATE
                <div className="space-y-2">
                  <button
-                   onClick={() => onGenerate(selectedStyle.prompt, selectedStyleId)}
+                   onClick={() => onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
                    disabled={!isAreaSelected}
                    className={`w-full py-2.5 font-semibold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm ${
                      isAreaSelected 

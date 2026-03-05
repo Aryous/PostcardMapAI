@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import PostcardMap from './components/PostcardMap';
 import ControlPanel, { STYLE_DEFS } from './components/ControlPanel';
 import PostcardResult from './components/PostcardResult';
@@ -41,25 +41,8 @@ export default function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [skipAnimation, setSkipAnimation] = useState(false);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('postcard_history');
-      if (saved) {
-        setHistory(JSON.parse(saved));
-      }
-    } catch (e) {
-      console.warn("Failed to load history", e);
-    }
-  }, []);
-
   const saveHistory = (newHistory: HistoryItem[]) => {
     setHistory(newHistory);
-    try {
-      const limitedHistory = newHistory.slice(0, 5); 
-      localStorage.setItem('postcard_history', JSON.stringify(limitedHistory));
-    } catch (e) {
-      console.warn("Failed to save history (likely quota exceeded)", e);
-    }
   };
 
   const handleMapSelection = useCallback((detectedName: string) => {
@@ -92,7 +75,7 @@ export default function App() {
       // 3. Generate
       const [frontResult, backResult] = await Promise.all([
         generatePostcard(mapBase64, prompt, model, userImage, aspectRatio, devConfig, nameToUse),
-        generatePostcardBack(styleId, model, aspectRatio)
+        generatePostcardBack(STYLE_DEFS.find(s => s.id === styleId)?.backPrompt ?? '', model, aspectRatio)
       ]);
       
       setGeneratedImage(frontResult.imageUrl);
@@ -158,7 +141,7 @@ export default function App() {
 
     setTimeout(async () => {
         const randomStyle = STYLE_DEFS[Math.floor(Math.random() * STYLE_DEFS.length)];
-        await handleGenerate(randomStyle.prompt, randomStyle.id, loc.name);
+        await handleGenerate(randomStyle.frontPrompt, randomStyle.id, loc.name);
     }, 4500); 
 
   }, [handleGenerate]);

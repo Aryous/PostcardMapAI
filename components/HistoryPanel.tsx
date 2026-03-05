@@ -3,7 +3,7 @@ import React from 'react';
 import { X, Trash2, Calendar, Zap, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { HistoryItem, Language } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
-import { STYLE_DEFS } from './ControlPanel';
+import { STYLE_DEFS } from '../utils/styles';
 
 interface HistoryPanelProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
   const getStyleLabel = (styleId: string) => {
     const style = STYLE_DEFS.find(s => s.id === styleId);
     if (!style) return styleId;
-    return t.styles[style.id as keyof typeof t.styles] || styleId;
+    return style.label[language] || styleId;
   };
 
   const formatDate = (timestamp: number) => {

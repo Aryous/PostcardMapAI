@@ -65,7 +65,11 @@ export const generatePostcard = async (
     if (devConfig?.useCustomPrompt && devConfig.customSystemInstruction) {
       // Append the style instructions to the custom prompt so the style buttons still work
       systemInstruction = `${devConfig.customSystemInstruction}\n\nSPECIFIC STYLE INSTRUCTIONS:\n${userPrompt}`;
-      
+
+      if (!cleanUserBase64) {
+        systemInstruction += `\n\n人物限制：当前没有提供人物照片，请不要在画面中添加任何人物形象。`;
+      }
+
       if (hasLocationName) {
         systemInstruction += `\n\nLOCATION CONTEXT:\n${locationName}`;
       }
@@ -181,36 +185,14 @@ export const generatePostcard = async (
 };
 
 export const generatePostcardBack = async (
-  styleId: string,
+  backPrompt: string,
   modelName: string = 'gemini-2.5-flash-image',
   aspectRatio: string = '4:3'
 ): Promise<GenerationResult | null> => {
   try {
     const ai = getClient();
-    
-    let styleDetails = "";
-    switch(styleId) {
-      case 'vintage':
-        styleDetails = "Aged yellowed paper texture with coffee stains. Antique victorian border.";
-        break;
-      case 'watercolor':
-        styleDetails = "Clean white cold-press watercolor paper texture. Soft floral corners.";
-        break;
-      case 'cyberpunk':
-        styleDetails = "Dark digital slate background. Neon blue grid lines. Holographic elements.";
-        break;
-      case 'sketch':
-        styleDetails = "Rough sketchbook paper texture. Charcoal pencil lines.";
-        break;
-      case 'oil':
-        styleDetails = "Canvas cloth texture background. Elegant painted border.";
-        break;
-      case 'ink':
-        styleDetails = "Aged rice paper texture. Vertical divider line painted with brush.";
-        break;
-      default:
-        styleDetails = "Standard off-white cardstock texture.";
-    }
+
+    const styleDetails = backPrompt;
 
     // Pass the aspect ratio directly as requested
     const config: any = {

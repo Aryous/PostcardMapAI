@@ -1,6 +1,4 @@
 
-import { Language } from '../types';
-
 export const TRANSLATIONS = {
   en: {
     title: "MapPostcard AI",
@@ -40,14 +38,6 @@ export const TRANSLATIONS = {
     output: "Output",
     total: "Total",
     tokens: "tokens",
-    styles: {
-      vintage: "Vintage",
-      ink: "Ancient Ink",
-      watercolor: "Watercolor",
-      cyberpunk: "Cyberpunk",
-      sketch: "Sketch",
-      oil: "Oil Paint"
-    },
     models: {
       flash: "Flash 2.5",
       pro: "Pro 3.0"
@@ -100,14 +90,6 @@ export const TRANSLATIONS = {
     output: "输出",
     total: "总计",
     tokens: "tokens",
-    styles: {
-      vintage: "复古",
-      ink: "古韵",
-      watercolor: "水彩",
-      cyberpunk: "赛博朋克",
-      sketch: "素描",
-      oil: "油画"
-    },
     models: {
       flash: "Flash 2.5",
       pro: "Pro 3.0"

@@ -73,7 +73,7 @@ const PostcardMap: React.FC<PostcardMapProps> = ({ appState, targetLocation, onM
             fullName += `, ${addr.country}`;
         }
         
-        return fullName.replace(/^,\s*/, ''); // Remove leading comma
+        return fullName.replace(/^,\s*/, '') || data.display_name || ""; // Remove leading comma
       }
       return "";
     } catch (error) {
