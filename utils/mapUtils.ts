@@ -14,8 +14,9 @@ export const captureMapElement = async (elementId: string): Promise<string> => {
       allowTaint: true, 
       logging: false,
       ignoreElements: (node) => {
-        // Ignore the geoman controls or UI overlays if they are inside the map div
-        return node.classList.contains('leaflet-control-container');
+        // Ignore geoman toolbar and drawn shapes (selection artifacts)
+        return node.classList.contains('leaflet-control-container') ||
+               node.classList.contains('leaflet-overlay-pane');
       }
     });
 
