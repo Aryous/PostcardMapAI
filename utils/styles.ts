@@ -33,8 +33,8 @@ export const STYLE_DEFS: StyleDef[] = [
   },
   {
     id: 'sketch',
-    frontPrompt: 'Style: Renaissance Architectural Study. Medium: Sepia Ink & Graphite on Parchment. Features: Detailed cross-hatching, construction lines, technical annotations, Da Vinci aesthetic. Precision meets art.',
-    backPrompt: 'Rough sketchbook paper texture. Charcoal pencil lines.',
+    frontPrompt: 'Style: A sophisticated urban cartography postcard style. The background features a faint, minimalist street map with delicate grid lines and pale pastel-colored regions. Layered on top are detailed hand-drawn architectural sketches in graphite pencil, using precise cross-hatching and fine-line ink techniques. The composition mimics a travel journal, combining isometric perspectives of landmarks with artistic map elements. High contrast between the crisp pencil strokes and the soft-textured vintage paper. Elegant typography and a clean, nostalgic aesthetic.',
+    backPrompt: 'Aged parchment paper texture. Fine ink border.',
     label: { zh: '素描', en: 'Sketch' }
   },
   {
