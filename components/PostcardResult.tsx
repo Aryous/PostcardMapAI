@@ -183,11 +183,14 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
             onClick={(e) => e.stopPropagation()}
         >
             {/* Header */}
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
-                <div className="p-1.5 bg-amber-100 text-amber-600 rounded-full shadow-sm">
-                    <Coins className="w-4 h-4" />
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-amber-100 text-amber-600 rounded-full shadow-sm">
+                        <Coins className="w-4 h-4" />
+                    </div>
+                    <span className="font-bold text-slate-800 text-xs uppercase tracking-wide">{t.cost}</span>
                 </div>
-                <span className="font-bold text-slate-800 text-xs uppercase tracking-wide">{t.cost}</span>
+                <span className="text-[9px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">~estimated</span>
             </div>
 
             {/* Details */}

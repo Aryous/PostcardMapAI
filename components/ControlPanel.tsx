@@ -133,9 +133,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 <span className="font-bold text-sm tracking-tight">{t.title}</span>
             </div>
             {sessionCost > 0 && (
-                <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                <div className="flex items-center gap-1 mt-0.5">
                     <Coins className="w-3 h-3 text-amber-500" />
-                    <span>{t.sessionCost}: ${sessionCost.toFixed(3)}</span>
+                    <span className="text-[10px] text-slate-500">{t.sessionCost}:</span>
+                    <span className="text-[10px] font-mono font-semibold text-amber-600">~${sessionCost.toFixed(4)}</span>
+                    <span className="text-[9px] text-slate-400">est.</span>
                 </div>
             )}
           </div>

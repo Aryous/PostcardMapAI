@@ -106,7 +106,8 @@ export default function App() {
         timestamp: Date.now(),
         styleId: styleId,
         model: model,
-        cost: combinedStats
+        cost: combinedStats,
+        locationName: nameToUse || undefined
       };
       saveHistory([newItem, ...history]);
 

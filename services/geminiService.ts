@@ -11,7 +11,9 @@ const getClient = () => {
 };
 
 // Pricing Constants (Per 1 Million Tokens)
-// Based on approximate public pricing for Gemini 1.5 tiers as proxy for 2.5/3.0
+// Based on Google AI published rates (https://ai.google.dev/pricing).
+// The Gemini API does not return billing data in response metadata,
+// so all displayed costs are estimates calculated from token counts × rate.
 const PRICING = {
   'gemini-2.5-flash-image': {
     input: 0.075,

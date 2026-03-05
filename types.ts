@@ -32,6 +32,7 @@ export interface HistoryItem {
   styleId: string;
   model: ModelType;
   cost?: UsageStats;
+  locationName?: string;
 }
 
 export interface DevConfig {
