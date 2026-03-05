@@ -120,23 +120,19 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
 
                 {/* Info */}
                 <div className="p-3 space-y-1.5">
-                  {/* Location name (if any) */}
-                  {item.locationName ? (
+                  {/* Location name */}
+                  {item.locationName && (
                     <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 truncate">
                       <MapPin className="w-3 h-3 text-indigo-400 flex-shrink-0" />
                       <span className="truncate">{item.locationName}</span>
                     </div>
-                  ) : (
-                    <span className="text-sm font-bold text-slate-800">
-                      {getStyleLabel(item.styleId)}
-                    </span>
                   )}
 
+                  {/* Style tag + cost */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
-                      <Calendar className="w-3 h-3" />
-                      {formatDate(item.timestamp)}
-                    </div>
+                    <span className="text-[10px] font-medium text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">
+                      {getStyleLabel(item.styleId)}
+                    </span>
                     {item.cost && (
                       <div className="flex items-center gap-0.5 text-[10px] font-mono font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
                         <DollarSign className="w-2.5 h-2.5" />
