@@ -290,7 +290,7 @@ setTimeout(() => setShowDevToast(false), 2000);
           {/* 1. Model Selection */}
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              {model === 'gemini-2.5-flash-image' ? <Zap className="w-3 h-3" /> : <Sparkles className="w-3 h-3" />}
+              {model === 'gemini-3-pro-image-preview' ? <Sparkles className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
               {t.selectModel}
             </label>
             <div className="flex bg-slate-100 rounded-lg p-1">
@@ -304,6 +304,17 @@ setTimeout(() => setShowDevToast(false), 2000);
               >
                 <Zap className="w-3 h-3" />
                 {t.models.flash}
+              </button>
+              <button
+                onClick={() => setModel('gemini-3.1-flash-image-preview')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  model === 'gemini-3.1-flash-image-preview'
+                    ? 'bg-white text-indigo-600 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                <Zap className="w-3 h-3" />
+                {t.models.flash31}
               </button>
               <button
                 onClick={() => setModel('gemini-3-pro-image-preview')}

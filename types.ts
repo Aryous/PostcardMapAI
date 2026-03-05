@@ -20,7 +20,7 @@ export enum AppState {
 
 export type Language = 'en' | 'zh';
 
-export type ModelType = 'gemini-2.5-flash-image' | 'gemini-3-pro-image-preview';
+export type ModelType = 'gemini-2.5-flash-image' | 'gemini-3.1-flash-image-preview' | 'gemini-3-pro-image-preview';
 
 export type AspectRatio = '1:1' | '4:3' | '3:4' | '16:9' | '9:16' | '3:2' | '2:3';
 

@@ -19,6 +19,10 @@ const PRICING = {
     input: 0.075,
     output: 0.30
   },
+  'gemini-3.1-flash-image-preview': {
+    input: 0.075,
+    output: 0.30
+  },
   'gemini-3-pro-image-preview': {
     input: 3.50,
     output: 10.50
@@ -180,7 +184,7 @@ Create something that could ONLY represent THIS place, and nowhere else in the w
       }
     };
 
-    if (modelName === 'gemini-3-pro-image-preview') {
+    if (modelName === 'gemini-3-pro-image-preview' || modelName === 'gemini-3.1-flash-image-preview') {
       config.imageConfig.imageSize = "1K";
     }
 
@@ -258,7 +262,7 @@ export const generatePostcardBack = async (
       }
     };
 
-    if (modelName === 'gemini-3-pro-image-preview') {
+    if (modelName === 'gemini-3-pro-image-preview' || modelName === 'gemini-3.1-flash-image-preview') {
       config.imageConfig.imageSize = "1K";
     }
 

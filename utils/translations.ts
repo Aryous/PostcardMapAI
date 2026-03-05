@@ -40,6 +40,7 @@ export const TRANSLATIONS = {
     tokens: "tokens",
     models: {
       flash: "Flash 2.5",
+      flash31: "Flash 3.1",
       pro: "Pro 3.0"
     },
     ratios: {
@@ -92,6 +93,7 @@ export const TRANSLATIONS = {
     tokens: "tokens",
     models: {
       flash: "Flash 2.5",
+      flash31: "Flash 3.1",
       pro: "Pro 3.0"
     },
     ratios: {
