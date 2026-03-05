@@ -40,6 +40,7 @@ export default function App() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [skipAnimation, setSkipAnimation] = useState(false);
+  const [pendingStyleId, setPendingStyleId] = useState<string | null>(null);
 
   const saveHistory = (newHistory: HistoryItem[]) => {
     setHistory(newHistory);
@@ -131,19 +132,22 @@ export default function App() {
   const handleLucky = useCallback(async () => {
     const loc = getRandomLocation();
     setTargetLocation(loc);
-    
+
     setLocationName(loc.name);
-    
+
     setGeneratedImage(undefined);
     setGeneratedBackImage(undefined);
     setCurrentUsageStats(undefined);
     setError(undefined);
     setAppState(AppState.IDLE);
 
+    const randomStyle = STYLE_DEFS[Math.floor(Math.random() * STYLE_DEFS.length)];
+    setPendingStyleId(randomStyle.id);
+
     setTimeout(async () => {
-        const randomStyle = STYLE_DEFS[Math.floor(Math.random() * STYLE_DEFS.length)];
+        setPendingStyleId(null);
         await handleGenerate(randomStyle.frontPrompt, randomStyle.id, loc.name);
-    }, 4500); 
+    }, 4500);
 
   }, [handleGenerate]);
 
@@ -183,7 +187,7 @@ export default function App() {
         targetLocation={targetLocation}
       />
       
-      <ControlPanel 
+      <ControlPanel
         appState={appState}
         onGenerate={handleGenerate}
         onReset={handleReset}
@@ -202,6 +206,7 @@ export default function App() {
         locationName={locationName}
         setLocationName={setLocationName}
         sessionCost={sessionCost}
+        pendingStyleId={pendingStyleId}
       />
 
       <LuckyDice 

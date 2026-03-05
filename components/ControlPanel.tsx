@@ -26,6 +26,7 @@ interface ControlPanelProps {
   locationName: string;
   setLocationName: (name: string) => void;
   sessionCost: number;
+  pendingStyleId?: string | null;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -46,15 +47,49 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   setDevConfig,
   locationName,
   setLocationName,
-  sessionCost
+  sessionCost,
+  pendingStyleId
 }) => {
   const [selectedStyleId, setSelectedStyleId] = useState(STYLE_DEFS[0].id);
-  
+  const [isSpinning, setIsSpinning] = useState(false);
+
+  // Slot-machine animation when pendingStyleId changes
+  useEffect(() => {
+    if (!pendingStyleId) return;
+
+    const styleIds = STYLE_DEFS.map(s => s.id);
+    const steps: { id: string; delay: number }[] = [];
+
+    // Fast phase: 14 random steps × 80ms
+    for (let i = 0; i < 14; i++) {
+      steps.push({ id: styleIds[Math.floor(Math.random() * styleIds.length)], delay: 80 });
+    }
+    // Slowing phase: increasing delays, last 2 steps forced to target
+    [110, 150, 200, 265, 340, 430].forEach((delay, i, arr) => {
+      const id = i >= arr.length - 2 ? pendingStyleId : styleIds[Math.floor(Math.random() * styleIds.length)];
+      steps.push({ id, delay });
+    });
+
+    setIsSpinning(true);
+    let cumulative = 0;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    steps.forEach(step => {
+      cumulative += step.delay;
+      timers.push(setTimeout(() => setSelectedStyleId(step.id), cumulative));
+    });
+
+    timers.push(setTimeout(() => setIsSpinning(false), cumulative + 100));
+
+    return () => timers.forEach(clearTimeout);
+  }, [pendingStyleId]);
+
   // Dev Mode State
   const [isDevEnabled, setIsDevEnabled] = useState(false);
   const [showDevMode, setShowDevMode] = useState(false);
   const [titleClickCount, setTitleClickCount] = useState(0);
   const [showDevToast, setShowDevToast] = useState(false);
+  const titleClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isProcessing = appState === AppState.GENERATING;
   const isAreaSelected = appState === AppState.REVIEWING || appState === AppState.GENERATING || appState === AppState.COMPLETE;
@@ -62,26 +97,23 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   const t = TRANSLATIONS[language];
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load Dev Mode state
-  useEffect(() => {
-    const storedDev = localStorage.getItem('map_postcard_dev_mode');
-    if (storedDev === 'true') {
-      setIsDevEnabled(true);
-    }
-  }, []);
 
   const handleTitleClick = () => {
     if (isDevEnabled) return;
+
+    // Reset the 2-second consecutive-click window
+    if (titleClickTimer.current) clearTimeout(titleClickTimer.current);
+    titleClickTimer.current = setTimeout(() => setTitleClickCount(0), 2000);
 
     const newCount = titleClickCount + 1;
     setTitleClickCount(newCount);
 
     if (newCount >= 5) {
+      if (titleClickTimer.current) clearTimeout(titleClickTimer.current);
       setIsDevEnabled(true);
       setShowDevMode(true);
       setShowDevToast(true);
-      localStorage.setItem('map_postcard_dev_mode', 'true');
-      setTimeout(() => setShowDevToast(false), 2000);
+setTimeout(() => setShowDevToast(false), 2000);
     }
   };
 
@@ -132,7 +164,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 <MapPin className="w-4 h-4" />
                 <span className="font-bold text-sm tracking-tight">{t.title}</span>
             </div>
-            {sessionCost > 0 && (
+            {isDevEnabled && sessionCost > 0 && (
                 <div className="flex items-center gap-1 mt-0.5">
                     <Coins className="w-3 h-3 text-amber-500" />
                     <span className="text-[10px] text-slate-500">{t.sessionCost}:</span>
@@ -323,7 +355,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   onClick={() => setSelectedStyleId(style.id)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
                     selectedStyleId === style.id
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-105'
+                      ? isSpinning
+                        ? 'bg-indigo-500 text-white border-indigo-400 shadow-lg scale-110 ring-2 ring-indigo-300 ring-offset-1'
+                        : 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-105'
                       : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                   }`}
                 >
