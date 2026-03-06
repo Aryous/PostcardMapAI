@@ -105,25 +105,47 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
     }
   }, [aspectRatio]);
 
-  const containerClasses = isExpanded 
-    ? "fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all duration-300"
-    : "fixed bottom-4 right-4 z-[1500] pointer-events-none";
+  // Compute exact px size for expanded view, respecting both viewport constraints
+  const expandedSize = useMemo(() => {
+    const [aw, ah] = (aspectRatio || '4:3').split(':').map(Number);
+    const ratio = aw / ah;
+    const maxW = window.innerWidth  * 0.90;
+    const maxH = window.innerHeight * 0.85;
+    let w = maxH * ratio;
+    let h = maxH;
+    if (w > maxW) { w = maxW; h = maxW / ratio; }
+    return { width: Math.round(w), height: Math.round(h) };
+  }, [aspectRatio]);
 
-  // Adaptive sizing for the minimized card
-  const minimizedClasses = "w-48 sm:w-64 md:w-72"; 
-  
-  const cardContainerClasses = isExpanded
-    ? `relative w-full max-w-4xl max-h-[85vh] ${aspectRatioClass} pointer-events-auto transition-all duration-500 transform scale-100 rotate-0 perspective-1000`
-    : `relative ${minimizedClasses} ${aspectRatioClass} pointer-events-auto transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-bottom-right cursor-pointer ${
-        animationStage === 'envelope' ? 'opacity-0 translate-y-full' :
-        animationStage === 'opening' ? 'opacity-100' :
-        animationStage === 'done' ? 'transform rotate-2 hover:rotate-0 hover:scale-105 hover:-translate-y-2' : ''
-      }`;
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Mini card dimensions (visual size when collapsed)
+  const MINI_W = 272;
+  const miniH = useMemo(() => {
+    const [aw, ah] = (aspectRatio || '4:3').split(':').map(Number);
+    return Math.round(MINI_W * ah / aw);
+  }, [aspectRatio]);
+
+  // Transform that positions the (always-expanded-size) card at bottom-right
+  const miniTransform = useMemo(() => {
+    const scale = MINI_W / expandedSize.width;
+    const dx = window.innerWidth  / 2 - MINI_W / 2 - 16;
+    const dy = window.innerHeight / 2 - miniH  / 2 - 16;
+    const rotate = isHovered ? 0 : 2;
+    const extraScale = isHovered ? 1.05 : 1;
+    return `translate(${dx}px, ${dy}px) scale(${scale * extraScale}) rotate(${rotate}deg)`;
+  }, [expandedSize, miniH, isHovered]);
+
+  // Counter-scale so buttons appear at natural size regardless of card scale
+  const miniCardScale = MINI_W / expandedSize.width;
+  const buttonCounterScale = isExpanded ? 1 : (1 / miniCardScale);
+
+  const cardTransform = isExpanded ? 'translate(0,0) scale(1) rotate(0deg)' : miniTransform;
 
   // Envelope Components
   if (animationStage !== 'done' && !isExpanded) {
     return (
-      <div className={`fixed bottom-6 right-6 z-[1500] ${minimizedClasses} aspect-[3/2] perspective-1000`}>
+      <div className="fixed bottom-6 right-6 z-[1500] w-48 sm:w-64 md:w-72 aspect-[3/2] perspective-1000">
         <div 
           className={`relative w-full h-full transition-all duration-700 preserve-3d ${
             animationStage === 'settling' ? 'animate-[envelope-drop_0.8s_forwards]' : 'animate-[envelope-in_0.8s_ease-out_forwards]'
@@ -174,8 +196,17 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
 
   // Final Result Card with Flip
   return (
-    <div className={containerClasses} onClick={() => isExpanded && setIsExpanded(false)}>
-      
+    <div
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ zIndex: isExpanded ? 2000 : 1500, pointerEvents: 'none' }}
+    >
+      {/* Backdrop — fades in when expanded */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-400"
+        style={{ opacity: isExpanded ? 1 : 0, pointerEvents: isExpanded ? 'auto' : 'none' }}
+        onClick={() => setIsExpanded(false)}
+      />
+
       {/* Cost Breakdown Panel - Separate UI */}
       {isExpanded && usageStats && (
         <div 
@@ -228,51 +259,72 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
         </div>
       )}
 
-      <div 
-        className={`${cardContainerClasses}`}
+      <div
+        className="relative group"
+        style={{
+          width: expandedSize.width,
+          height: expandedSize.height,
+          transform: cardTransform,
+          transformOrigin: 'center center',
+          transition: 'transform 0.48s cubic-bezier(0.34,1.3,0.64,1)',
+          pointerEvents: 'auto',
+          cursor: isExpanded ? 'default' : 'pointer',
+          zIndex: 10,
+          flexShrink: 0,
+        }}
         onClick={(e) => !isExpanded && setIsExpanded(true)}
+        onMouseEnter={() => !isExpanded && setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
          {/* 3D Wrapper */}
         <div className={`relative w-full h-full transition-transform duration-700 transform-style-3d preserve-3d shadow-2xl ${isFlipped ? 'rotate-y-180' : ''}`}>
             
             {/* FRONT SIDE */}
-            <div className="absolute inset-0 backface-hidden postcard-shadow bg-white">
-                <div className="relative w-full h-full overflow-hidden group flex items-center justify-center">
-                    <img 
-                        src={imageUrl} 
-                        alt="Postcard Front" 
-                        className="w-full h-full object-cover" 
+            <div className="absolute inset-0 backface-hidden postcard-shadow bg-white group">
+                <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
+                    <img
+                        src={imageUrl}
+                        alt="Postcard Front"
+                        className="w-full h-full object-cover"
                     />
-                    
-                    {/* Overlay Actions (Hover) - Front */}
-                    <div className={`absolute inset-0 bg-black/0 transition-colors flex items-start justify-end p-2 duration-200 ${isExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                        <div className="flex gap-2">
-                            {backImageUrl && (
-                                <button 
-                                    onClick={handleFlip}
-                                    className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-indigo-600 transition-transform hover:scale-110"
-                                    title={t.flip}
-                                >
-                                    <RotateCw className="w-4 h-4" />
-                                </button>
-                            )}
-                            <button 
-                                onClick={handleDownload}
-                                className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-slate-700 transition-transform hover:scale-110"
-                                title={t.download}
+                </div>
+
+                {/* Overlay Actions (Hover) - Front — outside overflow-hidden so counter-scale isn't clipped */}
+                <div className={`absolute inset-0 pointer-events-none flex items-start justify-between p-2 duration-200 transition-opacity ${isExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                    {/* Close — left side to avoid accidental clicks */}
+                    <div
+                      className="pointer-events-auto"
+                      style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top left' }}
+                    >
+                        <button
+                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); onClose(); }}
+                            className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-red-500 transition-transform hover:scale-110"
+                            title={t.close}
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                    {/* Flip + Download — right side */}
+                    <div
+                      className="flex gap-2 pointer-events-auto"
+                      style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top right' }}
+                    >
+                        {backImageUrl && (
+                            <button
+                                onClick={handleFlip}
+                                className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-indigo-600 transition-transform hover:scale-110"
+                                title={t.flip}
                             >
-                                <Download className="w-4 h-4" />
+                                <RotateCw className="w-4 h-4" />
                             </button>
-                            {isExpanded && (
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); onClose(); }}
-                                    className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-red-600 transition-transform hover:scale-110"
-                                    title={t.close}
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            )}
-                        </div>
+                        )}
+                        <button
+                            onClick={handleDownload}
+                            className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-slate-700 transition-transform hover:scale-110"
+                            title={t.download}
+                        >
+                            <Download className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
 
@@ -285,43 +337,53 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
             </div>
 
             {/* BACK SIDE */}
-            <div className="absolute inset-0 backface-hidden rotate-y-180 paper-texture postcard-shadow bg-[#fcfaf5]">
+            <div className="absolute inset-0 backface-hidden rotate-y-180 paper-texture postcard-shadow bg-[#fcfaf5] group">
                 {backImageUrl ? (
-                     <div className="relative w-full h-full overflow-hidden group flex items-center justify-center">
-                        <img 
-                            src={backImageUrl} 
-                            alt="Postcard Back" 
-                            className="w-full h-full object-cover" 
-                        />
-                         {/* Overlay Actions (Hover) - Back */}
-                        <div className={`absolute inset-0 bg-black/0 transition-colors flex items-start justify-end p-2 duration-200 opacity-100`}>
-                            <div className="flex gap-2">
-                                <button 
+                    <>
+                        <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
+                            <img
+                                src={backImageUrl}
+                                alt="Postcard Back"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        {/* Overlay Actions (Hover) - Back — outside overflow-hidden */}
+                        <div className={`absolute inset-0 pointer-events-none flex items-start justify-between p-2 duration-200 transition-opacity ${isExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                            {/* Close — left */}
+                            <div
+                              className="pointer-events-auto"
+                              style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top left' }}
+                            >
+                                <button
+                                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); onClose(); }}
+                                    className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-red-500 transition-transform hover:scale-110"
+                                    title={t.close}
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                            {/* Flip + Download — right */}
+                            <div
+                              className="flex gap-2 pointer-events-auto"
+                              style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top right' }}
+                            >
+                                <button
                                     onClick={handleFlip}
                                     className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-indigo-600 transition-transform hover:scale-110"
                                     title={t.flip}
                                 >
                                     <RotateCw className="w-4 h-4" />
                                 </button>
-                                <button 
+                                <button
                                     onClick={handleDownload}
                                     className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-slate-700 transition-transform hover:scale-110"
                                     title={t.download}
                                 >
                                     <Download className="w-4 h-4" />
                                 </button>
-                                {isExpanded && (
-                                    <button 
-                                        onClick={(e) => { e.stopPropagation(); onClose(); }}
-                                        className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-red-600 transition-transform hover:scale-110"
-                                        title={t.close}
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                )}
                             </div>
                         </div>
-                    </div>
+                    </>
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-300">
                          No Back Design
@@ -335,3 +397,4 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
 };
 
 export default PostcardResult;
+
