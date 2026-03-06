@@ -15,6 +15,7 @@ export default function App() {
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   const [generatedImage, setGeneratedImage] = useState<string | undefined>(undefined);
   const [generatedBackImage, setGeneratedBackImage] = useState<string | undefined>(undefined);
+  const [generatedAspectRatio, setGeneratedAspectRatio] = useState<AspectRatio>('4:3');
   const [currentUsageStats, setCurrentUsageStats] = useState<UsageStats | undefined>(undefined);
   const [sessionCost, setSessionCost] = useState<number>(0);
 
@@ -81,6 +82,7 @@ export default function App() {
       
       setGeneratedImage(frontResult.imageUrl);
       setGeneratedBackImage(backResult?.imageUrl || undefined);
+      setGeneratedAspectRatio(aspectRatio);
 
       // 4. Calculate Combined Cost (Front + Back)
       const frontUsage = frontResult.usage;
@@ -108,7 +110,8 @@ export default function App() {
         styleId: styleId,
         model: model,
         cost: combinedStats,
-        locationName: nameToUse || undefined
+        locationName: nameToUse || undefined,
+        aspectRatio: aspectRatio
       };
       saveHistory([newItem, ...history]);
 
@@ -169,6 +172,7 @@ export default function App() {
     setGeneratedImage(item.imageUrl);
     setGeneratedBackImage(item.backImageUrl);
     setCurrentUsageStats(item.cost);
+    if (item.aspectRatio) setGeneratedAspectRatio(item.aspectRatio);
     setSkipAnimation(true);
     setShowHistory(false);
   }, []);
@@ -233,7 +237,7 @@ export default function App() {
           onClose={handleCloseResult}
           language={language}
           skipAnimation={skipAnimation}
-          aspectRatio={aspectRatio}
+          aspectRatio={generatedAspectRatio}
           locationName={locationName}
           usageStats={currentUsageStats}
         />

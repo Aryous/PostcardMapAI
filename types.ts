@@ -33,6 +33,7 @@ export interface HistoryItem {
   model: ModelType;
   cost?: UsageStats;
   locationName?: string;
+  aspectRatio?: AspectRatio;
 }
 
 export interface DevConfig {

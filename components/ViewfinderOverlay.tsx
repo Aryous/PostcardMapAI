@@ -32,11 +32,14 @@ const TEXT_VALUE = 'rgba(55,48,163,0.80)';     // indigo-900 (values)
 const ACCENT = '#6366F1';                  // indigo-500
 const ACCENT_GEN = '#818CF8';                  // indigo-400 (generating)
 
+const TRANS = '0.38s cubic-bezier(0.4,0,0.2,1)';
+
 const bezelStyle = (extra?: React.CSSProperties): React.CSSProperties => ({
   position: 'absolute',
   background: GLASS_BG,
   backdropFilter: 'blur(18px)',
   WebkitBackdropFilter: 'blur(18px)',
+  transition: `left ${TRANS}, top ${TRANS}, width ${TRANS}, height ${TRANS}`,
   ...extra,
 });
 
@@ -214,6 +217,7 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({
             backdropFilter: 'blur(5px)',
             WebkitBackdropFilter: 'blur(5px)',
             clipPath: `path(evenodd, "${outer} ${inner}")`,
+            transition: `clip-path ${TRANS}`,
           }} />
         );
       })()}
@@ -224,6 +228,7 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({
         left: fl, top: ft, width: fw, height: fh,
         borderRadius: VF_R,
         background: 'rgba(186,210,255,0.10)',
+        transition: `left ${TRANS}, top ${TRANS}, width ${TRANS}, height ${TRANS}`,
       }} />
 
       {/* ── SVG: viewfinder border ring + corner screws ── */}
@@ -233,16 +238,18 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({
             stroke="none" />
 
           {/* Viewfinder border ring */}
-          <rect x={fl + 0.75} y={ft + 0.75} width={fw - 1.5} height={fh - 1.5} rx={VF_R}
-            fill="none"
+          <rect rx={VF_R} fill="none"
             stroke={isGen ? 'rgba(129,140,248,0.65)' : 'rgba(99,102,241,0.40)'}
-            strokeWidth={1.5} />
+            strokeWidth={1.5}
+            style={{ x: fl + 0.75, y: ft + 0.75, width: fw - 1.5, height: fh - 1.5,
+              transition: `x ${TRANS}, y ${TRANS}, width ${TRANS}, height ${TRANS}` }} />
 
           {/* Outer glow on viewfinder */}
-          <rect x={fl - 1} y={ft - 1} width={fw + 2} height={fh + 2} rx={VF_R + 1}
-            fill="none"
+          <rect rx={VF_R + 1} fill="none"
             stroke={isGen ? 'rgba(129,140,248,0.12)' : 'rgba(99,102,241,0.08)'}
-            strokeWidth={3} />
+            strokeWidth={3}
+            style={{ x: fl - 1, y: ft - 1, width: fw + 2, height: fh + 2,
+              transition: `x ${TRANS}, y ${TRANS}, width ${TRANS}, height ${TRANS}` }} />
 
           {/* Corner screws — subtle on frosted glass */}
           {([[camL + 18, camT + 18], [camR - 18, camT + 18], [camL + 18, camB - 18], [camR - 18, camB - 18]] as [number, number][]).map(([x, y], i) => (
@@ -272,7 +279,8 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({
         ] as [number, number, number, number][]).map(([l, t, w, h], i) => (
           <div key={i} className="viewfinder-bracket absolute" style={{
             left: l, top: t, width: w, height: h,
-            backgroundColor: accent, transition: 'background-color 0.4s',
+            backgroundColor: accent,
+            transition: `background-color 0.4s, left ${TRANS}, top ${TRANS}`,
           }} />
         ))}
 
