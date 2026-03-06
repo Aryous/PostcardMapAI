@@ -88,6 +88,8 @@ const LuckyDice: React.FC<LuckyDiceProps> = ({ onLucky, isLoading, label }) => {
       onClick={() => { if (!isLoading) onLucky(); }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleMouseEnter}
+      onTouchEnd={handleMouseLeave}
     >
       <div className="compass-body">
         <span className="compass-label compass-n">N</span>

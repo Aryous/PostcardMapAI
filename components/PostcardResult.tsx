@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+
+const isTouch = typeof window !== 'undefined' && 'ontouchstart' in window;
 import { X, Download, RotateCw, Coins } from 'lucide-react';
 import { Language, AspectRatio, UsageStats } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
@@ -290,7 +292,7 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
                 </div>
 
                 {/* Overlay Actions (Hover) - Front — outside overflow-hidden so counter-scale isn't clipped */}
-                <div className={`absolute inset-0 pointer-events-none flex items-start justify-between p-2 duration-200 transition-opacity ${isExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                <div className={`absolute inset-0 pointer-events-none flex items-start justify-between p-2 duration-200 transition-opacity ${isExpanded ? 'opacity-100' : (isTouch ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')}`}>
                     {/* Close — left side to avoid accidental clicks */}
                     <div
                       className="pointer-events-auto"
@@ -348,7 +350,7 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
                             />
                         </div>
                         {/* Overlay Actions (Hover) - Back — outside overflow-hidden */}
-                        <div className={`absolute inset-0 pointer-events-none flex items-start justify-between p-2 duration-200 transition-opacity ${isExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                        <div className={`absolute inset-0 pointer-events-none flex items-start justify-between p-2 duration-200 transition-opacity ${isExpanded ? 'opacity-100' : (isTouch ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')}`}>
                             {/* Close — left */}
                             <div
                               className="pointer-events-auto"
