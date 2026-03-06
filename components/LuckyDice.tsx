@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 interface LuckyDiceProps {
   onLucky: () => void;
@@ -7,39 +7,85 @@ interface LuckyDiceProps {
   label?: string;
 }
 
+const STIFFNESS = 0.10;
+const DAMPING   = 0.52;
+
 const LuckyDice: React.FC<LuckyDiceProps> = ({ onLucky, isLoading, label }) => {
-  const [snapAngle, setSnapAngle] = useState<number | null>(null);
+  // true while mouse is over (spring running toward random target)
+  // false when spring has fully returned to 0 (wobble CSS re-activates)
+  const [springActive, setSpringActive] = useState(false);
 
-  const handleClick = () => {
-    if (isLoading) return;
-    onLucky();
-  };
+  const needleRef   = useRef<HTMLDivElement | null>(null);
+  const angleRef    = useRef(0);
+  const velocityRef = useRef(0);
+  const targetRef   = useRef(0);
+  const rafRef      = useRef<number | null>(null);
+  const returningRef = useRef(false);   // true = animating back to 0
 
-  const handleMouseEnter = () => {
-    if (!isLoading) {
-      setSnapAngle(Math.floor(Math.random() * 360));
+  // Spring tick — stored in a ref so it's always current inside RAF
+  const tickRef = useRef<() => void>(() => {});
+  tickRef.current = () => {
+    velocityRef.current += (targetRef.current - angleRef.current) * STIFFNESS;
+    velocityRef.current *= DAMPING;
+    angleRef.current    += velocityRef.current;
+
+    if (needleRef.current) {
+      needleRef.current.style.transform = `rotate(${angleRef.current}deg)`;
+    }
+
+    const settled =
+      Math.abs(velocityRef.current) < 0.05 &&
+      Math.abs(targetRef.current - angleRef.current) < 0.1;
+
+    if (!settled) {
+      rafRef.current = requestAnimationFrame(() => tickRef.current());
+    } else if (returningRef.current) {
+      // Fully back to north — hand control back to CSS wobble animation
+      angleRef.current    = 0;
+      velocityRef.current = 0;
+      returningRef.current = false;
+      if (needleRef.current) needleRef.current.style.transform = '';
+      setSpringActive(false);
     }
   };
 
-  const handleMouseLeave = () => {
-    setSnapAngle(null);
+  const stopRaf = () => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
   };
+
+  const handleMouseEnter = useCallback(() => {
+    if (isLoading) return;
+    returningRef.current = false;
+    targetRef.current    = Math.floor(Math.random() * 360);
+    setSpringActive(true);
+    stopRaf();
+    rafRef.current = requestAnimationFrame(() => tickRef.current());
+  }, [isLoading]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isLoading) return;
+    returningRef.current = true;
+    targetRef.current    = 0;
+    stopRaf();
+    rafRef.current = requestAnimationFrame(() => tickRef.current());
+  }, [isLoading]);
+
+  // Cleanup on unmount
+  useEffect(() => () => stopRaf(), []);
 
   const needleClass = isLoading
     ? 'compass-needle animate-spin-compass'
-    : snapAngle !== null
-    ? 'compass-needle'
+    : springActive
+    ? 'compass-needle'                     // JS-driven; no CSS animation
     : 'compass-needle animate-wobble-compass';
-
-  const needleStyle =
-    snapAngle !== null && !isLoading
-      ? { transform: `rotate(${snapAngle}deg)`, transition: 'transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1)' }
-      : {};
 
   return (
     <div
       className="absolute bottom-10 right-8 z-[1000] flex flex-col items-center gap-3 cursor-pointer group"
-      onClick={handleClick}
+      onClick={() => { if (!isLoading) onLucky(); }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -49,7 +95,7 @@ const LuckyDice: React.FC<LuckyDiceProps> = ({ onLucky, isLoading, label }) => {
         <span className="compass-label compass-e">E</span>
         <span className="compass-label compass-w">W</span>
         <div className="compass-needle-wrap">
-          <div className={needleClass} style={needleStyle} />
+          <div className={needleClass} ref={needleRef} />
         </div>
         <div className="compass-pin" />
       </div>
