@@ -10,7 +10,7 @@ export { STYLE_DEFS };
 interface ControlPanelProps {
   appState: AppState;
   onGenerate: (prompt: string, styleId: string) => void;
-  onReset: () => void;
+
   onToggleHistory: () => void;
   error?: string;
   language: Language;
@@ -32,7 +32,7 @@ interface ControlPanelProps {
 const ControlPanel: React.FC<ControlPanelProps> = ({
   appState,
   onGenerate,
-  onReset,
+
   onToggleHistory,
   error,
   language,
@@ -433,14 +433,6 @@ setTimeout(() => setShowDevToast(false), 2000);
                   >
                     <RefreshCw className="w-4 h-4" /> {t.retry}
                   </button>
-                  <div className="flex gap-2">
-                    <button
-                        onClick={onReset}
-                        className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-lg transition-colors text-xs"
-                      >
-                        {t.newLocation}
-                    </button>
-                  </div>
                </div>
             ) : (
                // IDLE, DRAWING, or REVIEWING STATE
@@ -458,11 +450,6 @@ setTimeout(() => setShowDevToast(false), 2000);
                    {isAreaSelected ? t.generate : t.drawPrompt}
                  </button>
                  
-                 {isAreaSelected && (
-                    <button onClick={onReset} className="w-full text-[10px] text-slate-400 hover:text-red-500 font-medium transition-colors text-center">
-                      {t.redraw}
-                    </button>
-                 )}
                </div>
             )}
           </div>

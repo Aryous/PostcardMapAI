@@ -164,14 +164,6 @@ export default function App() {
 
   }, [handleGenerate]);
 
-  const handleReset = useCallback(() => {
-    setAppState(AppState.REVIEWING);
-    setGeneratedImage(undefined);
-    setGeneratedBackImage(undefined);
-    setCurrentUsageStats(undefined);
-    setError(undefined);
-    setLocationName("");
-  }, []);
 
   const handleCloseResult = useCallback(() => {
     setGeneratedImage(undefined);
@@ -206,7 +198,7 @@ export default function App() {
       <ControlPanel
         appState={appState}
         onGenerate={handleGenerate}
-        onReset={handleReset}
+
         onToggleHistory={() => setShowHistory(true)}
         error={error}
         language={language}
