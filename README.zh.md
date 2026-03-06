@@ -6,6 +6,11 @@
 
 [English](./README.md) · [在线体验](https://postcard-map-ai.vercel.app) · [反馈问题](https://github.com/Aryous/PostcardMapAI/issues)
 
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL%20v3-blue.svg)](./LICENSE)
+[![Deploy with Vercel](https://img.shields.io/badge/deployed%20on-Vercel-black?logo=vercel)](https://postcard-map-ai.vercel.app)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev)
+[![Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google&logoColor=white)](https://aistudio.google.com)
+
 </div>
 
 ---
