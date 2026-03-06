@@ -180,6 +180,15 @@
       .animate-spin-compass {
         animation: spin-compass 0.5s linear infinite;
       }
+
+      /* Viewfinder bracket breathing */
+      @keyframes bracket-breathe {
+        0%, 100% { opacity: 0.82; }
+        50%       { opacity: 1; }
+      }
+      .viewfinder-bracket {
+        animation: bracket-breathe 3.2s ease-in-out infinite;
+      }
     </style>
   <script type="module" src="/index.tsx"></script>
 </head>

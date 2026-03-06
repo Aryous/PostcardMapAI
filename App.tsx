@@ -152,12 +152,12 @@ export default function App() {
   }, [handleGenerate]);
 
   const handleReset = useCallback(() => {
-    setAppState(AppState.DRAWING);
+    setAppState(AppState.REVIEWING);
     setGeneratedImage(undefined);
     setGeneratedBackImage(undefined);
     setCurrentUsageStats(undefined);
     setError(undefined);
-    setLocationName(""); 
+    setLocationName("");
   }, []);
 
   const handleCloseResult = useCallback(() => {
@@ -181,8 +181,10 @@ export default function App() {
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-slate-50">
-      <PostcardMap 
-        appState={appState} 
+      <PostcardMap
+        appState={appState}
+        aspectRatio={aspectRatio}
+        locationName={locationName}
         onMapSelection={handleMapSelection}
         targetLocation={targetLocation}
       />
