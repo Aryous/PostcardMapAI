@@ -30,12 +30,12 @@ const MapEventHandler: React.FC<{
 }> = ({ appState, onMoveEnd, onMoveStart }) => {
   useMapEvents({
     movestart: () => {
-      if (appState !== AppState.GENERATING && appState !== AppState.COMPLETE) {
+      if (appState !== AppState.GENERATING) {
         onMoveStart();
       }
     },
     moveend: (e) => {
-      if (appState !== AppState.GENERATING && appState !== AppState.COMPLETE) {
+      if (appState !== AppState.GENERATING) {
         const c = e.target.getCenter();
         onMoveEnd(c.lat, c.lng);
       }
