@@ -5,11 +5,13 @@ import ControlPanel, { STYLE_DEFS } from './components/ControlPanel';
 import PostcardResult from './components/PostcardResult';
 import HistoryPanel from './components/HistoryPanel';
 import LuckyDice from './components/LuckyDice';
+import ApiKeyModal from './components/ApiKeyModal';
 import { AppState, Language, ModelType, HistoryItem, AspectRatio, DevConfig, UsageStats } from './types';
 import { generatePostcard, generatePostcardBack } from './services/geminiService';
 import { captureMapElement } from './utils/mapUtils';
 import { getRandomLocation } from './utils/locations';
 import { TRANSLATIONS } from './utils/translations';
+import { Key } from 'lucide-react';
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
@@ -42,6 +44,10 @@ export default function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [skipAnimation, setSkipAnimation] = useState(false);
   const [pendingStyleId, setPendingStyleId] = useState<string | null>(null);
+
+  // API Key modal — show on first load if no key is available
+  const hasKey = !!(localStorage.getItem('gemini_api_key') || process.env.API_KEY);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(!hasKey);
 
   const saveHistory = (newHistory: HistoryItem[]) => {
     setHistory(newHistory);
@@ -126,9 +132,13 @@ export default function App() {
            setError(language === 'zh' ? "API Key 权限不足。" : "Permission denied. Please check your API Key.");
         }
       } else {
-        setError(err.message || "Something went wrong during generation.");
+        // Open key modal on auth errors
+      if (errorMessage.includes('API Key is missing') || errorMessage.includes('API_KEY_INVALID')) {
+        setShowApiKeyModal(true);
       }
-      setAppState(AppState.REVIEWING); 
+      setError(err.message || "Something went wrong during generation.");
+      }
+      setAppState(AppState.REVIEWING);
     }
   }, [model, language, history, userImage, aspectRatio, devConfig, locationName]);
 
@@ -231,8 +241,8 @@ export default function App() {
       />
 
       {generatedImage && (
-        <PostcardResult 
-          imageUrl={generatedImage} 
+        <PostcardResult
+          imageUrl={generatedImage}
           backImageUrl={generatedBackImage}
           onClose={handleCloseResult}
           language={language}
@@ -240,6 +250,24 @@ export default function App() {
           aspectRatio={generatedAspectRatio}
           locationName={locationName}
           usageStats={currentUsageStats}
+        />
+      )}
+
+      {/* API Key config button — bottom-left corner */}
+      <button
+        onClick={() => setShowApiKeyModal(true)}
+        className="absolute bottom-4 left-4 z-[1000] p-2 rounded-full bg-black/30 hover:bg-indigo-600/70 backdrop-blur-md text-white/60 hover:text-white transition-all duration-200 shadow-lg ring-1 ring-white/10"
+        title={language === 'zh' ? '配置 API Key' : 'Configure API Key'}
+      >
+        <Key className="w-3.5 h-3.5" />
+      </button>
+
+      {/* API Key Modal */}
+      {showApiKeyModal && (
+        <ApiKeyModal
+          language={language}
+          onSave={() => setShowApiKeyModal(false)}
+          onClose={hasKey ? () => setShowApiKeyModal(false) : undefined}
         />
       )}
     </div>

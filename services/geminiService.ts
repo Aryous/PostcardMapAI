@@ -3,9 +3,9 @@ import { GoogleGenAI } from "@google/genai";
 import { DevConfig, UsageStats, GenerationResult } from "../types";
 
 const getClient = () => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = localStorage.getItem('gemini_api_key') || process.env.API_KEY;
   if (!apiKey) {
-    throw new Error("API Key is missing. Please set process.env.API_KEY.");
+    throw new Error("API Key is missing. Please configure your Gemini API Key.");
   }
   return new GoogleGenAI({ apiKey });
 };
