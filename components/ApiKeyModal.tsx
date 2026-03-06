@@ -46,12 +46,12 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose }) 
       setError(t.error);
       return;
     }
-    localStorage.setItem('gemini_api_key', trimmed);
+    sessionStorage.setItem('gemini_api_key', trimmed);
     onSave(trimmed);
   };
 
   const handleClearAndUseEnv = () => {
-    localStorage.removeItem('gemini_api_key');
+    sessionStorage.removeItem('gemini_api_key');
     onSave('');
   };
 

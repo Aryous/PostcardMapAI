@@ -46,7 +46,7 @@ export default function App() {
   const [pendingStyleId, setPendingStyleId] = useState<string | null>(null);
 
   // API Key modal — show on first load if no key is available
-  const hasKey = !!(localStorage.getItem('gemini_api_key') || process.env.API_KEY);
+  const hasKey = !!(sessionStorage.getItem('gemini_api_key') || process.env.API_KEY);
   const [showApiKeyModal, setShowApiKeyModal] = useState(!hasKey);
 
   const saveHistory = (newHistory: HistoryItem[]) => {
