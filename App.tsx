@@ -193,6 +193,7 @@ export default function App() {
         locationName={locationName}
         onMapSelection={handleMapSelection}
         targetLocation={targetLocation}
+        language={language}
       />
       
       <ControlPanel

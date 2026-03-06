@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
 import ViewfinderOverlay from './ViewfinderOverlay';
 import L from 'leaflet';
-import { AppState, AspectRatio } from '../types';
+import { AppState, AspectRatio, Language } from '../types';
 
 // Fix Leaflet's default icon issue in React
 const DefaultIcon = L.icon({
@@ -20,6 +20,7 @@ interface PostcardMapProps {
   locationName: string;
   targetLocation?: { lat: number, lng: number, zoom: number };
   onMapSelection: (detectedName: string) => void;
+  language: Language;
 }
 
 // Inner component to access map context
@@ -45,7 +46,7 @@ const MapEventHandler: React.FC<{
 };
 
 const PostcardMap: React.FC<PostcardMapProps> = ({
-  appState, aspectRatio, locationName, targetLocation, onMapSelection
+  appState, aspectRatio, locationName, targetLocation, onMapSelection, language
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const geocodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -64,11 +65,14 @@ const PostcardMap: React.FC<PostcardMapProps> = ({
     }
   }, []);
 
-  // Fire initial onMapSelection when map loads (puts app into REVIEWING state)
+  // Fire initial geocode when map loads
   useEffect(() => {
-    if (initialPosition && appState === AppState.IDLE) {
-      onMapSelection('');
-    }
+    if (!initialPosition || appState !== AppState.IDLE) return;
+    setIsDetecting(true);
+    fetchLocationName(initialPosition[0], initialPosition[1]).then(name => {
+      setIsDetecting(false);
+      onMapSelection(name);
+    });
   }, [initialPosition]);
 
   // flyTo when targetLocation changes
@@ -85,18 +89,30 @@ const PostcardMap: React.FC<PostcardMapProps> = ({
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`,
-        { headers: { 'Accept-Language': 'en,zh' } }
+        { headers: { 'Accept-Language': language === 'zh' ? 'zh,en' : 'en,zh' } }
       );
       const data = await response.json();
       if (data?.address) {
         const addr = data.address;
-        const name = addr.tourism || addr.historic || addr.leisure || addr.building ||
-          addr.amenity || addr.park || addr.village || addr.town ||
-          addr.city_district || addr.city || addr.state;
+        // Nominatim may return semicolon-separated names (e.g. "大伦敦;Greater London") — take first segment only
+        const clean = (s?: string) => s ? s.split(';')[0].trim() : undefined;
+        // In zh mode, skip fields that have no CJK characters (untranslated OSM data)
+        const prefer = (s?: string) => {
+          const v = clean(s);
+          if (!v) return undefined;
+          if (language === 'zh' && !/[\u4e00-\u9fa5\u3040-\u30ff\uac00-\ud7af]/.test(v)) return undefined;
+          return v;
+        };
+        const name = prefer(addr.tourism) || prefer(addr.historic) || prefer(addr.leisure) ||
+          prefer(addr.building) || prefer(addr.amenity) || prefer(addr.park) ||
+          prefer(addr.village) || prefer(addr.town) ||
+          prefer(addr.city_district) || prefer(addr.city) || prefer(addr.state) ||
+          clean(addr.city) || clean(addr.state);
+        const city = clean(addr.city);
         let full = name || '';
-        if (addr.city && name !== addr.city) full += `, ${addr.city}`;
-        else if (addr.country && !full.includes(addr.country)) full += `, ${addr.country}`;
-        return full.replace(/^,\s*/, '') || data.display_name || '';
+        if (city && name !== city) full += `, ${city}`;
+        else if (addr.country && !full.includes(addr.country)) full += `, ${clean(addr.country)}`;
+        return full.replace(/^,\s*/, '') || clean(data.display_name) || '';
       }
       return '';
     } catch {
