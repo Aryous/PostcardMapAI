@@ -120,7 +120,7 @@ export const generatePostcard = async (
     }
     else {
       systemInstruction = `
-Act as a Visionary Graphic Architect specializing in artistic travel postcards. Your task is to craft a "Geographic Love Letter" that seamlessly weaves together cartography, cultural landmarks, poetic expression, and HUMAN PRESENCE into a museum-quality keepsake.
+Act as a Visionary Graphic Architect specializing in artistic travel postcards. Your task is to craft a "Geographic Love Letter" that seamlessly weaves together cartography, cultural landmarks, and poetic expression into a museum-quality keepsake.
 
 
 ═══════════════════════════════════════════════════════════════
@@ -196,245 +196,31 @@ ${userPrompt}
 
 ═══════════════════════════════════════════════════════════════
 
-## 4. HUMAN PRESENCE (Optional but Powerful) ⭐ NEW SECTION
+## 4. HUMAN PRESENCE
 ${cleanUserBase64 ? `
 **USER PHOTO — REDRAW ONLY, DO NOT COMPOSITE**:
-Use the photo as a drawing reference only. REDRAW the person from scratch in the same
-hand-drawn illustration style—never paste, filter, or composite the photo directly.
+A traveler photo is provided. REDRAW the person from scratch in the same hand-drawn
+illustration style as the landmarks—never paste, filter, or composite the photo directly.
 The location is always "${locationName}" from the map, never from the photo's background.
-` : ''}
-**Core Principle**:
-When including human figures, they should feel like NATURAL INHABITANTS of the postcard world—not photographic inserts or digital overlays. They are part of the artistic narrative, rendered in the same hand-drawn style as the landmarks and map.
-
----
-
-### **4.1 Artistic Style Consistency**
-
-**CRITICAL RULE**: Human figures MUST match the overall artistic medium exactly.
 
 **Style Integration**:
-- **Same hand-drawn technique**: Steel pen line art + watercolor fills
-- **Same line quality**: Organic, slightly imperfect pen strokes (not digital vector lines)
-- **Same color treatment**: Soft, muted watercolor palette matching the overall scheme
-- **Same texture**: Visible paper grain, watercolor blooms, subtle imperfections
-- **Same level of detail**: If landmarks are simplified/stylized, figures should be too
+- Same artistic technique and medium as landmarks and map
+- Same muted color palette and paper texture
+- Organic, imperfect edges (not digital-perfect)
+- Avoid photorealism, vector art, or style mixing
+- The figure must look hand-drawn and indistinguishable from the illustrated landmarks
 
-**What to AVOID**:
-- ❌ Photorealistic figures in an illustrated world
-- ❌ Digital vector art figures in a watercolor composition
-- ❌ High-saturation colors that clash with muted palette
-- ❌ Sharp, perfect edges when everything else is organic
-- ❌ Different rendering style (e.g., anime style in a vintage postcard)
+**Positioning**:
+- Foreground Protagonist (30-50% of frame): Half-body or 3/4 body portrait
+- Creates "looking into the scene" perspective
+- Figure grounded ON the map's streets/terrain, not floating
+- Allow partial overlap with landmarks for depth
 
----
-
-### **4.2 Compositional Placement**
-
-**Three Strategic Approaches**:
-
-**A. Foreground Protagonist** (占画面30-50%)
-- **Position**: Front-left or front-right, creating a "looking into the scene" perspective
-- **Scale**: Half-body or 3/4 body portrait, significant presence
-- **Function**: Acts as the viewer's surrogate, inviting emotional connection
-- **Examples**:
-  - Tourist holding camera, capturing the moment
-  - Traveler sketching the scene in a notebook
-  - Local resident gazing at landmarks with pride
-- **Composition tip**: Leave negative space on opposite side for landmarks to breathe
-
-**B. Mid-ground Participants** (占画面15-25%)
-- **Position**: Integrated into the street scene or landscape
-- **Scale**: Full-body figures, smaller than foreground elements
-- **Function**: Adds life, movement, and human scale to the environment
-- **Examples**:
-  - Couples walking along riverside
-  - Small groups exploring landmarks
-  - Locals going about daily activities
-- **Composition tip**: Use 2-4 figures to create visual rhythm and depth
-
-**C. Background Silhouettes** (占画面5-10%)
-- **Position**: Distant, near horizon or atop structures
-- **Scale**: Tiny figures that establish scale
-- **Function**: Emphasizes grandeur of landmarks, adds atmospheric depth
-- **Examples**:
-  - Figures on city walls or observation decks
-  - Distant pedestrians on bridges
-  - Simplified human shapes in far perspective
-
-**Flexible Combinations**:
-- Single foreground figure + background silhouettes (creates depth)
-- Multiple mid-ground figures only (lively street scene)
-- Foreground + mid-ground + background (maximum narrative richness)
-
----
-
-### **4.3 Narrative Roles & Gestures**
-
-**The Observer** (most common for travel postcards)
-- **Gesture**: Holding camera, binoculars, or phone; gazing at landmarks
-- **Expression**: Wonder, curiosity, peaceful contemplation
-- **Clothing**: Casual travel attire, backpack, hat
-- **Cultural note**: For Chinese locations, can include traditional elements (qipao, hanfu) if contextually appropriate
-
-**The Documenter**
-- **Gesture**: Sketching in notebook, writing postcard, taking notes
-- **Expression**: Focused, artistic, engaged
-- **Props**: Sketchbook, watercolor set, vintage camera
-- **Narrative**: "Capturing memories" theme—meta-artistic layer
-
-**The Local Inhabitant**
-- **Gesture**: Natural daily activities—walking, cycling, conversing
-- **Expression**: Relaxed, at home, authentic
-- **Clothing**: Reflects local culture and climate
-- **Function**: Grounds the postcard in lived experience, not just tourism
-
-**The Wanderer**
-- **Gesture**: Walking, exploring, looking around
-- **Expression**: Discovery, adventure, freedom
-- **Posture**: Dynamic, in motion
-- **Function**: Embodies the spirit of travel and exploration
-
----
-
-### **4.4 Cultural & Contextual Authenticity**
-
-**For Chinese Locations**:
-- **Clothing options**:
-  - Modern casual (most common): Simple, contemporary travel wear
-  - Cultural elements (selective): Subtle traditional touches if contextually appropriate
-  - Avoid: Stereotypical "tourist costume" or forced cultural dress
-- **Activities**:
-  - Photographing ancient architecture
-  - Sketching traditional gardens
-  - Walking along city walls or riversides
-- **Posture & expression**: Natural, respectful engagement with heritage sites
-
-**For International Locations**:
-- **Clothing**: Reflects local climate and urban style
-  - European cities: Casual chic, scarves, coats
-  - Tropical locations: Light fabrics, hats, sunglasses
-  - Urban metropolises: Contemporary street style
-- **Activities**:
-  - Sightseeing iconic landmarks
-  - Enjoying local atmosphere (cafés, parks, waterfronts)
-  - Capturing moments with cameras or phones
-
-**Universal Principles**:
-- Figures should feel AUTHENTIC to the location, not generic stock poses
-- Avoid overly staged or artificial gestures
-- Expressions should be natural and relatable
-- Clothing and props should match the location's character and season
-
----
-
-### **4.5 Color & Light Integration**
-
-**Color Harmony**:
-- Human figures use the SAME muted, soft color palette as the rest of the composition
-- Skin tones: Warm beige, peachy cream, soft ochre (watercolor-style, not photorealistic)
-- Clothing: Harmonizes with overall palette—soft blues, muted greens, dusty rose, cream, earth tones
-- Hair: Sepia, warm brown, soft black (with watercolor texture, not solid fills)
-
-**Light & Shadow**:
-- Figures receive the same soft, diffused lighting as landmarks
-- Shadows: Diluted watercolor technique, never harsh drop shadows
-- Highlights: Subtle, achieved through lighter watercolor washes or paper white
-- Atmospheric perspective: Distant figures are lighter and less saturated
-
-**Watercolor Effects**:
-- Allow color to bleed slightly at edges (organic watercolor behavior)
-- Use varied saturation within clothing (lighter at highlights, deeper in folds)
-- Apply subtle texture overlays to match paper grain
-- Occasional "happy accidents": small drips or blooms that enhance hand-crafted feel
-
----
-
-### **4.6 Relationship with Landmarks & Map**
-
-**Spatial Integration** (NOT floating stickers):
-
-**Grounded in Geography**:
-- Figures stand ON the map's streets, paths, or terrain
-- Their feet/base should align with map's spatial logic
-- Example: Figure on a bridge should align with the bridge's map location
-
-**Interacting with Landmarks**:
-- Figures can be positioned to "look at" or "approach" key landmarks
-- Create visual dialogue: figure's gaze directs viewer's attention to architecture
-- Scale relationship: Figures provide human scale reference for landmark grandeur
-
-**Layering Strategy**:
-- Background layer: Map foundation
-- Mid-ground layer: Landmarks and architecture
-- Foreground layer: Human figures (when using Foreground Protagonist approach)
-- OR: Figures integrated into mid-ground alongside landmarks (for street scene approach)
-
-**Overlapping & Depth**:
-- Allow figures to partially overlap with landmarks or map elements
-- Use atmospheric perspective: Foreground figures are more detailed and saturated
-- Background figures are simplified, lighter, and less detailed
-
----
-
-### **4.7 Quantity & Composition Balance**
-
-**Single Figure** (intimate, personal narrative):
-- ✅ Best for: Emotional connection, "postcard from me to you" feel
-- ✅ Composition: Asymmetric placement, leaves space for landmarks
-- ✅ Scale: Can be larger (30-50% of frame) without overwhelming
-- Example: Solo traveler sketching the scene, gazing at sunset over landmarks
-
-**2-3 Figures** (social, relational narrative):
-- ✅ Best for: Couples, friends, small groups—adds warmth and interaction
-- ✅ Composition: Can be clustered or distributed across mid-ground
-- ✅ Scale: Medium (15-25% each) to maintain balance with landmarks
-- Example: Couple walking hand-in-hand along riverside, friends exploring street scene
-
-**4-6 Figures** (lively, bustling atmosphere):
-- ✅ Best for: Urban scenes, markets, busy landmarks—conveys energy and life
-- ✅ Composition: Distributed across multiple depth planes (foreground, mid, background)
-- ✅ Scale: Varied—larger in foreground, smaller in background
-- Example: Busy London scene with multiple pedestrians, tourists, locals
-
-**Negative Space Rule**:
-- Even with multiple figures, preserve 20-30% negative space
-- Figures should enhance, not clutter the composition
-- Landmarks must remain clearly visible and recognizable
-
----
-
-### **4.8 When to Include Figures (Decision Guide)**
-
-**INCLUDE human figures when**:
-✅ You want to add emotional warmth and relatability
-✅ The location benefits from human scale reference (grand architecture, vast landscapes)
-✅ You want to tell a story of travel, discovery, or cultural experience
-✅ The composition feels too static or empty without human presence
-✅ You want to create a "postcard from my journey" personal narrative
-
-**SKIP human figures when**:
-❌ The landmarks are so intricate that figures would create visual clutter
-❌ The location's essence is better captured through pure architecture/nature
-❌ The map-as-subject approach is being used (abstract, pattern-focused)
-❌ The composition is already visually rich and balanced without them
-❌ You want a timeless, "eternal place" aesthetic rather than a moment in time
-
----
-
-### **4.9 Technical Execution Checklist**
-
-Before finalizing human figures, verify:
-
-✅ **Style Match**: Figures use same hand-drawn line art + watercolor technique as landmarks
-✅ **Color Harmony**: Figures use muted, soft colors from the overall palette
-✅ **Texture Consistency**: Paper grain and watercolor effects applied to figures
-✅ **Spatial Logic**: Figures are grounded in the map's geography, not floating
-✅ **Scale Accuracy**: Figure size is proportional to landmarks and perspective
-✅ **Line Quality**: Organic, imperfect pen strokes (not digital-perfect vectors)
-✅ **Cultural Authenticity**: Clothing, gestures, and context match the location
-✅ **Narrative Clarity**: Figure's role (observer/documenter/local/wanderer) is clear
-✅ **Composition Balance**: Figures enhance, not overwhelm the landmarks
-✅ **Negative Space**: 20-30% breathing room preserved
+**Preserve 20-30% negative space.**
+` : `
+❌ NO HUMAN FIGURES. Do not include any people, silhouettes, or human forms in this postcard.
+Focus entirely on landmarks, architecture, geography, and cultural symbols.
+`}
 
 ═══════════════════════════════════════════════════════════════
 
