@@ -5,42 +5,41 @@ export interface StyleDef {
   label: { zh: string; en: string };
 }
 
-// REFACTORED STYLE DEFINITIONS: Focus on Medium, Mood, and Lighting.
 export const STYLE_DEFS: StyleDef[] = [
   {
     id: 'vintage',
-    frontPrompt: 'Style: 1950s Travel Poster. Medium: Lithograph / Screen Print. Features: Bold flat colors, grain texture, heavy retro typography header, nostalgic golden hour lighting. The map roads become charming winding streets.',
-    backPrompt: 'Aged yellowed paper texture with coffee stains. Antique victorian border.',
+    frontPrompt: 'Medium: 1950s lithograph travel poster with screen print texture. Bold flat colors, visible grain, heavy retro sans-serif typography. Golden hour warm lighting. Map roads rendered as simplified graphic curves.',
+    backPrompt: 'Aged yellowed paper with coffee stains and subtle creases. Victorian ornamental border.',
     label: { zh: '复古', en: 'Vintage' }
   },
   {
     id: 'ink',
-    frontPrompt: 'Style: Traditional Chinese "Shan-Shui" & Architectural Art. Medium: Ink wash on aged Rice Paper. Features: Axonometric projection, delicate line work, desaturated earth tones (sage, ochre), red seal stamps. Atmospheric and poetic.',
-    backPrompt: 'Aged rice paper texture. Vertical divider line painted with brush.',
+    frontPrompt: 'Medium: Traditional Chinese ink wash (水墨画) on aged rice paper. Axonometric architectural projection with delicate brush line work. Desaturated palette: sage green, burnt ochre, sepia. Red seal stamps (印章). Atmospheric negative space.',
+    backPrompt: 'Aged rice paper texture with natural fiber patterns. Vertical brush-painted divider line.',
     label: { zh: '古韵', en: 'Ancient Ink' }
   },
   {
     id: 'watercolor',
-    frontPrompt: 'Style: Urban Sketching / Plein Air. Medium: Watercolor & Ink. Features: Loose wet-on-wet washes, paint splatters, unfinished edges, handwritten calligraphy typography. Dreamy, airy, and artistic.',
-    backPrompt: 'Clean white cold-press watercolor paper texture. Soft floral corners.',
+    frontPrompt: 'Medium: Urban sketching watercolor with steel pen line art. Loose wet-on-wet washes, organic color bleeds, unfinished edges. Handwritten calligraphy typography. Soft paper texture visible throughout.',
+    backPrompt: 'Cold-press watercolor paper texture. Delicate floral corner ornaments in muted tones.',
     label: { zh: '水彩', en: 'Watercolor' }
   },
   {
     id: 'cyberpunk',
-    frontPrompt: 'Style: Sci-Fi Concept Art. Medium: Digital Painting. Features: Neon-soaked night, holographic map interface overlaying real city structures, glowing road networks, rain reflections, "Blade Runner" atmosphere.',
-    backPrompt: 'Dark digital slate background. Neon blue grid lines. Holographic elements.',
+    frontPrompt: 'Medium: Sci-fi digital concept art. Neon-lit night scene with holographic map interface overlaying architecture. Glowing cyan/magenta road networks, rain-slicked reflections. Blade Runner atmosphere with volumetric fog.',
+    backPrompt: 'Dark slate digital background with neon cyan grid lines. Holographic UI elements and glitch effects.',
     label: { zh: '赛博朋克', en: 'Cyberpunk' }
   },
   {
     id: 'sketch',
-    frontPrompt: 'Style: A sophisticated urban cartography postcard style. The background features a faint, minimalist street map with delicate grid lines and pale pastel-colored regions. Layered on top are detailed hand-drawn architectural sketches in graphite pencil, using precise cross-hatching and fine-line ink techniques. The composition mimics a travel journal, combining isometric perspectives of landmarks with artistic map elements. High contrast between the crisp pencil strokes and the soft-textured vintage paper. Elegant typography and a clean, nostalgic aesthetic.',
-    backPrompt: 'Aged parchment paper texture. Fine ink border.',
+    frontPrompt: 'Medium: Architectural travel journal with graphite pencil and fine-line ink. Faint minimalist street map background (pale pastels, delicate grid lines). Detailed cross-hatched landmark sketches in isometric perspective. High contrast between crisp pencil strokes and soft vintage paper texture.',
+    backPrompt: 'Aged parchment paper with subtle staining. Fine ink decorative border.',
     label: { zh: '素描', en: 'Sketch' }
   },
   {
     id: 'oil',
-    frontPrompt: 'Style: Impressionist Masterpiece. Medium: Oil on Canvas. Features: Thick impasto texture (palette knife), visible brush strokes, vibrant light vibration, emotional landscape. Like a Van Gogh or Monet painting.',
-    backPrompt: 'Canvas cloth texture background. Elegant painted border.',
+    frontPrompt: 'Medium: Impressionist oil painting with thick impasto texture. Visible palette knife strokes and directional brushwork. Vibrant color vibration with broken color technique. Atmospheric light treatment inspired by Van Gogh and Monet.',
+    backPrompt: 'Canvas cloth texture with visible weave. Painted ornamental border in complementary tones.',
     label: { zh: '油画', en: 'Oil Paint' }
   },
 ];
