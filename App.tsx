@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import PostcardMap from './components/PostcardMap';
 import ControlPanel, { STYLE_DEFS } from './components/ControlPanel';
 import PostcardResult from './components/PostcardResult';
@@ -142,7 +142,12 @@ export default function App() {
     }
   }, [model, language, history, userImage, aspectRatio, devConfig, locationName]);
 
+  const luckyInProgressRef = useRef(false);
+
   const handleLucky = useCallback(async () => {
+    if (luckyInProgressRef.current) return;
+    luckyInProgressRef.current = true;
+
     const loc = getRandomLocation();
     setTargetLocation(loc);
 
@@ -160,6 +165,7 @@ export default function App() {
     setTimeout(async () => {
         setPendingStyleId(null);
         await handleGenerate(randomStyle.frontPrompt, randomStyle.id, loc.name);
+        luckyInProgressRef.current = false;
     }, 4500);
 
   }, [handleGenerate]);
@@ -220,7 +226,7 @@ export default function App() {
 
       <LuckyDice 
         onLucky={handleLucky} 
-        isLoading={appState === AppState.IDLE && targetLocation !== undefined && generatedImage === undefined}
+        isLoading={appState === AppState.GENERATING || (appState === AppState.IDLE && targetLocation !== undefined && generatedImage === undefined)}
         label={TRANSLATIONS[language].lucky}
       />
 
