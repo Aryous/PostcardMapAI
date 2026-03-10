@@ -25,6 +25,15 @@
 - **Lucky spin** — the compass button picks a random city and style for instant inspiration
 - **Cost estimate** — token usage and estimated USD cost displayed after each generation
 
+## Gallery
+
+| | | |
+|:---:|:---:|:---:|
+| ![Watercolor · Barcelona](./img/水彩/postcard-260310-巴塞罗那西班牙-101207-front.png) | ![Oil · London](./img/油画/postcard-260310-英格兰CityofWestminster-101354-front.png) | ![Ancient Ink · Guilin](./img/古韵/postcard-260310-桂林-113724-front.png) |
+| **Watercolor** · Barcelona | **Oil Paint** · London | **Ancient Ink** · Guilin |
+| ![Vintage · Tokyo](./img/复古/postcard-260310-杉並區日本-100929-front.png) | ![Sketch · Chengdu](./img/素描/postcard-260310-武侯区中国-113559-front.png) | ![Cyberpunk · Singapore](./img/赛博朋克/postcard-260310-新加坡-114117-front.png) |
+| **Vintage** · Tokyo | **Sketch** · Chengdu | **Cyberpunk** · Singapore |
+
 ## Getting Started
 
 **Prerequisites:** Node.js 18+
