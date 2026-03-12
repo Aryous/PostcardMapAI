@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import PostcardMap from './components/PostcardMap';
 import ControlPanel, { STYLE_DEFS } from './components/ControlPanel';
 import PostcardResult from './components/PostcardResult';
@@ -7,7 +7,7 @@ import HistoryPanel from './components/HistoryPanel';
 import LuckyDice from './components/LuckyDice';
 import ApiKeyModal from './components/ApiKeyModal';
 import { AppState, Language, ModelType, HistoryItem, AspectRatio, DevConfig, UsageStats } from './types';
-import { generatePostcard, generatePostcardBack } from './services/geminiService';
+import { generatePostcard, generatePostcardBack, getServerApiAvailability, hasUserApiKey } from './services/geminiService';
 import { captureMapElement } from './utils/mapUtils';
 import { getRandomLocation } from './utils/locations';
 import { TRANSLATIONS } from './utils/translations';
@@ -44,10 +44,33 @@ export default function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [skipAnimation, setSkipAnimation] = useState(false);
   const [pendingStyleId, setPendingStyleId] = useState<string | null>(null);
+  const [hasServerKey, setHasServerKey] = useState<boolean | null>(null);
+  const [hasUserKey, setHasUserKey] = useState(() => hasUserApiKey());
 
-  // API Key modal — show on first load if no key is available
-  const hasKey = !!(sessionStorage.getItem('gemini_api_key') || process.env.API_KEY);
-  const [showApiKeyModal, setShowApiKeyModal] = useState(!hasKey);
+  const hasAnyKey = hasUserKey || hasServerKey === true;
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadServerKeyStatus = async () => {
+      const available = await getServerApiAvailability();
+      if (cancelled) {
+        return;
+      }
+
+      setHasServerKey(available);
+      if (!(available || hasUserApiKey())) {
+        setShowApiKeyModal(true);
+      }
+    };
+
+    loadServerKeyStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const saveHistory = (newHistory: HistoryItem[]) => {
     setHistory(newHistory);
@@ -65,13 +88,6 @@ export default function App() {
       setError(undefined);
       setSkipAnimation(false);
       setCurrentUsageStats(undefined);
-
-      if (model === 'gemini-3-pro-image-preview') {
-         const hasKey = await (window as any).aistudio?.hasSelectedApiKey();
-         if (!hasKey) {
-             await (window as any).aistudio?.openSelectKey();
-         }
-      }
       
       // 1. Capture Map
       await new Promise(resolve => setTimeout(resolve, 800)); 
@@ -125,18 +141,18 @@ export default function App() {
       console.error("Generation pipeline failed:", err);
       const errorMessage = err.message || JSON.stringify(err);
       if (errorMessage.includes('403') || errorMessage.includes('PERMISSION_DENIED')) {
-        if (model === 'gemini-3-pro-image-preview') {
-           setError(language === 'zh' ? "权限不足。请选择有效的付费 API Key。" : "Permission denied. Please select a valid paid API Key.");
-           setTimeout(() => { (window as any).aistudio?.openSelectKey(); }, 1500);
-        } else {
-           setError(language === 'zh' ? "API Key 权限不足。" : "Permission denied. Please check your API Key.");
-        }
+        setError(language === 'zh' ? "API Key 权限不足。" : "Permission denied. Please check your API Key.");
       } else {
         // Open key modal on auth errors
-      if (errorMessage.includes('API Key is missing') || errorMessage.includes('API_KEY_INVALID')) {
-        setShowApiKeyModal(true);
-      }
-      setError(err.message || "Something went wrong during generation.");
+        if (
+          errorMessage.includes('API Key is missing') ||
+          errorMessage.includes('API_KEY_INVALID') ||
+          errorMessage.includes('Server proxy is not available') ||
+          errorMessage.includes('Server Gemini API key is not configured')
+        ) {
+          setShowApiKeyModal(true);
+        }
+        setError(err.message || "Something went wrong during generation.");
       }
       setAppState(AppState.REVIEWING);
     }
@@ -190,6 +206,17 @@ export default function App() {
     const newHistory = history.filter(h => h.id !== id);
     saveHistory(newHistory);
   }, [history]);
+
+  const handleApiKeySaved = useCallback((_key: string) => {
+    setHasUserKey(hasUserApiKey());
+    setShowApiKeyModal(false);
+  }, []);
+
+  const handleUseServerKey = useCallback(() => {
+    sessionStorage.removeItem('gemini_api_key');
+    setHasUserKey(false);
+    setShowApiKeyModal(false);
+  }, []);
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-slate-50">
@@ -265,8 +292,10 @@ export default function App() {
       {showApiKeyModal && (
         <ApiKeyModal
           language={language}
-          onSave={() => setShowApiKeyModal(false)}
-          onClose={hasKey ? () => setShowApiKeyModal(false) : undefined}
+          hasServerKey={hasServerKey === true}
+          onSave={handleApiKeySaved}
+          onUseServerKey={hasServerKey ? handleUseServerKey : undefined}
+          onClose={hasAnyKey ? () => setShowApiKeyModal(false) : undefined}
         />
       )}
     </div>

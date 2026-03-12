@@ -48,13 +48,16 @@ npm run dev
 打开 [http://localhost:3000](http://localhost:3000) 即可使用。
 
 > **API Key：** 免费申请：[aistudio.google.com/apikey](https://aistudio.google.com/apikey)
-> 可直接在应用内（左下角钥匙图标）输入，无需修改任何配置文件。
+> 直接执行 `npm run dev` 时，请在应用内（左下角钥匙图标）输入你自己的 Key。它只会保存在当前浏览器会话的 `sessionStorage` 中。
 
-或者创建 `.env.local` 文件：
+如果要在本地测试“服务器端默认 Key”方案，请改用 Vercel Functions：
 
-```
+```bash
 GEMINI_API_KEY=你的Key
+vercel dev
 ```
+
+`npm run dev` 只会启动 Vite 前端，不会运行 `api/` 代理路由。
 
 ## 部署到 Vercel
 
@@ -66,7 +69,7 @@ GEMINI_API_KEY=你的Key
 
 | 变量名 | 值 |
 |--------|----|
-| `GEMINI_API_KEY` | 你的 Gemini API Key（可选——用户也可在应用内自行输入） |
+| `GEMINI_API_KEY` | 仅供 Vercel Functions 使用的默认 Gemini API Key |
 
 ### CLI 部署
 
@@ -80,8 +83,10 @@ vercel --prod
 
 1. 将本仓库推送至你的 GitHub 账号
 2. 访问 [vercel.com/new](https://vercel.com/new) 导入仓库
-3. 可选添加 `GEMINI_API_KEY` 环境变量
+3. 添加 `GEMINI_API_KEY` 环境变量，供服务器端代理使用
 4. 之后每次推送到 `main` 分支均自动部署
+
+用户仍可在应用内临时覆盖为自己的 Gemini Key；该 Key 只保存在当前浏览器会话中。
 
 ## 技术栈
 

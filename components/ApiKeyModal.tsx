@@ -5,36 +5,39 @@ import { Language } from '../types';
 
 interface ApiKeyModalProps {
   language: Language;
+  hasServerKey: boolean;
   onSave: (key: string) => void;
+  onUseServerKey?: () => void;
   onClose?: () => void;   // undefined = first-time setup (can't dismiss)
 }
 
 const T = {
   zh: {
     title: 'Gemini API Key',
-    subtitle: '需要 Google Gemini API Key 才能生成明信片。Key 仅存储在你的浏览器本地，不会上传到任何服务器。',
-    envNote: '管理员已通过环境变量配置了默认 Key，你也可以覆盖为自己的 Key。',
+    subtitle: '需要 Google Gemini API Key 才能生成明信片。你输入的 Key 仅保存在当前浏览器会话中，并会直接从你的设备发送给 Gemini。',
+    serverNote: '已检测到服务器端默认 Key。它保存在 Vercel Function 中，不会暴露给浏览器；你也可以临时改用自己的 Key。',
     placeholder: '粘贴你的 API Key（AIza...）',
-    save: '保存并开始',
+    save: '保存并使用我的 Key',
     getKey: '获取免费 API Key →',
     cancel: '取消',
     error: 'Key 不能为空',
+    reset: '恢复使用服务器端 Key',
   },
   en: {
     title: 'Gemini API Key',
-    subtitle: 'A Google Gemini API Key is required to generate postcards. Your key is stored locally in your browser and never sent to any server.',
-    envNote: 'A default key is already configured. You can optionally override it with your own.',
+    subtitle: 'A Google Gemini API Key is required to generate postcards. Any key you enter is stored only for this browser session and sent directly to Gemini from your device.',
+    serverNote: 'A server-side default key is available. It stays inside the Vercel Function and is never exposed to the browser; you can still override it with your own key.',
     placeholder: 'Paste your API Key (AIza...)',
-    save: 'Save & Start',
+    save: 'Save & Use My Key',
     getKey: 'Get a free API Key →',
     cancel: 'Cancel',
     error: 'Key cannot be empty',
+    reset: 'Use server key instead',
   },
 };
 
-const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose }) => {
+const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, hasServerKey, onSave, onUseServerKey, onClose }) => {
   const t = T[language];
-  const hasEnvKey = !!process.env.API_KEY;
 
   const [value, setValue] = useState('');
   const [showKey, setShowKey] = useState(false);
@@ -50,9 +53,9 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose }) 
     onSave(trimmed);
   };
 
-  const handleClearAndUseEnv = () => {
+  const handleClearAndUseServerKey = () => {
     sessionStorage.removeItem('gemini_api_key');
-    onSave('');
+    onUseServerKey?.();
   };
 
   return (
@@ -87,7 +90,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose }) 
         </div>
 
         <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-          {hasEnvKey ? t.envNote : t.subtitle}
+          {hasServerKey ? t.serverNote : t.subtitle}
         </p>
 
         {/* Input */}
@@ -138,13 +141,13 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose }) 
           </button>
         </div>
 
-        {/* Use env key option (only if env key exists and user wants to reset) */}
-        {hasEnvKey && onClose && (
+        {/* Reset to the secure server-side key when available */}
+        {hasServerKey && onUseServerKey && (
           <button
-            onClick={handleClearAndUseEnv}
+            onClick={handleClearAndUseServerKey}
             className="w-full mt-2 text-xs text-slate-400 hover:text-indigo-500 transition-colors py-1"
           >
-            {language === 'zh' ? '恢复使用默认 Key' : 'Reset to default key'}
+            {t.reset}
           </button>
         )}
       </div>

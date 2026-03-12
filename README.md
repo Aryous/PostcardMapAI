@@ -48,13 +48,16 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000).
 
 > **API Key:** Get one free at [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
-> You can enter it directly in the app (bottom-left key icon) — no config files needed.
+> For plain `npm run dev`, enter your own key in the app (bottom-left key icon). It stays in `sessionStorage` for the current browser session only.
 
-Alternatively, create a `.env.local` file:
+To test the secure server-side default key locally, run the Vercel Functions instead:
 
-```
+```bash
 GEMINI_API_KEY=your_key_here
+vercel dev
 ```
+
+`npm run dev` only serves the Vite frontend; it does not run the `api/` proxy routes.
 
 ## Deploy to Vercel
 
@@ -66,7 +69,7 @@ After deploying, add the environment variable in **Settings → Environment Vari
 
 | Name | Value |
 |------|-------|
-| `GEMINI_API_KEY` | Your Gemini API key (optional — users can also enter their own) |
+| `GEMINI_API_KEY` | Secure default Gemini API key used only by the Vercel Functions |
 
 ### CLI
 
@@ -80,8 +83,10 @@ vercel --prod
 
 1. Push this repo to your GitHub account
 2. Import it at [vercel.com/new](https://vercel.com/new)
-3. Optionally add `GEMINI_API_KEY` as an environment variable
+3. Add `GEMINI_API_KEY` as an environment variable for the server-side proxy
 4. Every push to `main` auto-deploys
+
+Users can still override the server-side key inside the app with their own Gemini key for the current browser session.
 
 ## Tech Stack
 

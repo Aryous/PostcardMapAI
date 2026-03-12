@@ -2,12 +2,72 @@
 import { GoogleGenAI } from "@google/genai";
 import { DevConfig, UsageStats, GenerationResult } from "../types";
 
-const getClient = () => {
-  const apiKey = sessionStorage.getItem('gemini_api_key') || process.env.API_KEY;
+const getStoredUserApiKey = () => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  return sessionStorage.getItem('gemini_api_key');
+};
+
+const getClient = (apiKeyOverride?: string) => {
+  const apiKey = apiKeyOverride || getStoredUserApiKey();
   if (!apiKey) {
     throw new Error("API Key is missing. Please configure your Gemini API Key.");
   }
   return new GoogleGenAI({ apiKey });
+};
+
+export const hasUserApiKey = () => !!getStoredUserApiKey();
+
+export const getServerApiAvailability = async (): Promise<boolean> => {
+  try {
+    const response = await fetch('/api/config', {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const data = await response.json();
+    return Boolean(data?.hasServerKey);
+  } catch {
+    return false;
+  }
+};
+
+const getProxyErrorMessage = async (response: Response) => {
+  try {
+    const data = await response.json();
+    if (typeof data?.error === 'string' && data.error.trim()) {
+      return data.error;
+    }
+  } catch {
+  }
+
+  if (response.status === 404) {
+    return "Server proxy is not available. Start Vercel dev locally or enter your own Gemini API key.";
+  }
+
+  return `Request failed with status ${response.status}.`;
+};
+
+const requestProxyGeneration = async <T>(path: string, payload: Record<string, unknown>): Promise<T> => {
+  const response = await fetch(path, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await getProxyErrorMessage(response));
+  }
+
+  return response.json() as Promise<T>;
 };
 
 // Pricing Constants (Per 1 Million Tokens)
@@ -45,17 +105,18 @@ const calculateCost = (model: string, promptTokens: number, candidatesTokens: nu
   };
 };
 
-export const generatePostcard = async (
+export const generatePostcardDirect = async (
   mapImageBase64: string,
   userPrompt: string,
   modelName: string = 'gemini-2.5-flash-image',
   userImageBase64?: string,
   aspectRatio: string = '4:3',
   devConfig?: DevConfig,
-  locationName: string = ""
+  locationName: string = "",
+  apiKeyOverride?: string
 ): Promise<GenerationResult> => {
   try {
-    const ai = getClient();
+    const ai = getClient(apiKeyOverride);
 
     const cleanMapBase64 = mapImageBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
     const cleanUserBase64 = userImageBase64 ? userImageBase64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "") : null;
@@ -604,13 +665,14 @@ When you include human figures, make them feel like they BELONG in this artistic
   }
 };
 
-export const generatePostcardBack = async (
+export const generatePostcardBackDirect = async (
   backPrompt: string,
   modelName: string = 'gemini-2.5-flash-image',
-  aspectRatio: string = '4:3'
+  aspectRatio: string = '4:3',
+  apiKeyOverride?: string
 ): Promise<GenerationResult | null> => {
   try {
-    const ai = getClient();
+    const ai = getClient(apiKeyOverride);
 
     const styleDetails = backPrompt;
 
@@ -666,4 +728,57 @@ export const generatePostcardBack = async (
     console.error("Back generation failed:", error);
     return null;
   }
-}
+};
+
+export const generatePostcard = async (
+  mapImageBase64: string,
+  userPrompt: string,
+  modelName: string = 'gemini-2.5-flash-image',
+  userImageBase64?: string,
+  aspectRatio: string = '4:3',
+  devConfig?: DevConfig,
+  locationName: string = ""
+): Promise<GenerationResult> => {
+  if (hasUserApiKey()) {
+    return generatePostcardDirect(
+      mapImageBase64,
+      userPrompt,
+      modelName,
+      userImageBase64,
+      aspectRatio,
+      devConfig,
+      locationName
+    );
+  }
+
+  return requestProxyGeneration<GenerationResult>('/api/generate-front', {
+    mapImageBase64,
+    userPrompt,
+    modelName,
+    userImageBase64,
+    aspectRatio,
+    devConfig,
+    locationName,
+  });
+};
+
+export const generatePostcardBack = async (
+  backPrompt: string,
+  modelName: string = 'gemini-2.5-flash-image',
+  aspectRatio: string = '4:3'
+): Promise<GenerationResult | null> => {
+  if (hasUserApiKey()) {
+    return generatePostcardBackDirect(backPrompt, modelName, aspectRatio);
+  }
+
+  try {
+    return await requestProxyGeneration<GenerationResult | null>('/api/generate-back', {
+      backPrompt,
+      modelName,
+      aspectRatio,
+    });
+  } catch (error) {
+    console.error("Back generation failed:", error);
+    return null;
+  }
+};
