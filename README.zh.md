@@ -18,6 +18,7 @@
 ## 功能特性
 
 - **随意探索** — 拖动地图到世界任意角落，通过反向地理编码自动识别地名
+- **多模型支持** — 可在 Nano Banana（`gemini-2.5-flash-image`）、Nano Banana 2（`gemini-3.1-flash-image-preview`）和 Nano Banana Pro（`gemini-3-pro-image-preview`）之间切换，按速度与质量需求选择模型
 - **多种艺术风格** — 水彩、复古、墨线素描、油画等
 - **明信片背面** — 与正面风格匹配的背面同步生成
 - **上传照片** — 把自己加入场景，AI 以明信片画风重新绘制你的形象
@@ -87,7 +88,7 @@ vercel --prod
 
 - **React + TypeScript + Vite**
 - **Leaflet** — 交互式地图
-- **Google Gemini API**（`gemini-2.5-flash-image`）— 图像生成
+- **Google Gemini API** — 基于 Nano Banana（`gemini-2.5-flash-image`）、Nano Banana 2（`gemini-3.1-flash-image-preview`）和 Nano Banana Pro（`gemini-3-pro-image-preview`）的多模型图像生成
 - **html2canvas** — 地图截图
 - **Nominatim** — 反向地理编码（OpenStreetMap）
 - **Tailwind CSS**（CDN 引入）

@@ -18,6 +18,7 @@
 ## Features
 
 - **Pan & explore** — move the map anywhere in the world; location is detected automatically via reverse geocoding
+- **Multi-model support** — switch between Nano Banana (`gemini-2.5-flash-image`), Nano Banana 2 (`gemini-3.1-flash-image-preview`), and Nano Banana Pro (`gemini-3-pro-image-preview`) based on speed and quality needs
 - **Multiple art styles** — watercolor, vintage, ink sketch, oil painting, and more
 - **Postcard back** — a matching decorative back side is generated alongside the front
 - **Upload a photo** — add yourself into the scene; the AI redraws you in the postcard's artistic style
@@ -87,7 +88,7 @@ vercel --prod
 
 - **React + TypeScript + Vite**
 - **Leaflet** — interactive map
-- **Google Gemini API** (`gemini-2.5-flash-image`) — image generation
+- **Google Gemini API** — multi-model image generation with Nano Banana (`gemini-2.5-flash-image`), Nano Banana 2 (`gemini-3.1-flash-image-preview`), and Nano Banana Pro (`gemini-3-pro-image-preview`)
 - **html2canvas** — map screenshot
 - **Nominatim** — reverse geocoding (OpenStreetMap)
 - **Tailwind CSS** (CDN)
