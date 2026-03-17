@@ -283,8 +283,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
           </div>
 
-          {DIVIDER}
-
           {/* FORMAT — Aspect ratio */}
           <div>
             <SectionLabel label={language === 'zh' ? '图片比例' : 'Format'} />
@@ -302,8 +300,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               ))}
             </div>
           </div>
-
-          {DIVIDER}
 
           {/* STYLE — with ● ○ dot indicators */}
           <div>

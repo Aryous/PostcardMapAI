@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 const isTouch = typeof window !== 'undefined' && 'ontouchstart' in window;
 import { X, Download, RotateCw, Coins } from 'lucide-react';
@@ -17,12 +17,12 @@ interface PostcardResultProps {
   usageStats?: UsageStats;
 }
 
-const PostcardResult: React.FC<PostcardResultProps> = ({ 
-  imageUrl, 
+const PostcardResult: React.FC<PostcardResultProps> = ({
+  imageUrl,
   backImageUrl,
-  onClose, 
-  language, 
-  skipAnimation = false, 
+  onClose,
+  language,
+  skipAnimation = false,
   aspectRatio = '4:3',
   locationName = 'MapPostcard',
   usageStats
@@ -42,19 +42,19 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
     // Sequence the animation stages
     const sequence = async () => {
       // 1. Envelope slides in
-      await new Promise(r => setTimeout(r, 600)); 
+      await new Promise(r => setTimeout(r, 600));
       setAnimationStage('opening');
-      
+
       // 2. Flap opens
-      await new Promise(r => setTimeout(r, 500)); 
+      await new Promise(r => setTimeout(r, 500));
       setAnimationStage('revealing');
 
       // 3. Card slides out
-      await new Promise(r => setTimeout(r, 700)); 
+      await new Promise(r => setTimeout(r, 700));
       setAnimationStage('settling');
 
       // 4. Envelope drops, card settles
-      await new Promise(r => setTimeout(r, 700)); 
+      await new Promise(r => setTimeout(r, 700));
       setAnimationStage('done');
     };
 
@@ -63,16 +63,16 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     // Format: postcard-YYMMDD-Site-Time.png
     const date = new Date();
     const yy = date.getFullYear().toString().slice(-2);
     const mm = (date.getMonth() + 1).toString().padStart(2, '0');
     const dd = date.getDate().toString().padStart(2, '0');
-    
+
     // Format time as HHmmss
     const time = date.toTimeString().split(' ')[0].replace(/:/g, '');
-    
+
     // Sanitize location name (remove spaces/special chars)
     const site = locationName.replace(/[^a-zA-Z0-9_\u4e00-\u9fa5]/g, '');
 
@@ -90,7 +90,7 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
   const handleFlip = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (backImageUrl) {
-        setIsFlipped(!isFlipped);
+      setIsFlipped(!isFlipped);
     }
   };
 
@@ -111,7 +111,7 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
   const expandedSize = useMemo(() => {
     const [aw, ah] = (aspectRatio || '4:3').split(':').map(Number);
     const ratio = aw / ah;
-    const maxW = window.innerWidth  * 0.90;
+    const maxW = window.innerWidth * 0.90;
     const maxH = window.innerHeight * 0.85;
     let w = maxH * ratio;
     let h = maxH;
@@ -120,6 +120,31 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
   }, [aspectRatio]);
 
   const [isHovered, setIsHovered] = useState(false);
+  const [isDismissing, setIsDismissing] = useState(false);
+  const autoDismissTimer = useRef<number>();
+
+  const startDismiss = useCallback(() => {
+    if (isDismissing) return;
+    clearTimeout(autoDismissTimer.current);
+    setIsDismissing(true);
+    setTimeout(onClose, 460);
+  }, [isDismissing, onClose]);
+
+  const handleClose = useCallback(() => {
+    if (isExpanded) {
+      setIsExpanded(false);
+      setTimeout(startDismiss, 460);
+    } else {
+      startDismiss();
+    }
+  }, [isExpanded, startDismiss]);
+
+  // Auto-dismiss 5s after entering mini state
+  useEffect(() => {
+    if (animationStage !== 'done' || isExpanded || isDismissing) return;
+    autoDismissTimer.current = window.setTimeout(startDismiss, 5000);
+    return () => clearTimeout(autoDismissTimer.current);
+  }, [animationStage, isExpanded, isDismissing]);
 
   // Mini card dimensions (visual size when collapsed)
   const MINI_W = 272;
@@ -131,8 +156,8 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
   // Transform that positions the (always-expanded-size) card at bottom-right
   const miniTransform = useMemo(() => {
     const scale = MINI_W / expandedSize.width;
-    const dx = window.innerWidth  / 2 - MINI_W / 2 - 16;
-    const dy = window.innerHeight / 2 - miniH  / 2 - 16;
+    const dx = window.innerWidth / 2 - MINI_W / 2 - 16;
+    const dy = window.innerHeight / 2 - miniH / 2 - 16;
     const rotate = isHovered ? 0 : 2;
     const extraScale = isHovered ? 1.05 : 1;
     return `translate(${dx}px, ${dy}px) scale(${scale * extraScale}) rotate(${rotate}deg)`;
@@ -148,47 +173,44 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
   if (animationStage !== 'done' && !isExpanded) {
     return (
       <div className="fixed bottom-6 right-6 z-[1500] w-48 sm:w-64 md:w-72 aspect-[3/2] perspective-1000">
-        <div 
-          className={`relative w-full h-full transition-all duration-700 preserve-3d ${
-            animationStage === 'settling' ? 'animate-[envelope-drop_0.8s_forwards]' : 'animate-[envelope-in_0.8s_ease-out_forwards]'
-          }`}
+        <div
+          className={`relative w-full h-full transition-all duration-700 preserve-3d ${animationStage === 'settling' ? 'animate-[envelope-drop_0.8s_forwards]' : 'animate-[envelope-in_0.8s_ease-out_forwards]'
+            }`}
         >
           {/* Envelope Body (Back) */}
           <div className="absolute inset-0 bg-[#e6dac8] shadow-2xl rounded-sm border-2 border-[#d4c5b0] flex items-end justify-center overflow-hidden">
-             {/* Airmail stripes */}
-             <div className="absolute top-0 left-0 w-full h-full opacity-10" 
-                  style={{backgroundImage: 'repeating-linear-gradient(45deg, #b91c1c 0, #b91c1c 10px, #f8fafc 10px, #f8fafc 20px, #1d4ed8 20px, #1d4ed8 30px, #f8fafc 30px, #f8fafc 40px)'}}>
-             </div>
+            {/* Airmail stripes */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-10"
+              style={{ backgroundImage: 'repeating-linear-gradient(45deg, #b91c1c 0, #b91c1c 10px, #f8fafc 10px, #f8fafc 20px, #1d4ed8 20px, #1d4ed8 30px, #f8fafc 30px, #f8fafc 40px)' }}>
+            </div>
           </div>
 
           {/* Postcard (Inside) */}
-          <div 
-            className={`absolute top-2 left-2 right-2 bottom-2 bg-white shadow-md transition-transform duration-700 ease-in-out z-10 ${
-              animationStage === 'revealing' || animationStage === 'settling' ? 'translate-y-[-120%]' : 'translate-y-0'
-            }`}
+          <div
+            className={`absolute top-2 left-2 right-2 bottom-2 bg-white shadow-md transition-transform duration-700 ease-in-out z-10 ${animationStage === 'revealing' || animationStage === 'settling' ? 'translate-y-[-120%]' : 'translate-y-0'
+              }`}
           >
-             <img src={imageUrl} className="w-full h-full object-cover" alt="Generated Postcard" />
+            <img src={imageUrl} className="w-full h-full object-cover" alt="Generated Postcard" />
           </div>
 
           {/* Envelope Front (Bottom pocket) */}
           <div className="absolute inset-0 z-20 pointer-events-none">
-             <div className="absolute bottom-0 left-0 w-full h-3/4 bg-[#f0e6d6] shadow-inner" 
-                  style={{clipPath: 'polygon(0 0, 50% 40%, 100% 0, 100% 100%, 0 100%)'}}></div>
+            <div className="absolute bottom-0 left-0 w-full h-3/4 bg-[#f0e6d6] shadow-inner"
+              style={{ clipPath: 'polygon(0 0, 50% 40%, 100% 0, 100% 100%, 0 100%)' }}></div>
           </div>
 
           {/* Envelope Flap (Top) */}
-          <div 
-            className={`absolute top-0 left-0 w-full h-1/2 origin-top z-30 transition-transform duration-500 ease-in-out ${
-              animationStage === 'opening' || animationStage === 'revealing' || animationStage === 'settling' ? 'rotate-x-180' : ''
-            }`}
-            style={{transformStyle: 'preserve-3d'}}
+          <div
+            className={`absolute top-0 left-0 w-full h-1/2 origin-top z-30 transition-transform duration-500 ease-in-out ${animationStage === 'opening' || animationStage === 'revealing' || animationStage === 'settling' ? 'rotate-x-180' : ''
+              }`}
+            style={{ transformStyle: 'preserve-3d' }}
           >
-            <div className="absolute inset-0 bg-[#e6dac8] border-t-2 border-[#d4c5b0]" 
-                 style={{clipPath: 'polygon(0 0, 50% 100%, 100% 0)', backfaceVisibility: 'hidden'}}>
+            <div className="absolute inset-0 bg-[#e6dac8] border-t-2 border-[#d4c5b0]"
+              style={{ clipPath: 'polygon(0 0, 50% 100%, 100% 0)', backfaceVisibility: 'hidden' }}>
             </div>
-             {/* Inner flap color (visible when open) */}
-            <div className="absolute inset-0 bg-[#f5efe6]" 
-                 style={{clipPath: 'polygon(0 0, 50% 100%, 100% 0)', transform: 'rotateY(180deg)', backfaceVisibility: 'hidden'}}>
+            {/* Inner flap color (visible when open) */}
+            <div className="absolute inset-0 bg-[#f5efe6]"
+              style={{ clipPath: 'polygon(0 0, 50% 100%, 100% 0)', transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}>
             </div>
           </div>
         </div>
@@ -211,189 +233,212 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
 
       {/* Cost Breakdown Panel - Separate UI */}
       {isExpanded && usageStats && (
-        <div 
-            className="absolute top-4 left-4 z-[2100] shadow-2xl rounded-lg p-4 min-w-[220px] animate-in slide-in-from-left-4 fade-in duration-500 cursor-default" style={{ background: 'rgba(248,243,232,0.98)', border: '1px solid rgba(42,69,53,0.15)', fontFamily: "'DM Sans', sans-serif" }}
-            onClick={(e) => e.stopPropagation()}
+        <div
+          className="absolute top-4 left-4 z-[2100] shadow-2xl rounded-lg p-4 min-w-[220px] animate-in slide-in-from-left-4 fade-in duration-500 cursor-default" style={{ background: 'rgba(248,243,232,0.98)', border: '1px solid rgba(42,69,53,0.15)', fontFamily: "'DM Sans', sans-serif" }}
+          onClick={(e) => e.stopPropagation()}
         >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-amber-100 text-amber-600 rounded-full shadow-sm">
-                        <Coins className="w-4 h-4" />
-                    </div>
-                    <span className="font-bold text-slate-800 text-xs uppercase tracking-wide">{t.cost}</span>
-                </div>
-                <span className="text-[9px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">~estimated</span>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-amber-100 text-amber-600 rounded-full shadow-sm">
+                <Coins className="w-4 h-4" />
+              </div>
+              <span className="font-bold text-slate-800 text-xs uppercase tracking-wide">{t.cost}</span>
+            </div>
+            <span className="text-[9px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">~estimated</span>
+          </div>
+
+          {/* Details */}
+          <div className="space-y-3">
+            {/* Input */}
+            <div className="flex flex-col gap-0.5">
+              <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase font-medium">
+                <span>{t.input}</span>
+                <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{usageStats.promptTokens.toLocaleString()} tks</span>
+              </div>
+              <div className="text-right font-mono text-xs text-slate-700 font-medium tracking-tight">
+                ${usageStats.inputCost.toFixed(5)}
+              </div>
             </div>
 
-            {/* Details */}
-            <div className="space-y-3">
-                {/* Input */}
-                <div className="flex flex-col gap-0.5">
-                    <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase font-medium">
-                        <span>{t.input}</span>
-                        <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{usageStats.promptTokens.toLocaleString()} tks</span>
-                    </div>
-                    <div className="text-right font-mono text-xs text-slate-700 font-medium tracking-tight">
-                        ${usageStats.inputCost.toFixed(5)}
-                    </div>
-                </div>
-
-                {/* Output */}
-                <div className="flex flex-col gap-0.5">
-                    <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase font-medium">
-                        <span>{t.output}</span>
-                        <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{usageStats.candidatesTokens.toLocaleString()} tks</span>
-                    </div>
-                    <div className="text-right font-mono text-xs text-slate-700 font-medium tracking-tight">
-                        ${usageStats.outputCost.toFixed(5)}
-                    </div>
-                </div>
-
-                {/* Total */}
-                <div className="pt-2 border-t border-slate-200 flex justify-between items-end">
-                    <span className="text-xs font-bold text-slate-800">{t.total}</span>
-                    <span className="font-mono text-sm font-bold text-emerald-600 tracking-tight">
-                        ${usageStats.totalCost.toFixed(5)}
-                    </span>
-                </div>
+            {/* Output */}
+            <div className="flex flex-col gap-0.5">
+              <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase font-medium">
+                <span>{t.output}</span>
+                <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{usageStats.candidatesTokens.toLocaleString()} tks</span>
+              </div>
+              <div className="text-right font-mono text-xs text-slate-700 font-medium tracking-tight">
+                ${usageStats.outputCost.toFixed(5)}
+              </div>
             </div>
+
+            {/* Total */}
+            <div className="pt-2 border-t border-slate-200 flex justify-between items-end">
+              <span className="text-xs font-bold text-slate-800">{t.total}</span>
+              <span className="font-mono text-sm font-bold text-emerald-600 tracking-tight">
+                ${usageStats.totalCost.toFixed(5)}
+              </span>
+            </div>
+          </div>
         </div>
       )}
 
-      <div
-        className="relative group"
-        style={{
-          width: expandedSize.width,
-          height: expandedSize.height,
-          transform: cardTransform,
-          transformOrigin: 'center center',
-          transition: 'transform 0.48s cubic-bezier(0.34,1.3,0.64,1)',
-          pointerEvents: 'auto',
-          cursor: isExpanded ? 'default' : 'pointer',
-          zIndex: 10,
-          flexShrink: 0,
-        }}
-        onClick={(e) => !isExpanded && setIsExpanded(true)}
-        onMouseEnter={() => !isExpanded && setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-         {/* 3D Wrapper */}
-        <div className={`relative w-full h-full transition-transform duration-700 transform-style-3d preserve-3d shadow-2xl ${isFlipped ? 'rotate-y-180' : ''}`}>
-            
+      {/* Dismiss wrapper — circular arc to bottom-right
+          ── 调参区 ──────────────────────────────────── */}
+      <style>{(() => {
+        const R = 1200;   // ← 旋转半径 (px)，越大弧线越平缓
+        const ALPHA = -2;    // ← 卡片底边法线角度 (deg)，对应卡片自身旋转角
+        const THETA = 52;    // ← 弧线总扫角 (deg)，越大退出距离越远
+        const ROT = 10;    // ← 退出过程中额外旋转量 (deg)
+        const a = ALPHA * Math.PI / 180;
+        const steps = [0, 0.25, 0.5, 0.75, 1];
+        const lines = steps.map(t => {
+          const th = t * THETA * Math.PI / 180;
+          const dx = Math.round(R * (Math.sin(a) + Math.sin(th - a)));
+          const dy = Math.round(R * (Math.cos(a) - Math.cos(th - a)));
+          const rot = Math.round(t * ROT);
+          const op = +(1 - t).toFixed(2);
+          return `${t * 100}% { transform: translateX(${dx}px) translateY(${dy}px) rotate(${rot}deg); opacity: ${op}; }`;
+        });
+        return `@keyframes postcard-arc-out {\n${lines.map(l => '          ' + l).join('\n')}\n        }`;
+      })()}</style>
+      <div style={{
+        animation: isDismissing ? 'postcard-arc-out 1.25s linear forwards' : 'none',
+      }}>
+        <div
+          className="relative group"
+          style={{
+            width: expandedSize.width,
+            height: expandedSize.height,
+            transform: cardTransform,
+            transformOrigin: 'center center',
+            transition: 'transform 0.48s cubic-bezier(0.34,1.3,0.64,1)',
+            pointerEvents: 'auto',
+            cursor: isExpanded ? 'default' : 'pointer',
+            zIndex: 10,
+            flexShrink: 0,
+          }}
+          onClick={(e) => !isExpanded && setIsExpanded(true)}
+          onMouseEnter={() => !isExpanded && setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* 3D Wrapper */}
+          <div className={`relative w-full h-full transition-transform duration-700 transform-style-3d preserve-3d shadow-2xl ${isFlipped ? 'rotate-y-180' : ''}`}>
+
             {/* FRONT SIDE */}
             <div className="absolute inset-0 backface-hidden postcard-shadow bg-white group">
-                <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
-                    <img
-                        src={imageUrl}
-                        alt="Postcard Front"
-                        className="w-full h-full object-cover"
-                    />
-                </div>
+              <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
+                <img
+                  src={imageUrl}
+                  alt="Postcard Front"
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
-                {/* Overlay Actions (Hover) - Front — outside overflow-hidden so counter-scale isn't clipped */}
-                <div className={`absolute inset-0 pointer-events-none flex items-start justify-between p-2 duration-200 transition-opacity ${isExpanded ? 'opacity-100' : (isTouch ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')}`}>
-                    {/* Close — left side to avoid accidental clicks */}
-                    <div
-                      className="pointer-events-auto"
-                      style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top left' }}
-                    >
-                        <button
-                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); onClose(); }}
-                            className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-red-500 transition-transform hover:scale-110"
-                            title={t.close}
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
-                    </div>
-                    {/* Flip + Download — right side */}
-                    <div
-                      className="flex gap-2 pointer-events-auto"
-                      style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top right' }}
-                    >
-                        {backImageUrl && (
-                            <button
-                                onClick={handleFlip}
-                                className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-[#2a4535] transition-transform hover:scale-110"
-                                title={t.flip}
-                            >
-                                <RotateCw className="w-4 h-4" />
-                            </button>
-                        )}
-                        <button
-                            onClick={handleDownload}
-                            className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-slate-700 transition-transform hover:scale-110"
-                            title={t.download}
-                        >
-                            <Download className="w-4 h-4" />
-                        </button>
-                    </div>
+              {/* Overlay Actions (Hover) - Front — outside overflow-hidden so counter-scale isn't clipped */}
+              <div className={`absolute inset-0 pointer-events-none flex items-start justify-between p-2 duration-200 transition-opacity ${isExpanded ? 'opacity-100' : (isTouch ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')}`}>
+                {/* Close — left side to avoid accidental clicks */}
+                <div
+                  className="pointer-events-auto"
+                  style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top left' }}
+                >
+                  <button
+                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleClose(); }}
+                    className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-red-500 transition-transform hover:scale-110"
+                    title={t.close}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
+                {/* Flip + Download — right side */}
+                <div
+                  className="flex gap-2 pointer-events-auto"
+                  style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top right' }}
+                >
+                  {backImageUrl && (
+                    <button
+                      onClick={handleFlip}
+                      className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-[#2a4535] transition-transform hover:scale-110"
+                      title={t.flip}
+                    >
+                      <RotateCw className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={handleDownload}
+                    className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-slate-700 transition-transform hover:scale-110"
+                    title={t.download}
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
 
-                <div className="absolute bottom-1.5 right-3 text-[8px] sm:text-[10px] text-white/90 font-serif italic tracking-wider select-none drop-shadow-md">
-                    {t.footer}
-                </div>
-                <div className="absolute bottom-2 left-3 w-6 h-6 sm:w-8 sm:h-8 opacity-60 border border-white rounded-full flex items-center justify-center rotate-[-12deg] pointer-events-none select-none drop-shadow-md">
-                    <span className="text-[5px] sm:text-[6px] text-white font-bold shadow-black">AIR</span>
-                </div>
+              <div className="absolute bottom-1.5 right-3 text-[8px] sm:text-[10px] text-white/90 font-serif italic tracking-wider select-none drop-shadow-md">
+                {t.footer}
+              </div>
+              <div className="absolute bottom-2 left-3 w-6 h-6 sm:w-8 sm:h-8 opacity-60 border border-white rounded-full flex items-center justify-center rotate-[-12deg] pointer-events-none select-none drop-shadow-md">
+                <span className="text-[5px] sm:text-[6px] text-white font-bold shadow-black">AIR</span>
+              </div>
             </div>
 
             {/* BACK SIDE */}
             <div className="absolute inset-0 backface-hidden rotate-y-180 paper-texture postcard-shadow bg-[#fcfaf5] group">
-                {backImageUrl ? (
-                    <>
-                        <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
-                            <img
-                                src={backImageUrl}
-                                alt="Postcard Back"
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                        {/* Overlay Actions (Hover) - Back — outside overflow-hidden */}
-                        <div className={`absolute inset-0 pointer-events-none flex items-start justify-between p-2 duration-200 transition-opacity ${isExpanded ? 'opacity-100' : (isTouch ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')}`}>
-                            {/* Close — left */}
-                            <div
-                              className="pointer-events-auto"
-                              style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top left' }}
-                            >
-                                <button
-                                    onClick={(e: React.MouseEvent) => { e.stopPropagation(); onClose(); }}
-                                    className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-red-500 transition-transform hover:scale-110"
-                                    title={t.close}
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
-                            {/* Flip + Download — right */}
-                            <div
-                              className="flex gap-2 pointer-events-auto"
-                              style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top right' }}
-                            >
-                                <button
-                                    onClick={handleFlip}
-                                    className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-[#2a4535] transition-transform hover:scale-110"
-                                    title={t.flip}
-                                >
-                                    <RotateCw className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={handleDownload}
-                                    className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-slate-700 transition-transform hover:scale-110"
-                                    title={t.download}
-                                >
-                                    <Download className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300">
-                         No Back Design
+              {backImageUrl ? (
+                <>
+                  <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
+                    <img
+                      src={backImageUrl}
+                      alt="Postcard Back"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {/* Overlay Actions (Hover) - Back — outside overflow-hidden */}
+                  <div className={`absolute inset-0 pointer-events-none flex items-start justify-between p-2 duration-200 transition-opacity ${isExpanded ? 'opacity-100' : (isTouch ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')}`}>
+                    {/* Close — left */}
+                    <div
+                      className="pointer-events-auto"
+                      style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top left' }}
+                    >
+                      <button
+                        onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleClose(); }}
+                        className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-red-500 transition-transform hover:scale-110"
+                        title={t.close}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
-                )}
+                    {/* Flip + Download — right */}
+                    <div
+                      className="flex gap-2 pointer-events-auto"
+                      style={{ transform: `scale(${buttonCounterScale})`, transformOrigin: 'top right' }}
+                    >
+                      <button
+                        onClick={handleFlip}
+                        className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-[#2a4535] transition-transform hover:scale-110"
+                        title={t.flip}
+                      >
+                        <RotateCw className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={handleDownload}
+                        className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-slate-700 transition-transform hover:scale-110"
+                        title={t.download}
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-300">
+                  No Back Design
+                </div>
+              )}
             </div>
+          </div>
         </div>
-      </div>
+      </div>{/* end dismiss wrapper */}
     </div>
   );
 };
