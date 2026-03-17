@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Zap, Sparkles, DollarSign } from 'lucide-react';
 import { HistoryItem, Language } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
 import { STYLE_DEFS } from '../utils/styles';
@@ -316,29 +316,30 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
 
               ) : (
 
-                /* ── Postcard grid ───────────────────────────────── */
+                /* ── Postcard list (single column) ──────────────── */
                 <div
                   key={openKey}
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: 24,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 28,
                   }}
                 >
                   {history.map((item, i) => {
                     const rot = SLOT_ROTATIONS[i % SLOT_ROTATIONS.length];
                     const isHov = hoveredId === item.id;
                     const arCss = (item.aspectRatio ?? '4:3').replace(':', '/');
+                    const isPro = item.model.includes('pro');
 
                     return (
                       /* entrance animation wrapper */
                       <div
                         key={item.id}
                         style={{
-                          animation: `binder-card-in 0.44s ease ${i * 52}ms both`,
+                          animation: `binder-card-in 0.44s ease ${i * 56}ms both`,
                         }}
                       >
-                        {/* polaroid card — hover / rotation */}
+                        {/* polaroid card */}
                         <div
                           onClick={() => onSelect(item)}
                           onMouseEnter={() => setHoveredId(item.id)}
@@ -347,14 +348,14 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                             position: 'relative',
                             cursor: 'pointer',
                             background: '#f8f3e8',
-                            padding: '5px 5px 26px',
+                            padding: '5px 5px 44px',
                             borderRadius: '1px',
                             transform: isHov
-                              ? 'rotate(0deg) translateY(-6px) scale(1.05)'
+                              ? 'rotate(0deg) translateY(-5px) scale(1.025)'
                               : `rotate(${rot}deg)`,
                             boxShadow: isHov
-                              ? '0 16px 36px rgba(0,0,0,0.3), 0 5px 14px rgba(0,0,0,0.2)'
-                              : '0 3px 12px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.14)',
+                              ? '0 16px 36px rgba(0,0,0,0.28), 0 5px 14px rgba(0,0,0,0.18)'
+                              : '0 4px 14px rgba(0,0,0,0.2), 0 1px 4px rgba(0,0,0,0.12)',
                             transition: 'transform 0.34s cubic-bezier(0.34, 1.42, 0.64, 1), box-shadow 0.34s ease',
                             userSelect: 'none',
                           }}
@@ -366,6 +367,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                             aspectRatio: arCss,
                             overflow: 'hidden',
                             background: '#ddd5be',
+                            position: 'relative',
                           }}>
                             <img
                               src={item.imageUrl}
@@ -377,37 +379,90 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                                 objectFit: 'cover',
                                 display: 'block',
                                 transition: 'transform 0.42s ease',
-                                transform: isHov ? 'scale(1.08)' : 'scale(1)',
+                                transform: isHov ? 'scale(1.06)' : 'scale(1)',
                               }}
                             />
+                            {/* model badge — image overlay top-left */}
+                            <div style={{
+                              position: 'absolute',
+                              top: 8,
+                              left: 8,
+                              background: 'rgba(0,0,0,0.45)',
+                              backdropFilter: 'blur(6px)',
+                              WebkitBackdropFilter: 'blur(6px)',
+                              color: '#fff',
+                              fontSize: 9,
+                              fontFamily: "'DM Mono', monospace",
+                              letterSpacing: '0.08em',
+                              padding: '3px 7px',
+                              borderRadius: '2px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 4,
+                            }}>
+                              {isPro
+                                ? <Sparkles size={9} style={{ color: '#f0c84a' }} />
+                                : <Zap size={9} style={{ color: '#93c5fd' }} />
+                              }
+                              <span>{isPro ? 'PRO' : 'FLASH'}</span>
+                            </div>
                           </div>
 
-                          {/* polaroid caption */}
+                          {/* polaroid info area */}
                           <div style={{
                             position: 'absolute',
-                            bottom: 6,
+                            bottom: 0,
                             left: 5,
                             right: 5,
-                            textAlign: 'center',
+                            height: 42,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            gap: 3,
+                            padding: '0 4px',
                           }}>
+                            {/* row 1: location + cost */}
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                            }}>
+                              <div style={{
+                                fontFamily: "'DM Sans', sans-serif",
+                                fontSize: 10,
+                                fontWeight: 600,
+                                color: 'rgba(30,24,16,0.7)',
+                                letterSpacing: '0.02em',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                flex: 1,
+                              }}>
+                                {item.locationName ?? '—'}
+                              </div>
+                              {item.cost && (
+                                <div style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 2,
+                                  fontFamily: "'DM Mono', monospace",
+                                  fontSize: 9,
+                                  color: '#2a7a4a',
+                                  flexShrink: 0,
+                                  marginLeft: 6,
+                                }}>
+                                  <DollarSign size={8} />
+                                  {item.cost.totalCost.toFixed(4)}
+                                </div>
+                              )}
+                            </div>
+                            {/* row 2: style */}
                             <div style={{
                               fontFamily: "'DM Mono', monospace",
-                              fontSize: 8,
-                              color: 'rgba(30,24,16,0.48)',
+                              fontSize: 8.5,
+                              color: 'rgba(30,24,16,0.38)',
                               letterSpacing: '0.06em',
                               textTransform: 'uppercase',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                            }}>
-                              {item.locationName ?? '—'}
-                            </div>
-                            <div style={{
-                              fontFamily: "'DM Sans', sans-serif",
-                              fontSize: 7.5,
-                              color: 'rgba(30,24,16,0.28)',
-                              marginTop: 1,
-                              letterSpacing: '0.04em',
                             }}>
                               {getStyleLabel(item.styleId)}
                             </div>
