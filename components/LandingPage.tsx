@@ -131,12 +131,12 @@ const HeroPostcard = () => (
 
 // ─── Style card renders ────────────────────────────────────────────────────────
 const styleVisuals: Record<string, React.ReactNode> = {
-  vintage:    <img src="/gallery/vintage.png"    alt="复古风格明信片示例"   style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  ink:        <img src="/gallery/ink.png"        alt="古韵水墨明信片示例"   style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  watercolor: <img src="/gallery/watercolor.png" alt="水彩明信片示例"       style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  cyberpunk:  <img src="/gallery/cyberpunk.png"  alt="赛博朋克明信片示例"   style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  sketch:     <img src="/gallery/sketch.png"     alt="素描明信片示例"       style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  oil:        <img src="/gallery/oil.png"        alt="油画明信片示例"       style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  vintage:    <img src="/gallery/vintage.png"    alt="复古风格明信片示例"   loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  ink:        <img src="/gallery/ink.png"        alt="古韵水墨明信片示例"   loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  watercolor: <img src="/gallery/watercolor.png" alt="水彩明信片示例"       loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  cyberpunk:  <img src="/gallery/cyberpunk.png"  alt="赛博朋克明信片示例"   loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  sketch:     <img src="/gallery/sketch.png"     alt="素描明信片示例"       loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  oil:        <img src="/gallery/oil.png"        alt="油画明信片示例"       loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
 };
 // ─── Gallery card component ────────────────────────────────────────────────────
 type StyleCardProps = React.JSX.IntrinsicAttributes & {
@@ -337,11 +337,17 @@ export default function LandingPage({ onStart }: LandingPageProps) {
             </p>
           </div>
 
-          {/* 3 × 2 grid */}
+          {/* Magazine grid — alternating [2,1] [1,2] [1,2] spans */}
+          {/* Spans: vintage(2) ink(1) / watercolor(1) cyberpunk(2) / sketch(1) oil(2) */}
           <div className="lp-gallery-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 22 }}>
-            {GALLERY.map(({ id, zh, en, location, descZh, descEn, delay }) => (
-              <StyleCard key={id} id={id} zh={zh} en={en} location={location} descZh={descZh} descEn={descEn} delay={delay} />
-            ))}
+            {GALLERY.map(({ id, zh, en, location, descZh, descEn, delay }, i) => {
+              const spans = [2, 1, 1, 2, 1, 2];
+              return (
+                <div key={id} className="lp-gallery-item" style={{ gridColumn: `span ${spans[i]}` }}>
+                  <StyleCard id={id} zh={zh} en={en} location={location} descZh={descZh} descEn={descEn} delay={delay} />
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
