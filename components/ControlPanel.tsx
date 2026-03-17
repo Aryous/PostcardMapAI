@@ -151,10 +151,10 @@ setTimeout(() => setShowDevToast(false), 2000);
 
   return (
     <div className="absolute top-4 left-4 z-[1000] w-full max-w-xs transition-all duration-300">
-      <div className="bg-white shadow-[0_16px_48px_rgba(0,0,0,0.14),0_4px_16px_rgba(0,0,0,0.07)] rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="bg-[#f8f3e8] shadow-[0_16px_48px_rgba(0,0,0,0.14),0_4px_16px_rgba(0,0,0,0.07)] rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto" style={{ fontFamily: "'DM Sans', sans-serif" }}>
         
         {/* Header - Always Visible */}
-        <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white/98 z-10">
+        <div className="px-4 py-3 border-b border-[#d4c9b8] flex items-center justify-between sticky top-0 bg-[#f8f3e8]/98 z-10">
           <div className="flex flex-col">
             <div 
                 className="flex items-center gap-2 text-[#2a4535] cursor-pointer select-none active:scale-95 transition-transform"
@@ -167,9 +167,9 @@ setTimeout(() => setShowDevToast(false), 2000);
             {isDevEnabled && sessionCost > 0 && (
                 <div className="flex items-center gap-1 mt-0.5">
                     <Coins className="w-3 h-3 text-amber-500" />
-                    <span className="text-[10px] text-slate-500">{t.sessionCost}:</span>
+                    <span className="text-[10px] text-[#2a4535]/50">{t.sessionCost}:</span>
                     <span className="text-[10px] font-mono font-semibold text-amber-600">~${sessionCost.toFixed(4)}</span>
-                    <span className="text-[9px] text-slate-400">est.</span>
+                    <span className="text-[9px] text-[#2a4535]/50">est.</span>
                 </div>
             )}
           </div>
@@ -179,7 +179,7 @@ setTimeout(() => setShowDevToast(false), 2000);
              {isDevEnabled && (
                 <button
                   onClick={() => setShowDevMode(!showDevMode)}
-                  className={`p-1.5 rounded-full transition-colors ${showDevMode ? 'bg-[#2a4535]/10 text-[#2a4535]' : 'bg-slate-100 text-slate-400 hover:text-slate-600'}`}
+                  className={`p-1.5 rounded-full transition-colors ${showDevMode ? 'bg-[#2a4535]/10 text-[#2a4535]' : 'bg-[#e2d9cc] text-[#2a4535]/50 hover:text-[#2a4535]/60'}`}
                   title="Developer Settings"
                 >
                     <Settings className="w-3.5 h-3.5" />
@@ -189,7 +189,7 @@ setTimeout(() => setShowDevToast(false), 2000);
              {/* History Button */}
              <button 
                 onClick={onToggleHistory}
-                className="p-1.5 rounded-full bg-slate-100 hover:bg-[#2a4535]/10 text-slate-600 hover:text-[#2a4535] transition-colors border border-slate-200"
+                className="p-1.5 rounded-full bg-[#e2d9cc] hover:bg-[#2a4535]/10 text-[#2a4535]/60 hover:text-[#2a4535] transition-colors border border-[#d4c9b8]"
                 title={t.history}
              >
                 <History className="w-3.5 h-3.5" />
@@ -198,11 +198,11 @@ setTimeout(() => setShowDevToast(false), 2000);
              {/* Language Toggle */}
              <button 
                 onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors border border-slate-200"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#e2d9cc] hover:bg-[#d4c9b8] transition-colors border border-[#d4c9b8]"
                 title="Switch Language"
              >
                 <span className={`text-xs ${language === 'en' ? 'opacity-100 grayscale-0' : 'opacity-40 grayscale'}`}>🇺🇸</span>
-                <span className="w-[1px] h-3 bg-slate-300"></span>
+                <span className="w-[1px] h-3 bg-[#c8bfad]"></span>
                 <span className={`text-xs ${language === 'zh' ? 'opacity-100 grayscale-0' : 'opacity-40 grayscale'}`}>🇨🇳</span>
              </button>
           </div>
@@ -210,17 +210,17 @@ setTimeout(() => setShowDevToast(false), 2000);
 
         {/* Developer Mode Panel */}
         {showDevMode && isDevEnabled && (
-          <div className="bg-slate-50 border-b border-slate-200 p-3 space-y-3 animate-in slide-in-from-top-2">
+          <div className="bg-[#ede7d5] border-b border-[#d4c9b8] p-3 space-y-3 animate-in slide-in-from-top-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
+              <span className="text-xs font-bold text-[#2a4535] flex items-center gap-1">
                 <Settings className="w-3 h-3" /> {t.devMode}
               </span>
-              <button onClick={() => setShowDevMode(false)}><ChevronUp className="w-3 h-3 text-slate-400" /></button>
+              <button onClick={() => setShowDevMode(false)}><ChevronUp className="w-3 h-3 text-[#2a4535]/50" /></button>
             </div>
             
             {/* Location Name Input (Moved to Dev Mode) */}
             <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider flex items-center gap-1">
                   <Type className="w-3 h-3" /> {language === 'zh' ? '地点名称 (调试)' : 'Location Name (Debug)'}
                 </label>
                 <div className="relative">
@@ -229,7 +229,7 @@ setTimeout(() => setShowDevToast(false), 2000);
                     value={locationName}
                     onChange={(e) => setLocationName(e.target.value)}
                     placeholder={isAreaSelected && !locationName ? (language === 'zh' ? '正在识别...' : 'Detecting...') : (language === 'zh' ? '手动输入' : 'Manual Input')}
-                    className="w-full px-3 py-2 text-xs border border-slate-300 rounded focus:ring-1 focus:ring-[#2a4535] bg-white"
+                    className="w-full px-3 py-2 text-xs border border-[#c8bfad] rounded focus:ring-1 focus:ring-[#2a4535] bg-[#f8f3e8]"
                     />
                     {isAreaSelected && !locationName && (
                         <div className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -241,10 +241,10 @@ setTimeout(() => setShowDevToast(false), 2000);
 
             {/* Prompt Mode Tabs */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+              <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider">
                 {language === 'zh' ? '提示词模式' : 'Prompt Mode'}
               </label>
-              <div className="flex bg-slate-100 rounded-md p-1">
+              <div className="flex bg-[#e2d9cc] rounded-md p-1">
                 {([
                   { id: 'default', label: language === 'zh' ? '默认' : 'Default' },
                   { id: 'v2',      label: 'V2' },
@@ -261,8 +261,8 @@ setTimeout(() => setShowDevToast(false), 2000);
                       })}
                       className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
                         active === id
-                          ? 'bg-white text-[#2a4535] shadow-sm'
-                          : 'text-slate-500 hover:text-slate-700'
+                          ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm'
+                          : 'text-[#2a4535]/50 hover:text-[#2a4535]'
                       }`}
                     >
                       {label}
@@ -275,7 +275,7 @@ setTimeout(() => setShowDevToast(false), 2000);
                 <textarea
                   value={devConfig.customSystemInstruction}
                   onChange={(e) => setDevConfig({...devConfig, customSystemInstruction: e.target.value})}
-                  className="w-full h-24 text-[10px] p-2 border border-slate-300 rounded focus:ring-1 focus:ring-[#2a4535] focus:border-[#2a4535] font-mono"
+                  className="w-full h-24 text-[10px] p-2 border border-[#c8bfad] rounded focus:ring-1 focus:ring-[#2a4535] focus:border-[#2a4535] font-mono"
                   placeholder="Enter system instructions here..."
                 />
               )}
@@ -289,17 +289,17 @@ setTimeout(() => setShowDevToast(false), 2000);
 
           {/* 1. Model Selection */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider flex items-center gap-1">
               {model === 'gemini-3-pro-image-preview' ? <Sparkles className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
               {t.selectModel}
             </label>
-            <div className="flex bg-slate-100 rounded-md p-1">
+            <div className="flex bg-[#e2d9cc] rounded-md p-1">
               <button
                 onClick={() => setModel('gemini-2.5-flash-image')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all ${
                   model === 'gemini-2.5-flash-image'
-                    ? 'bg-white text-[#2a4535] shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
+                    ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm'
+                    : 'text-[#2a4535]/50 hover:text-[#2a4535]'
                 }`}
               >
                 <Zap className="w-3 h-3" />
@@ -309,8 +309,8 @@ setTimeout(() => setShowDevToast(false), 2000);
                 onClick={() => setModel('gemini-3.1-flash-image-preview')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all ${
                   model === 'gemini-3.1-flash-image-preview'
-                    ? 'bg-white text-[#2a4535] shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
+                    ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm'
+                    : 'text-[#2a4535]/50 hover:text-[#2a4535]'
                 }`}
               >
                 <Zap className="w-3 h-3" />
@@ -320,8 +320,8 @@ setTimeout(() => setShowDevToast(false), 2000);
                 onClick={() => setModel('gemini-3-pro-image-preview')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all ${
                   model === 'gemini-3-pro-image-preview'
-                    ? 'bg-white text-[#2a4535] shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
+                    ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm'
+                    : 'text-[#2a4535]/50 hover:text-[#2a4535]'
                 }`}
               >
                 <Sparkles className="w-3 h-3" />
@@ -332,10 +332,10 @@ setTimeout(() => setShowDevToast(false), 2000);
 
           {/* 2. Aspect Ratio Selection */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider flex items-center gap-1">
               <RectangleHorizontal className="w-3 h-3" /> {t.selectRatio}
             </label>
-            <div className="flex bg-slate-100 rounded-md p-1 gap-1 overflow-x-auto no-scrollbar">
+            <div className="flex bg-[#e2d9cc] rounded-md p-1 gap-1 overflow-x-auto no-scrollbar">
               {ratioOptions.map((opt) => (
                 <button
                   key={opt.id}
@@ -343,8 +343,8 @@ setTimeout(() => setShowDevToast(false), 2000);
                   title={opt.label}
                   className={`flex-1 flex-shrink-0 flex flex-col items-center justify-center py-1.5 px-1 min-w-[32px] rounded-md transition-all gap-0.5 ${
                     aspectRatio === opt.id
-                      ? 'bg-white text-[#2a4535] shadow-sm ring-1 ring-black/5'
-                      : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/50'
+                      ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm ring-1 ring-[#2a4535]/15'
+                      : 'text-[#2a4535]/50 hover:text-[#2a4535]/60 hover:bg-[#d4c9b8]/50'
                   }`}
                 >
                   {opt.icon}
@@ -356,7 +356,7 @@ setTimeout(() => setShowDevToast(false), 2000);
 
           {/* 3. Style Selection */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider flex items-center gap-1">
               <Palette className="w-3 h-3" /> {t.selectStyle}
             </label>
             <div className="flex flex-wrap gap-2">
@@ -369,7 +369,7 @@ setTimeout(() => setShowDevToast(false), 2000);
                       ? isSpinning
                         ? 'bg-[#c4892a] text-white border-[#c4892a] shadow-lg scale-110 ring-2 ring-[#e5b06e] ring-offset-1'
                         : 'bg-[#2a4535] text-[#f8f3e8] border-[#2a4535] shadow-md transform scale-105'
-                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                      : 'bg-[#ede7d5] text-[#2a4535]/60 border-[#d4c9b8] hover:bg-[#e2d9cc]'
                   }`}
                 >
                   {style.label}
@@ -380,20 +380,20 @@ setTimeout(() => setShowDevToast(false), 2000);
 
           {/* 4. User Photo Upload */}
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider flex items-center gap-1">
                 <User className="w-3 h-3" /> {t.uploadPhoto}
             </label>
             
             {!userImage ? (
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg bg-slate-50 hover:bg-[#2a4535]/5 hover:border-[#2a4535] transition-colors flex items-center justify-center gap-2 text-xs text-slate-500 hover:text-[#2a4535]"
+                className="w-full py-2 border-2 border-dashed border-[#c8bfad] rounded-lg bg-[#ede7d5] hover:bg-[#2a4535]/5 hover:border-[#2a4535] transition-colors flex items-center justify-center gap-2 text-xs text-[#2a4535]/50 hover:text-[#2a4535]"
               >
                 <Upload className="w-3.5 h-3.5" />
                 {t.uploadHint}
               </button>
             ) : (
-              <div className="relative w-full h-16 rounded-lg overflow-hidden border border-slate-200 group">
+              <div className="relative w-full h-16 rounded-lg overflow-hidden border border-[#d4c9b8] group">
                 <img src={userImage} alt="User" className="w-full h-full object-cover opacity-80" />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
@@ -414,7 +414,7 @@ setTimeout(() => setShowDevToast(false), 2000);
             />
           </div>
 
-          <div className="pt-2 border-t border-slate-100">
+          <div className="pt-2 border-t border-[#d4c9b8]">
              {/* 5. Action Buttons */}
             {isProcessing ? (
                // GENERATING STATE
@@ -443,7 +443,7 @@ setTimeout(() => setShowDevToast(false), 2000);
                    className={`w-full py-2.5 font-semibold rounded-md transition-all flex items-center justify-center gap-2 text-sm ${
                      isAreaSelected
                       ? 'bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] active:scale-[0.98] shadow-[0_2px_12px_rgba(42,69,53,0.30)] hover:shadow-[0_4px_16px_rgba(42,69,53,0.38)]'
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                      : 'bg-[#d4c9b8] text-[#2a4535]/50 cursor-not-allowed shadow-none'
                    }`}
                  >
                    {isAreaSelected ? <Wand2 className="w-4 h-4" /> : <MousePointer2 className="w-4 h-4" />}
