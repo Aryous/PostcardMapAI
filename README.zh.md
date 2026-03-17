@@ -15,16 +15,33 @@
 
 ---
 
+## 界面截图
+
+| 落地页 | 主应用 |
+|:---:|:---:|
+| ![落地页](./img/screenshot-app.png) | ![主应用界面](./img/screenshot-app-main.png) |
+
 ## 功能特性
 
 - **随意探索** — 拖动地图到世界任意角落，通过反向地理编码自动识别地名
-- **多模型支持** — 可在 Nano Banana（`gemini-2.5-flash-image`）、Nano Banana 2（`gemini-3.1-flash-image-preview`）和 Nano Banana Pro（`gemini-3-pro-image-preview`）之间切换，按速度与质量需求选择模型
-- **多种艺术风格** — 水彩、复古、墨线素描、油画等
+- **3 种 AI 模型** — 可在 Nano Banana、Nano Banana 2、Nano Banana Pro 之间切换（详见[模型说明](#模型说明)）
+- **6 种艺术风格** — 水彩、复古、素描、油画、古韵、赛博朋克
+- **7 种画幅比例** — 1:1、4:3、3:4、16:9、9:16、3:2、2:3
 - **明信片背面** — 与正面风格匹配的背面同步生成
 - **上传照片** — 把自己加入场景，AI 以明信片画风重新绘制你的形象
-- **历史记录** — 浏览器本地保存最近 5 张生成结果
+- **历史记录** — 本次会话内的生成记录（刷新页面后清空）
 - **随机探索** — 罗盘按钮随机跳转城市 + 随机风格，一键获取灵感
 - **费用估算** — 每次生成后显示 token 用量和预估 USD 费用
+
+## 模型说明
+
+| 名称 | 模型 ID | 速度 | 质量 | 免费额度 |
+|------|---------|------|------|----------|
+| Nano Banana | `gemini-2.5-flash-image` | 快 | 好 | 支持 |
+| Nano Banana 2 | `gemini-3.1-flash-image-preview` | 快 | 更好 | 支持 |
+| Nano Banana Pro | `gemini-3-pro-image-preview` | 慢 | 最佳 | 不支持，需付费 API Key |
+
+> 费用基于 token 数量 × [Google AI 公开定价](https://ai.google.dev/pricing) 估算，实际账单以 Google 为准。
 
 ## 演示案例
 
@@ -92,6 +109,13 @@ vercel --prod
 - **html2canvas** — 地图截图
 - **Nominatim** — 反向地理编码（OpenStreetMap）
 - **Tailwind CSS**（CDN 引入）
+
+## 已知限制
+
+- **历史记录仅限本次会话** — 刷新页面后记录消失，不做持久化存储
+- **Nano Banana Pro 需付费 API Key** — 免费 Key 调用 `gemini-3-pro-image-preview` 会返回 403 错误
+- **地图瓦片 CORS** — 截图依赖瓦片服务允许 CORS，部分自定义图层可能截图空白
+- **费用为估算值** — 基于 token 数量计算，非 Google 实际账单数据
 
 ---
 

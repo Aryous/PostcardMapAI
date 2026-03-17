@@ -15,16 +15,33 @@
 
 ---
 
+## Screenshots
+
+| Landing | App |
+|:---:|:---:|
+| ![Landing page](./img/screenshot-app.png) | ![Main app](./img/screenshot-app-main.png) |
+
 ## Features
 
 - **Pan & explore** — move the map anywhere in the world; location is detected automatically via reverse geocoding
-- **Multi-model support** — switch between Nano Banana (`gemini-2.5-flash-image`), Nano Banana 2 (`gemini-3.1-flash-image-preview`), and Nano Banana Pro (`gemini-3-pro-image-preview`) based on speed and quality needs
-- **Multiple art styles** — watercolor, vintage, ink sketch, oil painting, and more
+- **3 AI models** — choose between Nano Banana, Nano Banana 2, and Nano Banana Pro based on speed and quality needs (see [Models](#models))
+- **6 art styles** — Watercolor, Vintage, Ink Sketch, Oil Paint, Ancient Ink, Cyberpunk
+- **7 aspect ratios** — 1:1, 4:3, 3:4, 16:9, 9:16, 3:2, 2:3
 - **Postcard back** — a matching decorative back side is generated alongside the front
 - **Upload a photo** — add yourself into the scene; the AI redraws you in the postcard's artistic style
-- **History** — last 5 generated postcards are saved in your browser
+- **History** — generated postcards are saved in the current session (cleared on page refresh)
 - **Lucky spin** — the compass button picks a random city and style for instant inspiration
 - **Cost estimate** — token usage and estimated USD cost displayed after each generation
+
+## Models
+
+| Name | Model ID | Speed | Quality | Free tier |
+|------|----------|-------|---------|-----------|
+| Nano Banana | `gemini-2.5-flash-image` | Fast | Good | Yes |
+| Nano Banana 2 | `gemini-3.1-flash-image-preview` | Fast | Better | Yes |
+| Nano Banana Pro | `gemini-3-pro-image-preview` | Slow | Best | No — paid API key required |
+
+> Cost is estimated from token counts × [Google AI published rates](https://ai.google.dev/pricing). Actual billing may differ.
 
 ## Gallery
 
@@ -92,6 +109,13 @@ vercel --prod
 - **html2canvas** — map screenshot
 - **Nominatim** — reverse geocoding (OpenStreetMap)
 - **Tailwind CSS** (CDN)
+
+## Known Limitations
+
+- **History is session-only** — generated postcards are lost on page refresh; there is no persistent storage
+- **Nano Banana Pro requires a paid API key** — free-tier keys return a 403 error for `gemini-3-pro-image-preview`
+- **Map tile CORS** — screenshots depend on tile providers allowing CORS; some custom tile layers may render blank
+- **Cost estimates are approximate** — calculated from token counts, not actual billing data from Google
 
 ---
 
