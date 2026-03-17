@@ -469,21 +469,19 @@ Capture the UNIQUE SOUL of "${locationName}" through authentic expression. Avoid
 ## 8. TEXTURE & FINISHING TOUCHES
 
 **Unified Texture Layer**:
-- Apply subtle paper grain across entire composition
-- Slight color variation and aging effects (cream to light sepia tones)
-- Watercolor edge effects where elements meet
-- Occasional "happy accidents": small drips, blooms, or color bleeds
+- Apply subtle texture appropriate to the artistic medium defined in Section 1
+- Do NOT add aging, yellowing, or paper grain unless the style explicitly calls for it
+- Texture effects (edge bleeds, brush strokes, grain) must match the chosen medium
 
 **Depth & Dimension**:
-- Soft shadows using diluted watercolor technique
+- Shadows and lighting consistent with the artistic medium defined in Section 1
 - Atmospheric perspective: distant elements lighter and less saturated
 - Overlapping elements to create spatial relationships
 
 **Authenticity Details**:
-- Visible brush strokes and pen lines
+- Artistic marks consistent with the medium (brush strokes for watercolor/oil, pen lines for sketch/ink)
 - Slight color variations within solid areas
-- Organic, imperfect edges (not digital-perfect)
-- Texture that suggests physical media (paper, ink, watercolor)
+- Organic, imperfect edges appropriate to the medium
 
 ═══════════════════════════════════════════════════════════════
 

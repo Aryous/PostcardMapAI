@@ -47,9 +47,9 @@ export default function App() {
   const [skipAnimation, setSkipAnimation] = useState(false);
   const [pendingStyleId, setPendingStyleId] = useState<string | null>(null);
 
-  // API Key modal — show on first load if no key is available
+  // API Key modal — never block on load, only open on demand or auth error
   const hasKey = !!(sessionStorage.getItem('gemini_api_key') || process.env.API_KEY);
-  const [showApiKeyModal, setShowApiKeyModal] = useState(!hasKey);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
 
   const saveHistory = (newHistory: HistoryItem[]) => {
     setHistory(newHistory);
@@ -265,6 +265,9 @@ export default function App() {
         title={language === 'zh' ? '配置 API Key' : 'Configure API Key'}
       >
         <Key className="w-3.5 h-3.5" />
+        {!hasKey && (
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#c4892a] border border-white/60" />
+        )}
       </button>
 
       {/* API Key Modal */}
@@ -272,7 +275,7 @@ export default function App() {
         <ApiKeyModal
           language={language}
           onSave={() => setShowApiKeyModal(false)}
-          onClose={hasKey ? () => setShowApiKeyModal(false) : undefined}
+          onClose={() => setShowApiKeyModal(false)}
         />
       )}
     </div>
