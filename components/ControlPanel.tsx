@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { MapPin, Wand2, RefreshCw, Palette, Zap, Sparkles, History, Upload, X, User, MousePointer2, RectangleHorizontal, RectangleVertical, Square, Settings, ChevronUp, Type, Loader2, Coins } from 'lucide-react';
+import { Wand2, RefreshCw, Zap, Sparkles, History, Upload, X, MousePointer2, RectangleHorizontal, RectangleVertical, Square, Settings, ChevronUp, Type, Loader2, Coins } from 'lucide-react';
 import { AppState, Language, ModelType, AspectRatio, DevConfig } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
 import { STYLE_DEFS } from '../utils/styles';
@@ -93,7 +93,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
   const isProcessing = appState === AppState.GENERATING;
   const isAreaSelected = appState === AppState.REVIEWING || appState === AppState.GENERATING || appState === AppState.COMPLETE;
-  
+
   const t = TRANSLATIONS[language];
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -113,7 +113,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       setIsDevEnabled(true);
       setShowDevMode(true);
       setShowDevToast(true);
-setTimeout(() => setShowDevToast(false), 2000);
+      setTimeout(() => setShowDevToast(false), 2000);
     }
   };
 
@@ -149,135 +149,163 @@ setTimeout(() => setShowDevToast(false), 2000);
     { id: '9:16', label: t.ratios.tall, icon: <RectangleVertical className="w-3 h-3 scale-y-125" /> }
   ];
 
+  // ── Section label helper ──────────────────────────────────────────────────
+  const SectionLabel = ({ label }: { label: string }) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+      <span style={{
+        fontFamily: 'ui-monospace, monospace',
+        fontSize: 9,
+        letterSpacing: '0.20em',
+        textTransform: 'uppercase' as const,
+        color: 'rgba(42,69,53,0.45)',
+        flexShrink: 0,
+      }}>
+        {label}
+      </span>
+      <div style={{ flex: 1, height: '1px', background: 'rgba(42,69,53,0.12)' }} />
+    </div>
+  );
+
+  const mono: React.CSSProperties = { fontFamily: 'ui-monospace, monospace' };
+
   return (
     <div className="absolute top-4 left-4 z-[1000] w-full max-w-xs transition-all duration-300">
-      <div className="bg-[#f8f3e8] shadow-[0_16px_48px_rgba(0,0,0,0.14),0_4px_16px_rgba(0,0,0,0.07)] rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-        
-        {/* Header - Always Visible */}
-        <div className="px-4 py-3 border-b border-[#d4c9b8] flex items-center justify-between sticky top-0 bg-[#f8f3e8]/98 z-10">
-          <div className="flex flex-col">
-            <div 
-                className="flex items-center gap-2 text-[#2a4535] cursor-pointer select-none active:scale-95 transition-transform"
-                onClick={handleTitleClick}
-                title={isDevEnabled ? "Developer Mode Active" : "MapPostcard AI"}
-            >
-                <MapPin className="w-4 h-4" />
-                <span className="font-bold text-sm tracking-tight">{t.title}</span>
+      <div
+        className="rounded-xl overflow-hidden max-h-[90vh] overflow-y-auto shadow-[0_16px_48px_rgba(30,24,16,0.18),0_4px_16px_rgba(30,24,16,0.08)]"
+        style={{
+          fontFamily: "'DM Sans', sans-serif",
+          background: '#f8f3e8',
+          backgroundImage: 'repeating-linear-gradient(transparent, transparent 23px, rgba(196,168,120,0.13) 23px, rgba(196,168,120,0.13) 24px)',
+          borderTop: '3px solid #2a4535',
+        }}
+      >
+
+        {/* ── Header ── */}
+        <div
+          className="px-4 pt-3 pb-3 sticky top-0 z-10 flex items-center justify-between"
+          style={{
+            background: 'rgba(248,243,232,0.97)',
+            backgroundImage: 'repeating-linear-gradient(transparent, transparent 23px, rgba(196,168,120,0.13) 23px, rgba(196,168,120,0.13) 24px)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            borderBottom: '1px solid rgba(196,168,120,0.3)',
+          }}
+        >
+          <div
+            className="cursor-pointer select-none active:scale-95 transition-transform"
+            onClick={handleTitleClick}
+            title={isDevEnabled ? 'Developer Mode Active' : 'MapPostcard AI'}
+          >
+            <div style={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, fontSize: 15, color: '#1e1810', letterSpacing: 0.3 }}>
+              <span style={{ color: '#2a4535', marginRight: 5 }}>✦</span>
+              MapPostcard<span style={{ color: '#2a4535' }}>.</span>AI
             </div>
             {isDevEnabled && sessionCost > 0 && (
-                <div className="flex items-center gap-1 mt-0.5">
-                    <Coins className="w-3 h-3 text-amber-500" />
-                    <span className="text-[10px] text-[#2a4535]/50">{t.sessionCost}:</span>
-                    <span className="text-[10px] font-mono font-semibold text-amber-600">~${sessionCost.toFixed(4)}</span>
-                    <span className="text-[9px] text-[#2a4535]/50">est.</span>
-                </div>
+              <div className="flex items-center gap-1 mt-0.5">
+                <Coins className="w-3 h-3 text-amber-500" />
+                <span style={{ ...mono, fontSize: 9, color: 'rgba(42,69,53,0.50)' }}>{t.sessionCost}:</span>
+                <span style={{ ...mono, fontSize: 9, fontWeight: 600, color: '#c4892a' }}>~${sessionCost.toFixed(4)}</span>
+              </div>
             )}
           </div>
-          
-          <div className="flex items-center gap-2">
-             {/* Dev Mode Toggle (Hidden until activated) */}
-             {isDevEnabled && (
-                <button
-                  onClick={() => setShowDevMode(!showDevMode)}
-                  className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${showDevMode ? 'bg-[#2a4535]/10 text-[#2a4535]' : 'bg-[#e2d9cc] text-[#2a4535]/50 hover:text-[#2a4535]/60'}`}
-                  aria-label="Developer Settings"
-                >
-                    <Settings className="w-3.5 h-3.5" />
-                </button>
-             )}
 
-             {/* History Button */}
-             <button
-                onClick={onToggleHistory}
-                aria-label={t.history}
-                className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-[#e2d9cc] hover:bg-[#2a4535]/10 text-[#2a4535]/60 hover:text-[#2a4535] transition-colors border border-[#d4c9b8]"
-             >
-                <History className="w-3.5 h-3.5" />
-             </button>
-
-             {/* Language Toggle */}
-             <button
-                onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
-                aria-label="Switch language"
-                className="flex items-center gap-1 px-2.5 py-2.5 min-w-[44px] min-h-[44px] justify-center rounded-full bg-[#e2d9cc] hover:bg-[#d4c9b8] transition-colors border border-[#d4c9b8]"
-             >
-                <span style={{ fontFamily: 'ui-monospace,monospace', fontSize: 10, letterSpacing: '0.05em', fontWeight: 600 }}
-                  className={language === 'en' ? 'text-[#2a4535]' : 'text-[#2a4535]/40'}>EN</span>
-                <span style={{ fontFamily: 'ui-monospace,monospace', fontSize: 10, color: '#c8bfad' }}>·</span>
-                <span style={{ fontFamily: 'ui-monospace,monospace', fontSize: 10, letterSpacing: '0.05em', fontWeight: 600 }}
-                  className={language === 'zh' ? 'text-[#2a4535]' : 'text-[#2a4535]/40'}>中</span>
-             </button>
+          <div className="flex items-center gap-0.5">
+            {isDevEnabled && (
+              <button
+                onClick={() => setShowDevMode(!showDevMode)}
+                className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors ${showDevMode ? 'bg-[#2a4535]/10 text-[#2a4535]' : 'text-[#2a4535]/40 hover:text-[#2a4535]/70 hover:bg-[#e2d9cc]'}`}
+                aria-label="Developer Settings"
+              >
+                <Settings className="w-3.5 h-3.5" />
+              </button>
+            )}
+            <button
+              onClick={onToggleHistory}
+              aria-label={t.history}
+              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[#2a4535]/45 hover:text-[#2a4535] hover:bg-[#e2d9cc] transition-colors"
+            >
+              <History className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
+              aria-label="Switch language"
+              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center gap-1 rounded-lg hover:bg-[#e2d9cc] transition-colors"
+            >
+              <span style={{ ...mono, fontSize: 10, fontWeight: 600, letterSpacing: '0.05em' }}
+                className={language === 'en' ? 'text-[#2a4535]' : 'text-[#2a4535]/35'}>EN</span>
+              <span style={{ ...mono, fontSize: 10, color: '#c8bfad' }}>·</span>
+              <span style={{ ...mono, fontSize: 10, fontWeight: 600, letterSpacing: '0.05em' }}
+                className={language === 'zh' ? 'text-[#2a4535]' : 'text-[#2a4535]/35'}>中</span>
+            </button>
           </div>
         </div>
 
-        {/* Developer Mode Panel */}
+        {/* ── Dev Panel ── */}
         {showDevMode && isDevEnabled && (
-          <div className="bg-[#ede7d5] border-b border-[#d4c9b8] p-3 space-y-3 animate-in slide-in-from-top-2">
+          <div
+            className="p-3 space-y-3 animate-in slide-in-from-top-2"
+            style={{ background: 'rgba(42,69,53,0.05)', borderBottom: '1px solid rgba(196,168,120,0.25)' }}
+          >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#2a4535] flex items-center gap-1">
+              <span style={{ ...mono, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#2a4535' }}
+                className="flex items-center gap-1">
                 <Settings className="w-3 h-3" /> {t.devMode}
               </span>
-              <button onClick={() => setShowDevMode(false)}><ChevronUp className="w-3 h-3 text-[#2a4535]/50" /></button>
-            </div>
-            
-            {/* Location Name Input (Moved to Dev Mode) */}
-            <div className="space-y-2">
-                <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider flex items-center gap-1">
-                  <Type className="w-3 h-3" /> {language === 'zh' ? '地点名称 (调试)' : 'Location Name (Debug)'}
-                </label>
-                <div className="relative">
-                    <input 
-                    type="text" 
-                    value={locationName}
-                    onChange={(e) => setLocationName(e.target.value)}
-                    placeholder={isAreaSelected && !locationName ? (language === 'zh' ? '正在识别...' : 'Detecting...') : (language === 'zh' ? '手动输入' : 'Manual Input')}
-                    className="w-full px-3 py-2 text-xs border border-[#c8bfad] rounded focus:ring-1 focus:ring-[#2a4535] bg-[#f8f3e8]"
-                    />
-                    {isAreaSelected && !locationName && (
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                            <Loader2 className="w-3 h-3 text-[#2a4535] animate-spin" />
-                        </div>
-                    )}
-                </div>
+              <button onClick={() => setShowDevMode(false)}>
+                <ChevronUp className="w-3 h-3 text-[#2a4535]/40" />
+              </button>
             </div>
 
-            {/* Prompt Mode Tabs */}
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider">
+            {/* Location debug */}
+            <div className="space-y-1.5">
+              <label style={{ ...mono, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(42,69,53,0.45)' }}
+                className="flex items-center gap-1">
+                <Type className="w-3 h-3" /> {language === 'zh' ? '地点名称 (调试)' : 'Location Name (Debug)'}
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={locationName}
+                  onChange={(e) => setLocationName(e.target.value)}
+                  placeholder={isAreaSelected && !locationName ? (language === 'zh' ? '正在识别...' : 'Detecting...') : (language === 'zh' ? '手动输入' : 'Manual Input')}
+                  className="w-full px-3 py-2 text-xs border border-[#c8bfad] rounded focus:ring-1 focus:ring-[#2a4535] bg-[#f8f3e8]"
+                />
+                {isAreaSelected && !locationName && (
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                    <Loader2 className="w-3 h-3 text-[#2a4535] animate-spin" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Prompt mode */}
+            <div className="space-y-1.5">
+              <label style={{ ...mono, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(42,69,53,0.45)' }}>
                 {language === 'zh' ? '提示词模式' : 'Prompt Mode'}
               </label>
-              <div className="flex bg-[#e2d9cc] rounded-md p-1">
+              <div className="flex bg-[#e2d9cc] rounded p-0.5">
                 {([
                   { id: 'default', label: language === 'zh' ? '默认' : 'Default' },
-                  { id: 'v2',      label: 'V2' },
-                  { id: 'custom',  label: language === 'zh' ? '自定义' : 'Custom' },
+                  { id: 'v2', label: 'V2' },
+                  { id: 'custom', label: language === 'zh' ? '自定义' : 'Custom' },
                 ] as const).map(({ id, label }) => {
                   const active = devConfig.useCustomPrompt ? 'custom' : devConfig.useV2Prompt ? 'v2' : 'default';
                   return (
                     <button
                       key={id}
-                      onClick={() => setDevConfig({
-                        ...devConfig,
-                        useV2Prompt: id === 'v2',
-                        useCustomPrompt: id === 'custom',
-                      })}
-                      className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
-                        active === id
-                          ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm'
-                          : 'text-[#2a4535]/50 hover:text-[#2a4535]'
-                      }`}
+                      onClick={() => setDevConfig({ ...devConfig, useV2Prompt: id === 'v2', useCustomPrompt: id === 'custom' })}
+                      className={`flex-1 py-1.5 rounded text-xs font-medium transition-all ${active === id ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm' : 'text-[#2a4535]/50 hover:text-[#2a4535]/80'}`}
                     >
                       {label}
                     </button>
                   );
                 })}
               </div>
-
               {devConfig.useCustomPrompt && (
                 <textarea
                   value={devConfig.customSystemInstruction}
-                  onChange={(e) => setDevConfig({...devConfig, customSystemInstruction: e.target.value})}
-                  className="w-full h-24 text-[10px] p-2 border border-[#c8bfad] rounded focus:ring-1 focus:ring-[#2a4535] focus:border-[#2a4535] font-mono"
+                  onChange={(e) => setDevConfig({ ...devConfig, customSystemInstruction: e.target.value })}
+                  className="w-full h-24 text-[10px] p-2 border border-[#c8bfad] rounded focus:ring-1 focus:ring-[#2a4535] focus:border-[#2a4535] font-mono bg-[#f8f3e8]"
                   placeholder="Enter system instructions here..."
                 />
               )}
@@ -285,94 +313,71 @@ setTimeout(() => setShowDevToast(false), 2000);
           </div>
         )}
 
-        <div className="p-4 space-y-4">
-          
-          {/* Location Name Input MOVED TO DEV PANEL ABOVE */}
+        {/* ── Main content ── */}
+        <div className="p-4 space-y-5">
 
-          {/* 1. Model Selection */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider flex items-center gap-1">
-              {model === 'gemini-3-pro-image-preview' ? <Sparkles className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
-              {t.selectModel}
-            </label>
-            <div className="flex bg-[#e2d9cc] rounded-md p-1">
-              <button
-                onClick={() => setModel('gemini-2.5-flash-image')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  model === 'gemini-2.5-flash-image'
-                    ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm'
-                    : 'text-[#2a4535]/50 hover:text-[#2a4535]'
-                }`}
-              >
-                <Zap className="w-3 h-3" />
-                {t.models.flash}
-              </button>
-              <button
-                onClick={() => setModel('gemini-3.1-flash-image-preview')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  model === 'gemini-3.1-flash-image-preview'
-                    ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm'
-                    : 'text-[#2a4535]/50 hover:text-[#2a4535]'
-                }`}
-              >
-                <Zap className="w-3 h-3" />
-                {t.models.flash31}
-              </button>
-              <button
-                onClick={() => setModel('gemini-3-pro-image-preview')}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  model === 'gemini-3-pro-image-preview'
-                    ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm'
-                    : 'text-[#2a4535]/50 hover:text-[#2a4535]'
-                }`}
-              >
-                <Sparkles className="w-3 h-3" />
-                {t.models.pro}
-              </button>
-            </div>
-          </div>
-
-          {/* 2. Aspect Ratio Selection */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider flex items-center gap-1">
-              <RectangleHorizontal className="w-3 h-3" /> {t.selectRatio}
-            </label>
-            <div className="flex bg-[#e2d9cc] rounded-md p-1 gap-1 overflow-x-auto no-scrollbar">
-              {ratioOptions.map((opt) => (
+          {/* 1. Model / Grade */}
+          <div>
+            <SectionLabel label={language === 'zh' ? '模型质量' : 'Grade'} />
+            <div className="flex gap-1.5">
+              {([
+                { id: 'gemini-2.5-flash-image',        icon: <Zap className="w-3 h-3" />,      label: t.models.flash   },
+                { id: 'gemini-3.1-flash-image-preview', icon: <Zap className="w-3 h-3" />,      label: t.models.flash31 },
+                { id: 'gemini-3-pro-image-preview',     icon: <Sparkles className="w-3 h-3" />, label: t.models.pro     },
+              ] as const).map(m => (
                 <button
-                  key={opt.id}
-                  onClick={() => setAspectRatio(opt.id)}
-                  title={opt.label}
-                  className={`flex-1 flex-shrink-0 flex flex-col items-center justify-center py-1.5 px-1 min-w-[32px] rounded-md transition-all gap-0.5 ${
-                    aspectRatio === opt.id
-                      ? 'bg-[#f8f3e8] text-[#2a4535] shadow-sm ring-1 ring-[#2a4535]/15'
-                      : 'text-[#2a4535]/50 hover:text-[#2a4535]/60 hover:bg-[#d4c9b8]/50'
+                  key={m.id}
+                  onClick={() => setModel(m.id)}
+                  className={`flex-1 py-2 text-xs font-medium flex items-center justify-center gap-1 rounded transition-all ${
+                    model === m.id
+                      ? 'bg-[#2a4535] text-[#f8f3e8] shadow-sm'
+                      : 'text-[#2a4535]/50 hover:text-[#2a4535] hover:bg-[#e2d9cc]'
                   }`}
                 >
-                  {opt.icon}
-                  <span className="text-[8px] font-bold leading-none">{opt.id}</span>
+                  {m.icon}{m.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* 3. Style Selection */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider flex items-center gap-1">
-              <Palette className="w-3 h-3" /> {t.selectStyle}
-            </label>
+          {/* 2. Aspect Ratio / Format */}
+          <div>
+            <SectionLabel label={language === 'zh' ? '图片比例' : 'Format'} />
+            <div className="flex gap-1 overflow-x-auto no-scrollbar">
+              {ratioOptions.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => setAspectRatio(opt.id)}
+                  title={opt.label}
+                  className={`flex-1 flex-shrink-0 flex flex-col items-center py-2 px-1 min-w-[32px] rounded transition-all gap-0.5 ${
+                    aspectRatio === opt.id
+                      ? 'bg-[#2a4535] text-[#f8f3e8] shadow-sm'
+                      : 'text-[#2a4535]/40 hover:text-[#2a4535] hover:bg-[#e2d9cc]'
+                  }`}
+                >
+                  {opt.icon}
+                  <span style={{ ...mono, fontSize: 8, fontWeight: 600 }}>{opt.id}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 3. Style */}
+          <div>
+            <SectionLabel label={language === 'zh' ? '艺术风格' : 'Style'} />
             <div className="flex flex-wrap gap-2">
-              {currentStyles.map((style) => (
+              {currentStyles.map(style => (
                 <button
                   key={style.id}
                   onClick={() => setSelectedStyleId(style.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
+                  className={`px-3 py-1.5 rounded text-xs font-medium border transition-all ${
                     selectedStyleId === style.id
                       ? isSpinning
-                        ? 'bg-[#c4892a] text-white border-[#c4892a] shadow-lg scale-110 ring-2 ring-[#e5b06e] ring-offset-1'
-                        : 'bg-[#2a4535] text-[#f8f3e8] border-[#2a4535] shadow-md transform scale-105'
-                      : 'bg-[#ede7d5] text-[#2a4535]/60 border-[#d4c9b8] hover:bg-[#e2d9cc]'
+                        ? 'bg-[#c4892a] text-white border-[#c4892a] shadow-md scale-[1.06]'
+                        : 'bg-[#2a4535] text-[#f8f3e8] border-[#2a4535] shadow-sm scale-[1.04]'
+                      : 'bg-[#ede7d5] text-[#2a4535]/70 border-[#d4c9b8] hover:bg-[#e2d9cc] hover:text-[#2a4535]'
                   }`}
+                  style={{ transition: 'all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
                 >
                   {style.label}
                 </button>
@@ -380,95 +385,81 @@ setTimeout(() => setShowDevToast(false), 2000);
             </div>
           </div>
 
-          {/* 4. User Photo Upload */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-[#2a4535]/50 uppercase tracking-wider flex items-center gap-1">
-                <User className="w-3 h-3" /> {t.uploadPhoto}
-            </label>
-            
+          {/* 4. Portrait upload */}
+          <div>
+            <SectionLabel label={language === 'zh' ? '个人照片' : 'Portrait'} />
             {!userImage ? (
-              <button 
+              <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-2 border-2 border-dashed border-[#c8bfad] rounded-lg bg-[#ede7d5] hover:bg-[#2a4535]/5 hover:border-[#2a4535] transition-colors flex items-center justify-center gap-2 text-xs text-[#2a4535]/50 hover:text-[#2a4535]"
+                className="w-full py-2.5 rounded border border-dashed border-[#c8bfad] hover:border-[#2a4535] bg-transparent hover:bg-[#e2d9cc]/30 transition-all flex items-center justify-center gap-2 text-xs text-[#2a4535]/45 hover:text-[#2a4535]/70"
               >
                 <Upload className="w-3.5 h-3.5" />
                 {t.uploadHint}
               </button>
             ) : (
-              <div className="relative w-full h-16 rounded-lg overflow-hidden border border-[#d4c9b8] group">
+              <div className="relative w-full h-16 rounded overflow-hidden border border-[#d4c9b8] group">
                 <img src={userImage} alt="User" className="w-full h-full object-cover opacity-80" />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button 
+                  <button
                     onClick={() => setUserImage(undefined)}
-                    className="px-2 py-1 bg-red-500 text-white rounded-md text-[10px] flex items-center gap-1 hover:bg-red-600"
+                    className="px-2 py-1 bg-red-600 text-white rounded text-[10px] flex items-center gap-1 hover:bg-red-700"
                   >
                     <X className="w-3 h-3" /> {t.removePhoto}
                   </button>
                 </div>
               </div>
             )}
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept="image/*"
-              onChange={handleFileChange}
-            />
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
           </div>
 
-          <div className="pt-2 border-t border-[#d4c9b8]">
-             {/* 5. Action Buttons */}
+          {/* ── Action area ── */}
+          <div style={{ borderTop: '1px solid rgba(196,168,120,0.28)', paddingTop: 14 }}>
             {isProcessing ? (
-               // GENERATING STATE
-               <div className="flex flex-col items-center justify-center py-2 space-y-3">
-                 <div className="w-6 h-6 border-2 border-[#2a4535]/15 border-t-[#2a4535] rounded-full animate-spin"></div>
-                 <p className="text-[10px] font-medium text-[#2a4535] animate-pulse text-center">
-                   {t.generating.replace('{style}', selectedStyle.label)}
-                 </p>
-               </div>
+              <div className="flex flex-col items-center py-2 space-y-3">
+                <div className="w-5 h-5 border-2 border-[#2a4535]/15 border-t-[#2a4535] rounded-full animate-spin" />
+                <p style={{ ...mono, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase' }}
+                  className="text-[#2a4535]/55 animate-pulse text-center">
+                  {t.generating.replace('{style}', selectedStyle.label)}
+                </p>
+              </div>
             ) : appState === AppState.COMPLETE ? (
-               // COMPLETE STATE
-               <div className="space-y-2 animate-in fade-in">
-                  <button
-                    onClick={() => onGenerate(selectedStyle.frontPrompt, selectedStyleId)} 
-                    className="w-full py-2.5 bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] font-semibold rounded-md transition-all active:scale-[0.98] shadow-[0_2px_12px_rgba(42,69,53,0.30)] hover:shadow-[0_4px_16px_rgba(42,69,53,0.38)] flex items-center justify-center gap-2 text-sm"
-                  >
-                    <RefreshCw className="w-4 h-4" /> {t.retry}
-                  </button>
-               </div>
+              <button
+                onClick={() => onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
+                className="w-full py-2.5 bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] font-semibold rounded transition-all active:scale-[0.98] shadow-[0_2px_12px_rgba(42,69,53,0.30)] hover:shadow-[0_4px_16px_rgba(42,69,53,0.38)] flex items-center justify-center gap-2 text-sm tracking-wide"
+              >
+                <RefreshCw className="w-4 h-4" /> {t.retry}
+              </button>
             ) : (
-               // IDLE, DRAWING, or REVIEWING STATE
-               <div className="space-y-2">
-                 <button
-                   onClick={() => onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
-                   disabled={!isAreaSelected}
-                   className={`w-full py-2.5 font-semibold rounded-md transition-all flex items-center justify-center gap-2 text-sm ${
-                     isAreaSelected
-                      ? 'bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] active:scale-[0.98] shadow-[0_2px_12px_rgba(42,69,53,0.30)] hover:shadow-[0_4px_16px_rgba(42,69,53,0.38)]'
-                      : 'bg-[#d4c9b8] text-[#2a4535]/50 cursor-not-allowed shadow-none'
-                   }`}
-                 >
-                   {isAreaSelected ? <Wand2 className="w-4 h-4" /> : <MousePointer2 className="w-4 h-4" />}
-                   {isAreaSelected ? t.generate : t.drawPrompt}
-                 </button>
-
-               </div>
+              <button
+                onClick={() => onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
+                disabled={!isAreaSelected}
+                className={`w-full py-2.5 font-semibold rounded transition-all flex items-center justify-center gap-2 text-sm tracking-wide ${
+                  isAreaSelected
+                    ? 'bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] active:scale-[0.98] shadow-[0_2px_12px_rgba(42,69,53,0.30)] hover:shadow-[0_4px_16px_rgba(42,69,53,0.38)]'
+                    : 'bg-[#d4c9b8] text-[#2a4535]/40 cursor-not-allowed'
+                }`}
+              >
+                {isAreaSelected ? <Wand2 className="w-4 h-4" /> : <MousePointer2 className="w-4 h-4" />}
+                {isAreaSelected ? t.generate : t.drawPrompt}
+              </button>
             )}
           </div>
 
-          {/* Error Display */}
+          {/* Error */}
           {error && (
-            <div className="text-[10px] text-red-500 bg-red-50 p-2 rounded-lg border border-red-100 text-center animate-in slide-in-from-top-1">
+            <div style={{ ...mono, fontSize: 10, letterSpacing: '0.06em' }}
+              className="text-[#a83232] bg-[#f9ebe8] p-2 rounded border border-[#e8c8c0] text-center animate-in slide-in-from-top-1">
               {error}
             </div>
           )}
 
-          {/* Activation Toast */}
+          {/* Dev toast */}
           {showDevToast && (
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-800/90 text-white text-xs px-3 py-1.5 rounded-full shadow-lg pointer-events-none animate-in fade-in zoom-in duration-300">
-                {t.devModeEnabled}
-             </div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#2a4535]/90 text-[#f8f3e8] text-xs px-3 py-1.5 rounded-full shadow-lg pointer-events-none animate-in fade-in zoom-in duration-300">
+              {t.devModeEnabled}
+            </div>
           )}
+
         </div>
       </div>
     </div>
