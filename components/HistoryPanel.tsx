@@ -157,7 +157,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
         <div
           style={{
             display: 'flex',
-            height: 'min(660px, 84vh)',
+            height: 'min(860px, 92vh)',
             borderRadius: '3px',
             overflow: 'hidden',
             boxShadow: '0 28px 72px rgba(0,0,0,0.55), 0 10px 28px rgba(0,0,0,0.32), 0 3px 8px rgba(0,0,0,0.2)',
