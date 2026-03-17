@@ -9,7 +9,9 @@
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL%20v3-blue.svg)](./LICENSE)
 [![Deploy with Vercel](https://img.shields.io/badge/deployed%20on-Vercel-black?logo=vercel)](https://postcard-map-ai.vercel.app)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev)
-[![Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google&logoColor=white)](https://aistudio.google.com)
+[![Gemini 2.5 Flash](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google&logoColor=white)](https://aistudio.google.com)
+[![Gemini 3.1 Flash](https://img.shields.io/badge/Gemini-3.1%20Flash-5A9CF8?logo=google&logoColor=white)](https://aistudio.google.com)
+[![Gemini 3 Pro](https://img.shields.io/badge/Gemini-3%20Pro-1A73E8?logo=google&logoColor=white)](https://aistudio.google.com)
 
 </div>
 
@@ -17,9 +19,9 @@
 
 ## Screenshots
 
-| Landing | App |
-|:---:|:---:|
-| ![Landing page](./img/screenshot-app.png) | ![Main app](./img/screenshot-app-main.png) |
+| Landing | Map Editor | Collection |
+|:---:|:---:|:---:|
+| ![Landing page](./img/screenshot-app.png) | ![Main app](./img/screenshot-app-main.png) | ![History binder](./img/screenshot-app-history-pan.png) |
 
 ## Features
 
@@ -29,7 +31,7 @@
 - **7 aspect ratios** — 1:1, 4:3, 3:4, 16:9, 9:16, 3:2, 2:3
 - **Postcard back** — a matching decorative back side is generated alongside the front
 - **Upload a photo** — add yourself into the scene; the AI redraws you in the postcard's artistic style
-- **History** — generated postcards are saved in the current session (cleared on page refresh)
+- **Collection binder** — generated postcards are collected in a floating ring-binder panel; session-only (cleared on page refresh)
 - **Lucky spin** — the compass button picks a random city and style for instant inspiration
 - **Cost estimate** — token usage and estimated USD cost displayed after each generation
 

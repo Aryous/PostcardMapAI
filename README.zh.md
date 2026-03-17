@@ -9,7 +9,9 @@
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL%20v3-blue.svg)](./LICENSE)
 [![Deploy with Vercel](https://img.shields.io/badge/deployed%20on-Vercel-black?logo=vercel)](https://postcard-map-ai.vercel.app)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev)
-[![Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google&logoColor=white)](https://aistudio.google.com)
+[![Gemini 2.5 Flash](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?logo=google&logoColor=white)](https://aistudio.google.com)
+[![Gemini 3.1 Flash](https://img.shields.io/badge/Gemini-3.1%20Flash-5A9CF8?logo=google&logoColor=white)](https://aistudio.google.com)
+[![Gemini 3 Pro](https://img.shields.io/badge/Gemini-3%20Pro-1A73E8?logo=google&logoColor=white)](https://aistudio.google.com)
 
 </div>
 
@@ -17,9 +19,9 @@
 
 ## 界面截图
 
-| 落地页 | 主应用 |
-|:---:|:---:|
-| ![落地页](./img/screenshot-app.png) | ![主应用界面](./img/screenshot-app-main.png) |
+| 落地页 | 地图编辑 | 明信片集 |
+|:---:|:---:|:---:|
+| ![落地页](./img/screenshot-app.png) | ![主应用界面](./img/screenshot-app-main.png) | ![历史活页本](./img/screenshot-app-history-pan.png) |
 
 ## 功能特性
 
@@ -29,7 +31,7 @@
 - **7 种画幅比例** — 1:1、4:3、3:4、16:9、9:16、3:2、2:3
 - **明信片背面** — 与正面风格匹配的背面同步生成
 - **上传照片** — 把自己加入场景，AI 以明信片画风重新绘制你的形象
-- **历史记录** — 本次会话内的生成记录（刷新页面后清空）
+- **明信片集** — 生成的明信片收集在悬浮活页本面板中，仅限本次会话（刷新后清空）
 - **随机探索** — 罗盘按钮随机跳转城市 + 随机风格，一键获取灵感
 - **费用估算** — 每次生成后显示 token 用量和预估 USD 费用
 
@@ -112,7 +114,7 @@ vercel --prod
 
 ## 已知限制
 
-- **历史记录仅限本次会话** — 刷新页面后记录消失，不做持久化存储
+- **明信片集仅限本次会话** — 刷新页面后记录消失，不做持久化存储
 - **Nano Banana Pro 需付费 API Key** — 免费 Key 调用 `gemini-3-pro-image-preview` 会返回 403 错误
 - **地图瓦片 CORS** — 截图依赖瓦片服务允许 CORS，部分自定义图层可能截图空白
 - **费用为估算值** — 基于 token 数量计算，非 Google 实际账单数据
