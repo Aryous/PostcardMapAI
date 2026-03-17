@@ -189,6 +189,38 @@
       .viewfinder-bracket {
         animation: bracket-breathe 3.2s ease-in-out infinite;
       }
+
+      /* ── Generating scan beam — @property for GPU-smooth animation ── */
+      @property --vf-scan {
+        syntax: '<number>';
+        inherits: false;
+        initial-value: -0.05;
+      }
+      @keyframes vf-scan-anim {
+        0%   { --vf-scan: -0.05; opacity: 0; }
+        6%   { opacity: 1; }
+        94%  { opacity: 1; }
+        100% { --vf-scan: 1.05;  opacity: 0; }
+      }
+      .vf-scan-beam {
+        --vf-scan: -0.05;
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 1.5px;
+        /* transform uses @property value × container height */
+        transform: translateY(calc(var(--vf-scan) * var(--vf-h, 400) * 1px));
+        animation: vf-scan-anim 2.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        background: linear-gradient(
+          to right,
+          transparent        0%,
+          rgba(196,137,42,0) 8%,
+          rgba(196,137,42,0.75) 30%,
+          rgba(196,137,42,0.90) 50%,
+          rgba(196,137,42,0.75) 70%,
+          rgba(196,137,42,0) 92%,
+          transparent        100%
+        );
+        box-shadow: 0 0 12px rgba(196,137,42,0.45);
+      }
     </style>
   <script type="module" src="/index.tsx"></script>
 </head>

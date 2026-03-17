@@ -151,7 +151,7 @@ setTimeout(() => setShowDevToast(false), 2000);
 
   return (
     <div className="absolute top-4 left-4 z-[1000] w-full max-w-xs transition-all duration-300">
-      <div className="bg-white shadow-[0_4px_24px_rgba(0,0,0,0.10),0_2px_8px_rgba(42,69,53,0.07)] rounded-lg overflow-hidden border border-[#e8e2d8] max-h-[90vh] overflow-y-auto" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="bg-white shadow-[0_16px_48px_rgba(0,0,0,0.14),0_4px_16px_rgba(0,0,0,0.07)] rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto" style={{ fontFamily: "'DM Sans', sans-serif" }}>
         
         {/* Header - Always Visible */}
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white/98 z-10">
