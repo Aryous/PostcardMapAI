@@ -184,11 +184,15 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               aria-label="Switch language"
               className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center gap-1 rounded-lg hover:bg-[#e2d9cc] transition-colors"
             >
-              <span style={{ ...mono, fontSize: 10, fontWeight: 600, letterSpacing: '0.05em' }}
-                className={language === 'en' ? 'text-[#2a4535]' : 'text-[#2a4535]/32'}>EN</span>
+              <span style={{ ...mono, fontSize: 10, fontWeight: language === 'en' ? 700 : 400, letterSpacing: '0.05em',
+                color: language === 'en' ? '#c4892a' : 'rgba(42,69,53,0.30)',
+                borderBottom: language === 'en' ? '1.5px solid #c4892a' : '1.5px solid transparent',
+                paddingBottom: 1, lineHeight: 1.2 }}>EN</span>
               <span style={{ ...mono, fontSize: 10, color: '#c8bfad' }}>·</span>
-              <span style={{ ...mono, fontSize: 10, fontWeight: 600, letterSpacing: '0.05em' }}
-                className={language === 'zh' ? 'text-[#2a4535]' : 'text-[#2a4535]/32'}>中</span>
+              <span style={{ ...mono, fontSize: 10, fontWeight: language === 'zh' ? 700 : 400, letterSpacing: '0.05em',
+                color: language === 'zh' ? '#c4892a' : 'rgba(42,69,53,0.30)',
+                borderBottom: language === 'zh' ? '1.5px solid #c4892a' : '1.5px solid transparent',
+                paddingBottom: 1, lineHeight: 1.2 }}>中</span>
             </button>
           </div>
         </div>
