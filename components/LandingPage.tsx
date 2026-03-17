@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './LandingPage.css';
 
 interface LandingPageProps {
@@ -190,6 +190,9 @@ export default function LandingPage({ onStart }: LandingPageProps) {
     };
   }, []);
 
+  const [activeStyle, setActiveStyle] = useState<string>(GALLERY[0].id);
+  const activeCard = GALLERY.find(g => g.id === activeStyle)!;
+
   const step1Ref = useReveal(0);
   const step2Ref = useReveal(140);
   const step3Ref = useReveal(280);
@@ -292,28 +295,43 @@ export default function LandingPage({ onStart }: LandingPageProps) {
             </p>
           </div>
 
-          {/* Expanding strip — hover to expand */}
-          <div className="lp-expand-gallery">
-            {GALLERY.map(({ id, zh, en, location, descZh }) => (
-              <div key={id} className="lp-expand-card">
-                <img
-                  src={`/gallery/${id}.png`}
-                  alt={`${zh} 风格明信片示例`}
-                  className="lp-expand-img"
-                  loading="lazy"
-                />
-                <div className="lp-expand-overlay" />
-                <div className="lp-expand-label">
-                  <span className="lp-expand-label-text">{zh}</span>
-                </div>
-                <div className="lp-expand-info">
-                  <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 10, color: '#c4892a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>{en}</div>
-                  <div style={{ fontFamily: '"Playfair Display",serif', fontSize: 22, fontWeight: 700, color: '#f0e8d0', marginBottom: 4 }}>{zh}</div>
-                  <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 10, color: 'rgba(240,232,200,0.5)', letterSpacing: '0.06em', marginBottom: 10 }}>{location}</div>
-                  <div style={{ fontFamily: '"DM Sans",sans-serif', fontSize: 13, color: 'rgba(240,232,200,0.72)', lineHeight: 1.55 }}>{descZh}</div>
-                </div>
+          {/* Spotlight gallery — hover thumbnail to switch featured */}
+          <div className="lp-spotlight-gallery">
+            {/* Featured postcard */}
+            <div className="lp-spotlight-featured">
+              <img
+                key={activeStyle}
+                src={`/gallery/${activeStyle}.png`}
+                alt={`${activeCard.zh} 风格明信片`}
+                className="lp-spotlight-img"
+                loading="lazy"
+              />
+              <div className="lp-spotlight-overlay" />
+              <div className="lp-spotlight-caption">
+                <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 10, color: '#c4892a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>{activeCard.en}</div>
+                <div style={{ fontFamily: '"Playfair Display",serif', fontSize: 26, fontWeight: 700, color: '#f0e8d0', marginBottom: 4 }}>{activeCard.zh}</div>
+                <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 10, color: 'rgba(240,232,200,0.5)', letterSpacing: '0.06em', marginBottom: 10 }}>{activeCard.location}</div>
+                <div style={{ fontFamily: '"DM Sans",sans-serif', fontSize: 13, color: 'rgba(240,232,200,0.72)', lineHeight: 1.55 }}>{activeCard.descZh}</div>
               </div>
-            ))}
+            </div>
+            {/* Thumbnail list */}
+            <div className="lp-spotlight-thumbs">
+              {GALLERY.map(({ id, zh, en, location }) => (
+                <div
+                  key={id}
+                  className={`lp-spotlight-thumb${activeStyle === id ? ' active' : ''}`}
+                  onMouseEnter={() => setActiveStyle(id)}
+                >
+                  <div className="lp-spotlight-thumb-img-wrap">
+                    <img src={`/gallery/${id}.png`} alt={zh} loading="lazy" className="lp-spotlight-thumb-img" />
+                  </div>
+                  <div className="lp-spotlight-thumb-text">
+                    <div style={{ fontFamily: '"Playfair Display",serif', fontSize: 15, fontWeight: 700, color: '#1e1810', marginBottom: 2 }}>{zh}</div>
+                    <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 10, color: '#9a8a72', letterSpacing: '0.06em' }}>{en.toUpperCase()} · {location}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
