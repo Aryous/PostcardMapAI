@@ -1,5 +1,6 @@
 
 import React, { useState, useCallback, useRef } from 'react';
+import LandingPage from './components/LandingPage';
 import PostcardMap from './components/PostcardMap';
 import ControlPanel, { STYLE_DEFS } from './components/ControlPanel';
 import PostcardResult from './components/PostcardResult';
@@ -14,6 +15,7 @@ import { TRANSLATIONS } from './utils/translations';
 import { Key } from 'lucide-react';
 
 export default function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   const [generatedImage, setGeneratedImage] = useState<string | undefined>(undefined);
   const [generatedBackImage, setGeneratedBackImage] = useState<string | undefined>(undefined);
@@ -190,6 +192,10 @@ export default function App() {
     const newHistory = history.filter(h => h.id !== id);
     saveHistory(newHistory);
   }, [history]);
+
+  if (showLanding) {
+    return <LandingPage onStart={() => setShowLanding(false)} />;
+  }
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-slate-50">
