@@ -449,7 +449,7 @@ setTimeout(() => setShowDevToast(false), 2000);
                    {isAreaSelected ? <Wand2 className="w-4 h-4" /> : <MousePointer2 className="w-4 h-4" />}
                    {isAreaSelected ? t.generate : t.drawPrompt}
                  </button>
-                 
+
                </div>
             )}
           </div>
