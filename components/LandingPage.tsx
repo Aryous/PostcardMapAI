@@ -74,6 +74,27 @@ const HeroPostcard = ({
   onPrev: () => void;
   onNext: () => void;
 }) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [availW, setAvailW] = useState(0);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setAvailW(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Scale everything from 420px base design, cap at 1.6×
+  const scale = availW > 0 ? Math.min(availW / 420, 1.6) : 1;
+  const CARD_W = Math.round(240 * scale);
+  const CARD_H = Math.round(180 * scale); // 4:3
+  const X_OFF   = Math.round(138 * scale);
+  const Y_DOWN  = Math.round(24  * scale);
+  const Y_UP    = Math.round(8   * scale);
+  const HIDDEN_X = Math.round(200 * scale);
+  const containerH = Math.round(300 * scale);
+
   const activeIndex = GALLERY.findIndex(g => g.id === activeStyle);
   const N = GALLERY.length;
 
@@ -82,11 +103,9 @@ const HeroPostcard = ({
     return mod > N / 2 ? mod - N : mod;
   };
 
-  const CARD_W = 240;
-  const CARD_H = 180; // 4:3
-
   return (
-    <div style={{ position: 'relative', width: 420, height: 300, userSelect: 'none', flexShrink: 0 }}>
+    <div ref={wrapperRef} style={{ width: '100%', userSelect: 'none' }}>
+    <div style={{ position: 'relative', width: '100%', height: containerH || 300 }}>
       {GALLERY.map((card, cardIndex) => {
         const pos = getPos(cardIndex);
 
@@ -98,21 +117,21 @@ const HeroPostcard = ({
         let pointerEvents: 'auto' | 'none';
 
         if (pos === 0) {
-          transform = 'translateX(0px) translateY(-8px) rotate(-2deg) scale(1)';
+          transform = `translateX(0px) translateY(-${Y_UP}px) rotate(-2deg) scale(1)`;
           opacity = 1;
           zIndex = 3;
           boxShadow = '0 28px 72px rgba(30,24,16,0.38), 0 8px 24px rgba(30,24,16,0.22)';
           cursor = 'default';
           pointerEvents = 'auto';
         } else if (pos === 1) {
-          transform = 'translateX(138px) translateY(24px) rotate(9deg) scale(0.78)';
+          transform = `translateX(${X_OFF}px) translateY(${Y_DOWN}px) rotate(9deg) scale(0.78)`;
           opacity = 0.52;
           zIndex = 2;
           boxShadow = '0 8px 24px rgba(30,24,16,0.16)';
           cursor = 'pointer';
           pointerEvents = 'auto';
         } else if (pos === -1) {
-          transform = 'translateX(-138px) translateY(24px) rotate(-9deg) scale(0.78)';
+          transform = `translateX(-${X_OFF}px) translateY(${Y_DOWN}px) rotate(-9deg) scale(0.78)`;
           opacity = 0.52;
           zIndex = 1;
           boxShadow = '0 8px 24px rgba(30,24,16,0.16)';
@@ -121,7 +140,7 @@ const HeroPostcard = ({
         } else {
           // Hidden — park beyond the visible side cards
           const side = pos > 0 ? 1 : -1;
-          transform = `translateX(${side * 200}px) translateY(24px) rotate(${side * 14}deg) scale(0.65)`;
+          transform = `translateX(${side * HIDDEN_X}px) translateY(${Y_DOWN}px) rotate(${side * 14}deg) scale(0.65)`;
           opacity = 0;
           zIndex = 0;
           boxShadow = 'none';
@@ -162,6 +181,7 @@ const HeroPostcard = ({
           </div>
         );
       })}
+    </div>
     </div>
   );
 };
@@ -344,7 +364,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
           </div>
 
           {/* Right column — floating postcard */}
-          <div className="lp-hero-right" style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="lp-hero-right" style={{ flex: 1, display: 'flex', alignItems: 'center', minWidth: 0 }}>
             <HeroPostcard activeStyle={activeStyle} onPrev={goPrev} onNext={goNext} />
           </div>
         </div>
