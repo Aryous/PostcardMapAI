@@ -362,7 +362,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
 
           <div className="lp-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 56 }}>
             {[
-              { ref: step1Ref, num: '01', zh: '框选地图区域', en: 'Draw on the map',     desc: '用矩形框选任意城市街区、山脉或海岸线。全球任意地点，均可框选。' },
+              { ref: step1Ref, num: '01', zh: '移动地图到目标区域', en: 'Navigate the map', desc: '移动和缩放地图，将取景框对准你想要的城市街区、山脉或海岸线。' },
               { ref: step2Ref, num: '02', zh: '选择艺术风格', en: 'Choose your style',   desc: '从六种艺术风格中选择：复古版画、古韵水墨、水彩、赛博朋克、素描或油画。' },
               { ref: step3Ref, num: '03', zh: '下载你的明信片', en: 'Download & share', desc: '几秒钟后，正面与背面同时生成。下载留存，或寄给远方的朋友。' },
             ].map(step => (

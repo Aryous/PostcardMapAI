@@ -198,7 +198,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-slate-50">
+    <div className="relative w-full h-full overflow-hidden bg-[#ede7d5]">
       <PostcardMap
         appState={appState}
         aspectRatio={aspectRatio}

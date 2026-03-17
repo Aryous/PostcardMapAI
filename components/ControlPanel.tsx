@@ -179,31 +179,33 @@ setTimeout(() => setShowDevToast(false), 2000);
              {isDevEnabled && (
                 <button
                   onClick={() => setShowDevMode(!showDevMode)}
-                  className={`p-1.5 rounded-full transition-colors ${showDevMode ? 'bg-[#2a4535]/10 text-[#2a4535]' : 'bg-[#e2d9cc] text-[#2a4535]/50 hover:text-[#2a4535]/60'}`}
-                  title="Developer Settings"
+                  className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors ${showDevMode ? 'bg-[#2a4535]/10 text-[#2a4535]' : 'bg-[#e2d9cc] text-[#2a4535]/50 hover:text-[#2a4535]/60'}`}
+                  aria-label="Developer Settings"
                 >
                     <Settings className="w-3.5 h-3.5" />
                 </button>
              )}
 
              {/* History Button */}
-             <button 
+             <button
                 onClick={onToggleHistory}
-                className="p-1.5 rounded-full bg-[#e2d9cc] hover:bg-[#2a4535]/10 text-[#2a4535]/60 hover:text-[#2a4535] transition-colors border border-[#d4c9b8]"
-                title={t.history}
+                aria-label={t.history}
+                className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-[#e2d9cc] hover:bg-[#2a4535]/10 text-[#2a4535]/60 hover:text-[#2a4535] transition-colors border border-[#d4c9b8]"
              >
                 <History className="w-3.5 h-3.5" />
              </button>
 
              {/* Language Toggle */}
-             <button 
+             <button
                 onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[#e2d9cc] hover:bg-[#d4c9b8] transition-colors border border-[#d4c9b8]"
-                title="Switch Language"
+                aria-label="Switch language"
+                className="flex items-center gap-1 px-2.5 py-2.5 min-w-[44px] min-h-[44px] justify-center rounded-full bg-[#e2d9cc] hover:bg-[#d4c9b8] transition-colors border border-[#d4c9b8]"
              >
-                <span className={`text-xs ${language === 'en' ? 'opacity-100 grayscale-0' : 'opacity-40 grayscale'}`}>🇺🇸</span>
-                <span className="w-[1px] h-3 bg-[#c8bfad]"></span>
-                <span className={`text-xs ${language === 'zh' ? 'opacity-100 grayscale-0' : 'opacity-40 grayscale'}`}>🇨🇳</span>
+                <span style={{ fontFamily: 'ui-monospace,monospace', fontSize: 10, letterSpacing: '0.05em', fontWeight: 600 }}
+                  className={language === 'en' ? 'text-[#2a4535]' : 'text-[#2a4535]/40'}>EN</span>
+                <span style={{ fontFamily: 'ui-monospace,monospace', fontSize: 10, color: '#c8bfad' }}>·</span>
+                <span style={{ fontFamily: 'ui-monospace,monospace', fontSize: 10, letterSpacing: '0.05em', fontWeight: 600 }}
+                  className={language === 'zh' ? 'text-[#2a4535]' : 'text-[#2a4535]/40'}>中</span>
              </button>
           </div>
         </div>
