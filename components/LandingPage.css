@@ -70,17 +70,83 @@
   opacity: 1;
 }
 
-/* ─── Style Cards ─────────────────────────── */
-.lp-style-card {
-  background: #fff;
-  border-radius: 4px;
+/* ─── Expanding Gallery ───────────────────── */
+.lp-expand-gallery {
+  display: flex;
+  height: 460px;
+  gap: 5px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(30, 24, 16, 0.1), 0 1px 3px rgba(30, 24, 16, 0.08);
-  transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.3s ease;
+  border-radius: 3px;
 }
-.lp-style-card:hover {
-  transform: translateY(-6px) rotate(0.4deg);
-  box-shadow: 0 20px 48px rgba(30, 24, 16, 0.2), 0 6px 16px rgba(30, 24, 16, 0.12);
+.lp-expand-card {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 2px;
+  min-width: 0;
+  transition: flex 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.lp-expand-gallery:hover .lp-expand-card {
+  flex: 0.18;
+}
+.lp-expand-card:hover {
+  flex: 4 !important;
+}
+.lp-expand-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.lp-expand-card:hover .lp-expand-img {
+  transform: scale(1.04);
+}
+.lp-expand-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(16,12,6,0.86) 0%, rgba(16,12,6,0.28) 48%, rgba(16,12,6,0.08) 100%);
+  pointer-events: none;
+}
+.lp-expand-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.22s ease;
+  pointer-events: none;
+}
+.lp-expand-card:hover .lp-expand-label {
+  opacity: 0;
+}
+.lp-expand-label-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(240, 232, 200, 0.72);
+  white-space: nowrap;
+}
+.lp-expand-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 20px 24px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.28s ease 0.18s, transform 0.28s ease 0.18s;
+  pointer-events: none;
+}
+.lp-expand-card:hover .lp-expand-info {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 /* ─── Scroll Reveal ───────────────────────── */
@@ -118,13 +184,6 @@
   .lp-hero-right {
     display: none !important;
   }
-  .lp-gallery-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-  /* Reset magazine spans — let all cards flow as equal 1fr on tablet/mobile */
-  .lp-gallery-item {
-    grid-column: span 1 !important;
-  }
   .lp-steps-grid {
     grid-template-columns: 1fr !important;
     gap: 48px !important;
@@ -138,12 +197,35 @@
   .lp-section {
     padding: 72px 24px !important;
   }
+  /* Mobile: horizontal scroll strip, no expand effect */
+  .lp-expand-gallery {
+    height: 280px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .lp-expand-gallery::-webkit-scrollbar {
+    display: none;
+  }
+  .lp-expand-card {
+    flex: 0 0 200px !important;
+  }
+  .lp-expand-gallery:hover .lp-expand-card {
+    flex: 0 0 200px;
+  }
+  .lp-expand-card:hover {
+    flex: 0 0 200px !important;
+  }
+  .lp-expand-label {
+    opacity: 1 !important;
+  }
+  .lp-expand-info {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
 }
 
 @media (max-width: 560px) {
-  .lp-gallery-grid {
-    grid-template-columns: 1fr !important;
-  }
   .lp-cta-section {
     padding: 72px 24px !important;
   }

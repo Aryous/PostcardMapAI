@@ -129,17 +129,8 @@ const HeroPostcard = () => (
   </div>
 );
 
-// ─── Style card renders ────────────────────────────────────────────────────────
-const styleVisuals: Record<string, React.ReactNode> = {
-  vintage:    <img src="/gallery/vintage.png"    alt="复古风格明信片示例"   loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  ink:        <img src="/gallery/ink.png"        alt="古韵水墨明信片示例"   loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  watercolor: <img src="/gallery/watercolor.png" alt="水彩明信片示例"       loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  cyberpunk:  <img src="/gallery/cyberpunk.png"  alt="赛博朋克明信片示例"   loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  sketch:     <img src="/gallery/sketch.png"     alt="素描明信片示例"       loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  oil:        <img src="/gallery/oil.png"        alt="油画明信片示例"       loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-};
-// ─── Gallery card component ────────────────────────────────────────────────────
-type StyleCardProps = React.JSX.IntrinsicAttributes & {
+// ─── Style card data type ──────────────────────────────────────────────────────
+type StyleCardProps = {
   id: string;
   zh: string;
   en: string;
@@ -147,42 +138,6 @@ type StyleCardProps = React.JSX.IntrinsicAttributes & {
   descZh: string;
   descEn: string;
   delay: number;
-};
-
-const StyleCard = ({ id, zh, en, location, descZh, delay }: StyleCardProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => el.classList.add('visible'), delay);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div ref={ref} className="lp-reveal lp-style-card">
-      <div style={{ aspectRatio: '4/3', overflow: 'hidden' }}>
-        {styleVisuals[id]}
-      </div>
-      <div style={{ padding: '16px 18px 18px' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
-          <span style={{ fontFamily: '"Playfair Display",serif', fontSize: 18, fontWeight: 700, color: '#1e1810' }}>{zh}</span>
-          <span style={{ fontFamily: '"DM Mono",monospace', fontSize: 10, color: '#9a8a72', letterSpacing: 1 }}>{en.toUpperCase()}</span>
-        </div>
-        <div style={{ fontFamily: '"DM Sans",sans-serif', fontSize: 13, color: '#7a6d5e', lineHeight: 1.5, marginBottom: 4 }}>{descZh}</div>
-        <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 10, color: '#b0a492', letterSpacing: 0.5 }}>{location}</div>
-      </div>
-    </div>
-  );
 };
 
 // ─── Style card data ───────────────────────────────────────────────────────────
@@ -337,17 +292,28 @@ export default function LandingPage({ onStart }: LandingPageProps) {
             </p>
           </div>
 
-          {/* Magazine grid — alternating [2,1] [1,2] [1,2] spans */}
-          {/* Spans: vintage(2) ink(1) / watercolor(1) cyberpunk(2) / sketch(1) oil(2) */}
-          <div className="lp-gallery-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 22 }}>
-            {GALLERY.map(({ id, zh, en, location, descZh, descEn, delay }, i) => {
-              const spans = [2, 1, 1, 2, 1, 2];
-              return (
-                <div key={id} className="lp-gallery-item" style={{ gridColumn: `span ${spans[i]}` }}>
-                  <StyleCard id={id} zh={zh} en={en} location={location} descZh={descZh} descEn={descEn} delay={delay} />
+          {/* Expanding strip — hover to expand */}
+          <div className="lp-expand-gallery">
+            {GALLERY.map(({ id, zh, en, location, descZh }) => (
+              <div key={id} className="lp-expand-card">
+                <img
+                  src={`/gallery/${id}.png`}
+                  alt={`${zh} 风格明信片示例`}
+                  className="lp-expand-img"
+                  loading="lazy"
+                />
+                <div className="lp-expand-overlay" />
+                <div className="lp-expand-label">
+                  <span className="lp-expand-label-text">{zh}</span>
                 </div>
-              );
-            })}
+                <div className="lp-expand-info">
+                  <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 10, color: '#c4892a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>{en}</div>
+                  <div style={{ fontFamily: '"Playfair Display",serif', fontSize: 22, fontWeight: 700, color: '#f0e8d0', marginBottom: 4 }}>{zh}</div>
+                  <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 10, color: 'rgba(240,232,200,0.5)', letterSpacing: '0.06em', marginBottom: 10 }}>{location}</div>
+                  <div style={{ fontFamily: '"DM Sans",sans-serif', fontSize: 13, color: 'rgba(240,232,200,0.72)', lineHeight: 1.55 }}>{descZh}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
