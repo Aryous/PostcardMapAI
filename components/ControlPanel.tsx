@@ -1,6 +1,8 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Wand2, RefreshCw, Zap, Sparkles, History, Upload, X, MousePointer2, RectangleHorizontal, RectangleVertical, Square, Settings, ChevronUp, Type, Loader2, Coins } from 'lucide-react';
+import { Wand2, RefreshCw, Zap, Sparkles, History, Upload, X, MousePointer2,
+         RectangleHorizontal, RectangleVertical, Square, Settings, ChevronLeft,
+         ChevronRight, Type, Loader2, Coins } from 'lucide-react';
 import { AppState, Language, ModelType, AspectRatio, DevConfig } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
 import { STYLE_DEFS } from '../utils/styles';
@@ -35,6 +37,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   devConfig, setDevConfig, locationName, setLocationName,
   sessionCost, pendingStyleId,
 }) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedStyleId, setSelectedStyleId] = useState(STYLE_DEFS[0].id);
   const [isSpinning, setIsSpinning] = useState(false);
 
@@ -100,20 +103,30 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   const ratioOptions: { id: AspectRatio; label: string; icon: React.ReactNode }[] = [
-    { id: '1:1', label: t.ratios.square,         icon: <Square className="w-3 h-3" /> },
-    { id: '3:2', label: t.ratios.classic,         icon: <RectangleHorizontal className="w-3 h-3 scale-x-110" /> },
-    { id: '2:3', label: t.ratios.classicPortrait, icon: <RectangleVertical className="w-3 h-3 scale-y-110" /> },
-    { id: '4:3', label: t.ratios.landscape,       icon: <RectangleHorizontal className="w-3 h-3" /> },
-    { id: '3:4', label: t.ratios.portrait,        icon: <RectangleVertical className="w-3 h-3" /> },
-    { id: '16:9', label: t.ratios.wide,           icon: <RectangleHorizontal className="w-3 h-3 scale-x-125" /> },
-    { id: '9:16', label: t.ratios.tall,           icon: <RectangleVertical className="w-3 h-3 scale-y-125" /> },
+    { id: '1:1',  label: t.ratios.square,         icon: <Square className="w-3 h-3" /> },
+    { id: '3:2',  label: t.ratios.classic,         icon: <RectangleHorizontal className="w-3 h-3 scale-x-110" /> },
+    { id: '2:3',  label: t.ratios.classicPortrait, icon: <RectangleVertical className="w-3 h-3 scale-y-110" /> },
+    { id: '4:3',  label: t.ratios.landscape,       icon: <RectangleHorizontal className="w-3 h-3" /> },
+    { id: '3:4',  label: t.ratios.portrait,        icon: <RectangleVertical className="w-3 h-3" /> },
+    { id: '16:9', label: t.ratios.wide,            icon: <RectangleHorizontal className="w-3 h-3 scale-x-125" /> },
+    { id: '9:16', label: t.ratios.tall,            icon: <RectangleVertical className="w-3 h-3 scale-y-125" /> },
   ];
 
-  // ── Shared style tokens ───────────────────────────────────────────────────
   const mono: React.CSSProperties = { fontFamily: 'ui-monospace, monospace' };
   const DIVIDER = <div style={{ height: '0.5px', background: 'rgba(42,69,53,0.12)', margin: '0 -16px' }} />;
 
-  // ── Section header ────────────────────────────────────────────────────────
+  // ── Generate-ready pulse (fires once when area becomes selected) ──────────
+  const prevAreaSelectedRef = useRef(false);
+  const [generatePulse, setGeneratePulse] = useState(false);
+  useEffect(() => {
+    if (isAreaSelected && !prevAreaSelectedRef.current) {
+      setGeneratePulse(true);
+      const t = setTimeout(() => setGeneratePulse(false), 700);
+      return () => clearTimeout(t);
+    }
+    prevAreaSelectedRef.current = isAreaSelected;
+  }, [isAreaSelected]);
+
   const SectionLabel = ({ label }: { label: string }) => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
       <span style={{ ...mono, fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: 'rgba(42,69,53,0.38)', flexShrink: 0 }}>
@@ -123,8 +136,111 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     </div>
   );
 
+  // ── Shared keyframes (always in DOM) ─────────────────────────────────────
+  const KEYFRAMES = (
+    <style>{`
+      @keyframes cp-tab-in {
+        from { opacity: 0; transform: translateX(-10px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes cp-panel-in {
+        from { opacity: 0; transform: translateX(-16px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes cp-panel-out {
+        from { opacity: 1; transform: translateX(0); }
+        to   { opacity: 0; transform: translateX(-10px); }
+      }
+      @keyframes cp-ready-pulse {
+        0%   { box-shadow: 0 0 0 0 rgba(42,69,53,0.45); }
+        55%  { box-shadow: 0 0 0 8px rgba(42,69,53,0); }
+        100% { box-shadow: 0 0 0 0 rgba(42,69,53,0); }
+      }
+      @keyframes cp-item-in {
+        from { opacity: 0; transform: translateY(5px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        [style*="cp-tab-in"], [style*="cp-panel-in"],
+        [style*="cp-panel-out"], [style*="cp-item-in"] { animation: none !important; }
+      }
+    `}</style>
+  );
+
+  // ── Exit state (panel plays out-animation before switching to tab) ────────
+  const [isExiting, setIsExiting] = useState(false);
+
+  const handleCollapse = () => {
+    setIsExiting(true);
+    setTimeout(() => { setIsCollapsed(true); setIsExiting(false); }, 220);
+  };
+
+  // ── Collapsed tab ─────────────────────────────────────────────────────────
+  if (isCollapsed) {
+    return (
+      <>
+        {KEYFRAMES}
+        <div className="absolute top-4 left-4 z-[1000]" style={{ animation: 'cp-tab-in 0.28s cubic-bezier(0.16,1,0.3,1) both' }}>
+        <div
+          className="rounded-xl overflow-hidden shadow-[0_16px_48px_rgba(30,24,16,0.16),0_4px_16px_rgba(30,24,16,0.07)]"
+          style={{ background: '#f8f3e8', borderTop: '2px solid #2a4535', fontFamily: "'DM Sans', sans-serif" }}
+        >
+          {/* Expand button */}
+          <button
+            onClick={() => setIsCollapsed(false)}
+            className="w-12 h-12 flex items-center justify-center hover:bg-[#e2d9cc] transition-colors active:scale-95"
+            aria-label="Expand panel"
+            style={{ animation: 'cp-item-in 0.22s cubic-bezier(0.16,1,0.3,1) 0.04s both' }}
+          >
+            <div style={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, fontSize: 13, color: '#2a4535' }}>✦</div>
+          </button>
+
+          <div style={{ height: '0.5px', background: 'rgba(42,69,53,0.1)', margin: '0 10px' }} />
+
+          {/* History */}
+          <button
+            onClick={onToggleHistory}
+            className="w-12 h-12 flex items-center justify-center text-[#2a4535]/40 hover:text-[#2a4535] hover:bg-[#e2d9cc] transition-colors active:scale-95"
+            aria-label={t.history}
+            style={{ animation: 'cp-item-in 0.22s cubic-bezier(0.16,1,0.3,1) 0.08s both' }}
+          >
+            <History className="w-4 h-4" />
+          </button>
+
+          <div style={{ height: '0.5px', background: 'rgba(42,69,53,0.1)', margin: '0 10px' }} />
+
+          {/* Generate / state indicator */}
+          <button
+            onClick={() => isAreaSelected && !isProcessing && onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
+            className={`w-12 h-12 flex items-center justify-center transition-colors active:scale-95 ${
+              isProcessing
+                ? 'text-[#2a4535]/40'
+                : isAreaSelected
+                  ? 'text-[#2a4535] hover:bg-[#e2d9cc]'
+                  : 'text-[#2a4535]/25 cursor-not-allowed'
+            }`}
+            aria-label={t.generate}
+            style={{ animation: 'cp-item-in 0.22s cubic-bezier(0.16,1,0.3,1) 0.12s both' }}
+          >
+            {isProcessing
+              ? <div className="w-4 h-4 border-2 border-[#2a4535]/15 border-t-[#2a4535] rounded-full animate-spin" />
+              : isAreaSelected
+                ? <Wand2 className="w-4 h-4" />
+                : <MousePointer2 className="w-4 h-4" />
+            }
+          </button>
+        </div>
+        </div>
+      </>
+    );
+  }
+
+  // ── Expanded panel ────────────────────────────────────────────────────────
   return (
-    <div className="absolute top-4 left-4 z-[1000] w-full max-w-xs transition-all duration-300">
+    <>
+    {KEYFRAMES}
+    <div className="absolute top-4 left-4 z-[1000] w-full max-w-xs"
+      style={{ animation: isExiting ? 'cp-panel-out 0.22s cubic-bezier(0.4,0,1,1) both' : 'cp-panel-in 0.38s cubic-bezier(0.16,1,0.3,1) both' }}>
       <div
         className="rounded-xl overflow-hidden max-h-[90vh] overflow-y-auto shadow-[0_16px_48px_rgba(30,24,16,0.16),0_4px_16px_rgba(30,24,16,0.07)]"
         style={{
@@ -147,7 +263,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <div
             className="cursor-pointer select-none active:scale-95 transition-transform"
             onClick={handleTitleClick}
-            title={isDevEnabled ? 'Developer Mode Active' : 'MapPostcard AI'}
           >
             <div style={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, fontSize: 15, color: '#1e1810', letterSpacing: 0.3 }}>
               <span style={{ color: '#2a4535', marginRight: 5 }}>✦</span>
@@ -184,15 +299,17 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               aria-label="Switch language"
               className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center gap-1 rounded-lg hover:bg-[#e2d9cc] transition-colors"
             >
-              <span style={{ ...mono, fontSize: 10, fontWeight: language === 'en' ? 700 : 400, letterSpacing: '0.05em',
-                color: language === 'en' ? '#c4892a' : 'rgba(42,69,53,0.30)',
-                borderBottom: language === 'en' ? '1.5px solid #c4892a' : '1.5px solid transparent',
-                paddingBottom: 1, lineHeight: 1.2 }}>EN</span>
+              <span style={{ ...mono, fontSize: 10, fontWeight: language === 'en' ? 700 : 400, letterSpacing: '0.05em', color: language === 'en' ? '#c4892a' : 'rgba(42,69,53,0.30)', borderBottom: language === 'en' ? '1.5px solid #c4892a' : '1.5px solid transparent', paddingBottom: 1, lineHeight: 1.2 }}>EN</span>
               <span style={{ ...mono, fontSize: 10, color: '#c8bfad' }}>·</span>
-              <span style={{ ...mono, fontSize: 10, fontWeight: language === 'zh' ? 700 : 400, letterSpacing: '0.05em',
-                color: language === 'zh' ? '#c4892a' : 'rgba(42,69,53,0.30)',
-                borderBottom: language === 'zh' ? '1.5px solid #c4892a' : '1.5px solid transparent',
-                paddingBottom: 1, lineHeight: 1.2 }}>中</span>
+              <span style={{ ...mono, fontSize: 10, fontWeight: language === 'zh' ? 700 : 400, letterSpacing: '0.05em', color: language === 'zh' ? '#c4892a' : 'rgba(42,69,53,0.30)', borderBottom: language === 'zh' ? '1.5px solid #c4892a' : '1.5px solid transparent', paddingBottom: 1, lineHeight: 1.2 }}>中</span>
+            </button>
+            {/* Collapse button */}
+            <button
+              onClick={handleCollapse}
+              aria-label="Collapse panel"
+              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[#2a4535]/35 hover:text-[#2a4535] hover:bg-[#e2d9cc] transition-colors"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -207,7 +324,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 <Settings className="w-3 h-3" /> {t.devMode}
               </span>
               <button onClick={() => setShowDevMode(false)}>
-                <ChevronUp className="w-3 h-3 text-[#2a4535]/35" />
+                <ChevronLeft className="w-3 h-3 text-[#2a4535]/35 rotate-90" />
               </button>
             </div>
             <div className="space-y-1.5">
@@ -262,7 +379,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* ── Main content ── */}
         <div className="px-4 pt-4 pb-0 space-y-4">
 
-          {/* GRADE — Model */}
+          {/* GRADE */}
           <div>
             <SectionLabel label={language === 'zh' ? '模型质量' : 'Grade'} />
             <div className="flex gap-1.5">
@@ -283,10 +400,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
           </div>
 
-          {/* FORMAT — Aspect ratio */}
+          {/* FORMAT */}
           <div>
             <SectionLabel label={language === 'zh' ? '图片比例' : 'Format'} />
-            <div className="flex gap-1 overflow-x-auto no-scrollbar">
+            <div className="flex gap-1">
               {ratioOptions.map(opt => (
                 <button key={opt.id} onClick={() => setAspectRatio(opt.id)} title={opt.label}
                   className={`flex-1 flex-shrink-0 flex flex-col items-center py-2 px-1 min-w-[32px] rounded transition-all gap-0.5 ${
@@ -301,7 +418,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
           </div>
 
-          {/* STYLE — with ● ○ dot indicators */}
+          {/* STYLE */}
           <div>
             <SectionLabel label={language === 'zh' ? '艺术风格' : 'Style'} />
             <div className="grid grid-cols-3 gap-x-2 gap-y-1">
@@ -327,7 +444,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
           {DIVIDER}
 
-          {/* PORTRAIT — Upload */}
+          {/* PORTRAIT */}
           <div>
             <SectionLabel label={language === 'zh' ? '个人照片' : 'Portrait'} />
             {!userImage ? (
@@ -351,8 +468,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           </div>
         </div>
 
-        {/* ── Generate / Action ── */}
-        <div className="mt-4" style={{ borderTop: '1px solid rgba(42,69,53,0.14)' }}>
+        {/* ── Generate ── */}
+        <div className="mt-4 sticky bottom-0" style={{ borderTop: '1px solid rgba(42,69,53,0.14)' }}>
           {isProcessing ? (
             <div className="flex flex-col items-center py-5 space-y-3">
               <div className="w-5 h-5 border-2 border-[#2a4535]/15 border-t-[#2a4535] rounded-full animate-spin" />
@@ -365,9 +482,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             <button onClick={() => onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
               className="w-full py-3.5 bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] transition-all active:scale-[0.99] flex items-center gap-3 px-4">
               <RefreshCw className="w-4 h-4 flex-shrink-0" />
-              <span style={{ ...mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600 }}>
-                {t.retry}
-              </span>
+              <span style={{ ...mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600 }}>{t.retry}</span>
               <div style={{ flex: 1, height: '0.5px', background: 'rgba(248,243,232,0.3)' }} />
             </button>
           ) : (
@@ -379,6 +494,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   ? 'bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] active:scale-[0.99]'
                   : 'bg-[#d4c9b8] text-[#2a4535]/35 cursor-not-allowed'
               }`}
+              style={generatePulse ? { animation: 'cp-ready-pulse 0.7s ease-out' } : undefined}
             >
               {isAreaSelected
                 ? <Wand2 className="w-4 h-4 flex-shrink-0" />
@@ -410,6 +526,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
       </div>
     </div>
+    </>
   );
 };
 
