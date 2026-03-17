@@ -199,12 +199,12 @@ type StyleCardProps = {
 
 // ─── Style card data ───────────────────────────────────────────────────────────
 const GALLERY: StyleCardProps[] = [
-  { id: 'vintage',    zh: '复古',    en: 'Vintage',    location: 'Paris, France',     descZh: '1950年代版画旅行海报',     descEn: '1950s lithograph travel poster',      delay: 0   },
-  { id: 'ink',        zh: '古韵',    en: 'Ancient Ink',location: 'Suzhou, China',     descZh: '传统中国水墨画 · 宣纸质感', descEn: 'Traditional Chinese ink wash',        delay: 80  },
-  { id: 'watercolor', zh: '水彩',    en: 'Watercolor', location: 'Amsterdam, NL',     descZh: '城市素描水彩 · 湿涂晕染',   descEn: 'Urban sketching watercolor',          delay: 160 },
-  { id: 'cyberpunk',  zh: '赛博朋克',en: 'Cyberpunk',  location: 'Tokyo, Japan',      descZh: '霓虹夜都 · 赛博全息界面',   descEn: 'Sci-fi neon holographic concept art', delay: 240 },
-  { id: 'sketch',     zh: '素描',    en: 'Sketch',     location: 'New York, USA',     descZh: '建筑旅行日记 · 铅笔线稿',   descEn: 'Architectural travel journal sketch', delay: 320 },
-  { id: 'oil',        zh: '油画',    en: 'Oil Paint',  location: 'Florence, Italy',   descZh: '印象派厚涂油画 · 梵高笔触', descEn: 'Impressionist impasto oil painting',  delay: 400 },
+  { id: 'vintage',    zh: '复古',    en: 'Vintage',    location: 'Sydney, Australia', descZh: '1950年代版画旅行海报',     descEn: '1950s lithograph travel poster',      delay: 0   },
+  { id: 'ink',        zh: '古韵',    en: 'Ancient Ink',location: 'Guilin, China',     descZh: '传统中国水墨画 · 宣纸质感', descEn: 'Traditional Chinese ink wash',        delay: 80  },
+  { id: 'watercolor', zh: '水彩',    en: 'Watercolor', location: "Xi'an, China",      descZh: '城市素描水彩 · 湿涂晕染',   descEn: 'Urban sketching watercolor',          delay: 160 },
+  { id: 'cyberpunk',  zh: '赛博朋克',en: 'Cyberpunk',  location: 'Paris, France',     descZh: '霓虹夜都 · 赛博全息界面',   descEn: 'Sci-fi neon holographic concept art', delay: 240 },
+  { id: 'sketch',     zh: '素描',    en: 'Sketch',     location: 'Chengdu, China',    descZh: '建筑旅行日记 · 铅笔线稿',   descEn: 'Architectural travel journal sketch', delay: 320 },
+  { id: 'oil',        zh: '油画',    en: 'Oil Paint',  location: 'London, UK',        descZh: '印象派厚涂油画 · 梵高笔触', descEn: 'Impressionist impasto oil painting',  delay: 400 },
 ];
 
 // ─── Scroll reveal hook ────────────────────────────────────────────────────────
