@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
+/* ─── Focus ring (inherit global :focus-visible from index.html) ── */
+/* Landing page buttons get a slightly tighter ring to match their border-radius */
+.lp-btn-primary:focus-visible,
+.lp-btn-ghost:focus-visible {
+  outline: 2px solid #c4892a;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
 /* ─── Buttons ─────────────────────────────── */
 .lp-btn-primary {
   display: inline-flex;
