@@ -1,10 +1,71 @@
 
-import React from 'react';
-import { X, Trash2, Calendar, Zap, Sparkles, Image as ImageIcon, MapPin, DollarSign } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { HistoryItem, Language } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
 import { STYLE_DEFS } from '../utils/styles';
 
+// Deterministic rotation per slot index
+const SLOT_ROTATIONS = [-2.2, 1.6, -1.7, 2.4, -1.1, 1.9, -2.6, 1.3, -1.4, 2.1, -0.8, 2.0];
+
+// ── Metallic ring clamp ─────────────────────────────────────────────────────
+const Ring = () => (
+  <div style={{
+    position: 'relative',
+    width: 30,
+    height: 30,
+    borderRadius: '50%',
+    background: 'conic-gradient(from 200deg, #3d2308 0deg, #8a5a12 50deg, #c89828 95deg, #f0c84a 130deg, #d4a030 165deg, #8a5a12 215deg, #6a4010 260deg, #4a2c08 310deg, #3d2308 360deg)',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.7), 0 1px 3px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,220,100,0.15)',
+    flexShrink: 0,
+  }}>
+    {/* Inner hole */}
+    <div style={{
+      position: 'absolute',
+      inset: '30%',
+      borderRadius: '50%',
+      background: '#0a0805',
+      boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.95)',
+    }} />
+  </div>
+);
+
+// ── Triangular photo-mount corner ───────────────────────────────────────────
+type CornerPos = 'tl' | 'tr' | 'bl' | 'br';
+const CLIP: Record<CornerPos, string> = {
+  tl: 'polygon(0 0, 100% 0, 0 100%)',
+  tr: 'polygon(0 0, 100% 0, 100% 100%)',
+  bl: 'polygon(0 0, 0 100%, 100% 100%)',
+  br: 'polygon(100% 0, 0 100%, 100% 100%)',
+};
+const CORNER_POS: Record<CornerPos, React.CSSProperties> = {
+  tl: { top: -1, left: -1 },
+  tr: { top: -1, right: -1 },
+  bl: { bottom: -1, left: -1 },
+  br: { bottom: -1, right: -1 },
+};
+
+const PhotoCorners = () => (
+  <>
+    {(['tl', 'tr', 'bl', 'br'] as CornerPos[]).map(pos => (
+      <div
+        key={pos}
+        style={{
+          position: 'absolute',
+          ...CORNER_POS[pos],
+          width: 12,
+          height: 12,
+          background: 'rgba(196,137,42,0.52)',
+          clipPath: CLIP[pos],
+          pointerEvents: 'none',
+          zIndex: 2,
+        }}
+      />
+    ))}
+  </>
+);
+
+// ── Main component ───────────────────────────────────────────────────────────
 interface HistoryPanelProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,138 +75,394 @@ interface HistoryPanelProps {
   language: Language;
 }
 
-const HistoryPanel: React.FC<HistoryPanelProps> = ({ 
-  isOpen, 
-  onClose, 
-  history, 
-  onSelect, 
-  onDelete, 
-  language 
+const HistoryPanel: React.FC<HistoryPanelProps> = ({
+  isOpen,
+  onClose,
+  history,
+  onSelect,
+  onDelete,
+  language,
 }) => {
   const t = TRANSLATIONS[language];
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  // Bump this key every time the panel opens to re-trigger card entrance animations
+  const [openKey, setOpenKey] = useState(0);
+
+  useEffect(() => {
+    if (isOpen) setOpenKey(k => k + 1);
+  }, [isOpen]);
 
   const getStyleLabel = (styleId: string) => {
     const style = STYLE_DEFS.find(s => s.id === styleId);
-    if (!style) return styleId;
-    return style.label[language] || styleId;
-  };
-
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return style?.label[language] ?? styleId;
   };
 
   return (
     <>
-      {/* Backdrop */}
-      <div 
-        className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-[1100] transition-opacity duration-300 ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+      {/* ── Backdrop ─────────────────────────────────────────────── */}
+      <div
         onClick={onClose}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(14,11,6,0.42)',
+          backdropFilter: 'blur(2px)',
+          WebkitBackdropFilter: 'blur(2px)',
+          zIndex: 1100,
+          opacity: isOpen ? 1 : 0,
+          pointerEvents: isOpen ? 'auto' : 'none',
+          transition: 'opacity 0.32s ease',
+        }}
       />
 
-      {/* Slide-out Panel */}
-      <div 
-        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-2xl z-[1200] transform transition-transform duration-300 ease-in-out flex flex-col ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+      {/* ── Binder container (handles slide animation) ────────────── */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '50%',
+          right: 20,
+          transform: isOpen
+            ? 'translateY(-50%) translateX(0) rotate(0deg)'
+            : 'translateY(-50%) translateX(460px) rotate(4deg)',
+          transition: isOpen
+            ? 'transform 0.52s cubic-bezier(0.34, 1.26, 0.64, 1)'
+            : 'transform 0.3s cubic-bezier(0.4, 0, 1, 1)',
+          zIndex: 1200,
+          width: 400,
+          // not overflow:hidden here — lets page-stack layers poke out
+        }}
       >
-        {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <div className="flex items-center gap-2 text-slate-800">
-            <span className="font-bold text-lg">{t.history}</span>
-            <span className="px-2 py-0.5 bg-[#2a4535]/10 text-[#2a4535] text-xs rounded-full font-medium">
-              {history.length}
-            </span>
+        {/* ── Page-stack depth layers (visible behind the binder) ─── */}
+        <div style={{
+          position: 'absolute',
+          top: 6,
+          bottom: 6,
+          left: 48,
+          right: -5,
+          background: 'linear-gradient(to right, #d4ccb8, #ddd5c0)',
+          borderRadius: '0 3px 3px 0',
+          boxShadow: '3px 0 8px rgba(0,0,0,0.14)',
+        }} />
+        <div style={{
+          position: 'absolute',
+          top: 12,
+          bottom: 12,
+          left: 50,
+          right: -9,
+          background: '#c8c0ac',
+          borderRadius: '0 3px 3px 0',
+        }} />
+
+        {/* ── Main binder (spine + page) ─────────────────────────── */}
+        <div
+          style={{
+            display: 'flex',
+            height: 'min(660px, 84vh)',
+            borderRadius: '3px',
+            overflow: 'hidden',
+            boxShadow: '0 28px 72px rgba(0,0,0,0.55), 0 10px 28px rgba(0,0,0,0.32), 0 3px 8px rgba(0,0,0,0.2)',
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
+
+          {/* ── Leather spine ──────────────────────────────────────── */}
+          <div style={{
+            width: 48,
+            flexShrink: 0,
+            background: 'linear-gradient(105deg, #080604 0%, #160f08 35%, #1e1410 65%, #160f08 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'space-evenly',
+            paddingTop: 28,
+            paddingBottom: 28,
+            position: 'relative',
+          }}>
+            {/* Subtle leather grain texture */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E")`,
+              pointerEvents: 'none',
+            }} />
+            {/* Spine → page boundary glow */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: 1,
+              background: 'linear-gradient(to bottom, transparent 0%, rgba(196,137,42,0.2) 15%, rgba(196,137,42,0.5) 40%, rgba(196,137,42,0.65) 50%, rgba(196,137,42,0.5) 60%, rgba(196,137,42,0.2) 85%, transparent 100%)',
+            }} />
+            <Ring />
+            <Ring />
+            <Ring />
           </div>
-          <button 
-            onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
 
-        {/* List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {history.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-3">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
-                <ImageIcon className="w-8 h-8 opacity-50" />
+          {/* ── Parchment page ─────────────────────────────────────── */}
+          <div style={{
+            flex: 1,
+            background: '#ede7d5',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            // Inset shadow: spine impression on left, subtle depth on top
+            boxShadow: 'inset 6px 0 12px rgba(0,0,0,0.1), inset 0 3px 6px rgba(0,0,0,0.06)',
+          }}>
+
+            {/* ── Header ─────────────────────────────────────────── */}
+            <div style={{
+              background: '#2a4535',
+              padding: '15px 18px 15px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexShrink: 0,
+              borderBottom: '1px solid rgba(0,0,0,0.18)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            }}>
+              <div>
+                <div style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontStyle: 'italic',
+                  fontWeight: 400,
+                  fontSize: 22,
+                  color: '#f0e8d0',
+                  lineHeight: 1,
+                  letterSpacing: '0.01em',
+                }}>
+                  Collection
+                </div>
+                <div style={{
+                  fontFamily: "'DM Mono', monospace",
+                  fontSize: 9,
+                  color: 'rgba(240,232,208,0.42)',
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                  marginTop: 5,
+                }}>
+                  {history.length}&thinsp;{language === 'zh' ? '张明信片' : 'postcards'}
+                </div>
               </div>
-              <p className="text-sm">{t.noHistory}</p>
-            </div>
-          ) : (
-            history.map((item) => (
-              <div 
-                key={item.id}
-                onClick={() => onSelect(item)}
-                className="group relative bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#2a4535]/30 transition-all cursor-pointer active:scale-[0.98]"
+              <button
+                onClick={onClose}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  border: '1px solid rgba(240,232,208,0.2)',
+                  background: 'transparent',
+                  color: 'rgba(240,232,208,0.5)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'background 0.18s, color 0.18s',
+                  flexShrink: 0,
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(240,232,208,0.12)';
+                  (e.currentTarget as HTMLButtonElement).style.color = '#f0e8d0';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                  (e.currentTarget as HTMLButtonElement).style.color = 'rgba(240,232,208,0.5)';
+                }}
               >
-                {/* Image Aspect Ratio Container */}
-                <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
-                  <img 
-                    src={item.imageUrl} 
-                    alt="History" 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  
-                  {/* Overlay Gradient */}
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+                <X size={12} />
+              </button>
+            </div>
 
-                  {/* Badges */}
-                  <div className="absolute top-2 left-2 flex gap-1">
-                    <div className="bg-black/40 backdrop-blur-md text-white text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1">
-                        {item.model.includes('pro') ? <Sparkles className="w-2.5 h-2.5 text-amber-300" /> : <Zap className="w-2.5 h-2.5 text-blue-300" />}
-                        <span className="font-medium">{item.model.includes('pro') ? 'PRO' : 'FLASH'}</span>
-                    </div>
-                  </div>
+            {/* ── Scrollable card grid ─────────────────────────── */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '22px 16px 22px 18px',
+              minHeight: 0,
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(196,137,42,0.3) transparent',
+            }}>
+              {history.length === 0 ? (
 
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={(e) => onDelete(item.id, e)}
-                      className="p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-full shadow-sm backdrop-blur-sm"
-                      title={t.delete}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                /* ── Empty state ─────────────────────────────────── */
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  minHeight: 240,
+                  gap: 16,
+                }}>
+                  <div style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontStyle: 'italic',
+                    fontSize: 56,
+                    color: 'rgba(42,69,53,0.1)',
+                    lineHeight: 1,
+                    userSelect: 'none',
+                  }}>∅</div>
+                  <div style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 11,
+                    color: 'rgba(30,24,16,0.36)',
+                    letterSpacing: '0.09em',
+                    textTransform: 'uppercase',
+                  }}>
+                    {t.noHistory}
                   </div>
                 </div>
 
-                {/* Info */}
-                <div className="p-3 space-y-1.5">
-                  {/* Location name */}
-                  {item.locationName && (
-                    <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 truncate">
-                      <MapPin className="w-3 h-3 text-[#2a4535]/60 flex-shrink-0" />
-                      <span className="truncate">{item.locationName}</span>
-                    </div>
-                  )}
+              ) : (
 
-                  {/* Style tag + cost */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-medium text-[#2a4535] bg-[#2a4535]/5 border border-[#2a4535]/15 px-2 py-0.5 rounded-full">
-                      {getStyleLabel(item.styleId)}
-                    </span>
-                    {item.cost && (
-                      <div className="flex items-center gap-0.5 text-[10px] font-mono font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                        <DollarSign className="w-2.5 h-2.5" />
-                        {item.cost.totalCost.toFixed(4)}
+                /* ── Postcard grid ───────────────────────────────── */
+                <div
+                  key={openKey}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 24,
+                  }}
+                >
+                  {history.map((item, i) => {
+                    const rot = SLOT_ROTATIONS[i % SLOT_ROTATIONS.length];
+                    const isHov = hoveredId === item.id;
+                    const arCss = (item.aspectRatio ?? '4:3').replace(':', '/');
+
+                    return (
+                      /* entrance animation wrapper */
+                      <div
+                        key={item.id}
+                        style={{
+                          animation: `binder-card-in 0.44s ease ${i * 52}ms both`,
+                        }}
+                      >
+                        {/* polaroid card — hover / rotation */}
+                        <div
+                          onClick={() => onSelect(item)}
+                          onMouseEnter={() => setHoveredId(item.id)}
+                          onMouseLeave={() => setHoveredId(null)}
+                          style={{
+                            position: 'relative',
+                            cursor: 'pointer',
+                            background: '#f8f3e8',
+                            padding: '5px 5px 26px',
+                            borderRadius: '1px',
+                            transform: isHov
+                              ? 'rotate(0deg) translateY(-6px) scale(1.05)'
+                              : `rotate(${rot}deg)`,
+                            boxShadow: isHov
+                              ? '0 16px 36px rgba(0,0,0,0.3), 0 5px 14px rgba(0,0,0,0.2)'
+                              : '0 3px 12px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.14)',
+                            transition: 'transform 0.34s cubic-bezier(0.34, 1.42, 0.64, 1), box-shadow 0.34s ease',
+                            userSelect: 'none',
+                          }}
+                        >
+                          <PhotoCorners />
+
+                          {/* image */}
+                          <div style={{
+                            aspectRatio: arCss,
+                            overflow: 'hidden',
+                            background: '#ddd5be',
+                          }}>
+                            <img
+                              src={item.imageUrl}
+                              alt={item.locationName ?? ''}
+                              loading="lazy"
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                display: 'block',
+                                transition: 'transform 0.42s ease',
+                                transform: isHov ? 'scale(1.08)' : 'scale(1)',
+                              }}
+                            />
+                          </div>
+
+                          {/* polaroid caption */}
+                          <div style={{
+                            position: 'absolute',
+                            bottom: 6,
+                            left: 5,
+                            right: 5,
+                            textAlign: 'center',
+                          }}>
+                            <div style={{
+                              fontFamily: "'DM Mono', monospace",
+                              fontSize: 8,
+                              color: 'rgba(30,24,16,0.48)',
+                              letterSpacing: '0.06em',
+                              textTransform: 'uppercase',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}>
+                              {item.locationName ?? '—'}
+                            </div>
+                            <div style={{
+                              fontFamily: "'DM Sans', sans-serif",
+                              fontSize: 7.5,
+                              color: 'rgba(30,24,16,0.28)',
+                              marginTop: 1,
+                              letterSpacing: '0.04em',
+                            }}>
+                              {getStyleLabel(item.styleId)}
+                            </div>
+                          </div>
+
+                          {/* delete button */}
+                          <button
+                            onClick={(e) => onDelete(item.id, e)}
+                            style={{
+                              position: 'absolute',
+                              top: -9,
+                              right: -9,
+                              width: 20,
+                              height: 20,
+                              borderRadius: '50%',
+                              background: '#c0392b',
+                              border: '1.5px solid #f8f3e8',
+                              color: '#fff',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              padding: 0,
+                              opacity: isHov ? 1 : 0,
+                              transform: isHov ? 'scale(1)' : 'scale(0.5)',
+                              transition: 'opacity 0.2s ease, transform 0.22s cubic-bezier(0.34,1.4,0.64,1)',
+                              zIndex: 3,
+                            }}
+                          >
+                            <X size={9} />
+                          </button>
+                        </div>
                       </div>
-                    )}
-                  </div>
+                    );
+                  })}
                 </div>
-              </div>
-            ))
-          )}
+              )}
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* ── Keyframes ──────────────────────────────────────────────── */}
+      <style>{`
+        @keyframes binder-card-in {
+          from {
+            opacity: 0;
+            transform: translateY(18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </>
   );
 };
