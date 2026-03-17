@@ -131,12 +131,12 @@ const HeroPostcard = () => (
 
 // ─── Style card renders ────────────────────────────────────────────────────────
 const styleVisuals: Record<string, React.ReactNode> = {
-  vintage:    <img src="/gallery/vintage.png"    alt="复古风格明信片示例"   style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  ink:        <img src="/gallery/ink.png"        alt="古韵水墨明信片示例"   style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  watercolor: <img src="/gallery/watercolor.png" alt="水彩明信片示例"       style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  cyberpunk:  <img src="/gallery/cyberpunk.png"  alt="赛博朋克明信片示例"   style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  sketch:     <img src="/gallery/sketch.png"     alt="素描明信片示例"       style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
-  oil:        <img src="/gallery/oil.png"        alt="油画明信片示例"       style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  vintage:    <img src="/gallery/vintage.png"    alt="复古风格明信片示例"   loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  ink:        <img src="/gallery/ink.png"        alt="古韵水墨明信片示例"   loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  watercolor: <img src="/gallery/watercolor.png" alt="水彩明信片示例"       loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  cyberpunk:  <img src="/gallery/cyberpunk.png"  alt="赛博朋克明信片示例"   loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  sketch:     <img src="/gallery/sketch.png"     alt="素描明信片示例"       loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
+  oil:        <img src="/gallery/oil.png"        alt="油画明信片示例"       loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />,
 };
 // ─── Gallery card component ────────────────────────────────────────────────────
 type StyleCardProps = React.JSX.IntrinsicAttributes & {
@@ -337,11 +337,17 @@ export default function LandingPage({ onStart }: LandingPageProps) {
             </p>
           </div>
 
-          {/* 3 × 2 grid */}
+          {/* Magazine grid — alternating [2,1] [1,2] [1,2] spans */}
+          {/* Spans: vintage(2) ink(1) / watercolor(1) cyberpunk(2) / sketch(1) oil(2) */}
           <div className="lp-gallery-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 22 }}>
-            {GALLERY.map(({ id, zh, en, location, descZh, descEn, delay }) => (
-              <StyleCard key={id} id={id} zh={zh} en={en} location={location} descZh={descZh} descEn={descEn} delay={delay} />
-            ))}
+            {GALLERY.map(({ id, zh, en, location, descZh, descEn, delay }, i) => {
+              const spans = [2, 1, 1, 2, 1, 2];
+              return (
+                <div key={id} className="lp-gallery-item" style={{ gridColumn: `span ${spans[i]}` }}>
+                  <StyleCard id={id} zh={zh} en={en} location={location} descZh={descZh} descEn={descEn} delay={delay} />
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -362,7 +368,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
 
           <div className="lp-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 56 }}>
             {[
-              { ref: step1Ref, num: '01', zh: '框选地图区域', en: 'Draw on the map',     desc: '用矩形框选任意城市街区、山脉或海岸线。全球任意地点，均可框选。' },
+              { ref: step1Ref, num: '01', zh: '移动地图到目标区域', en: 'Navigate the map', desc: '移动和缩放地图，将取景框对准你想要的城市街区、山脉或海岸线。' },
               { ref: step2Ref, num: '02', zh: '选择艺术风格', en: 'Choose your style',   desc: '从六种艺术风格中选择：复古版画、古韵水墨、水彩、赛博朋克、素描或油画。' },
               { ref: step3Ref, num: '03', zh: '下载你的明信片', en: 'Download & share', desc: '几秒钟后，正面与背面同时生成。下载留存，或寄给远方的朋友。' },
             ].map(step => (
@@ -399,7 +405,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
             开始创作 →
           </button>
           <div style={{ marginTop: 36, fontFamily: '"DM Mono",monospace', fontSize: 11, color: 'rgba(240,232,200,0.3)', letterSpacing: '0.1em' }}>
-            postcard-map-ai.vercel.app
+            {window.location.hostname}
           </div>
         </div>
       </section>
