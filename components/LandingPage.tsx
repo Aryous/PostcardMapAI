@@ -294,7 +294,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
   const TAGS = ['六种艺术风格', '自带 API Key', '开源免费', '中英双语'];
 
   return (
-    <div style={{ fontFamily: '"DM Sans", system-ui, sans-serif', background: '#f8f3e8', color: '#1e1810', overflowX: 'hidden' }}>
+    <div style={{ fontFamily: '"DM Sans", system-ui, sans-serif', background: '#f8f3e8', color: '#1e1810', overflowX: 'clip' }}>
 
       {/* ════════════════════════════════════════
           HERO
@@ -376,7 +376,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
       <section id="lp-gallery" className="lp-section" style={{ background: '#ede7d5', padding: '96px 52px' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           {/* Section header */}
-          <div style={{ textAlign: 'center', marginBottom: 64 }}>
+          <div className="lp-gallery-header" style={{ textAlign: 'center', marginBottom: 64 }}>
             <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 11, color: '#2a4535', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 12 }}>
               Six Artistic Styles
             </div>
@@ -388,7 +388,24 @@ export default function LandingPage({ onStart }: LandingPageProps) {
             </p>
           </div>
 
-          {/* Spotlight gallery — hover thumbnail to switch featured */}
+          {/* Mobile tap-grid — shown only on ≤560px */}
+          <div className="lp-mobile-grid">
+            {GALLERY.map(({ id, zh, en }) => (
+              <div
+                key={id}
+                className={`lp-mobile-card${activeStyle === id ? ' active' : ''}`}
+                onClick={() => { setActiveStyle(id); startCarousel(); }}
+              >
+                <img src={`/gallery/${id}.png`} alt={zh} loading="lazy" />
+                <div className="lp-mobile-card-label">
+                  <span className="lp-mobile-card-zh">{zh}</span>
+                  <span className="lp-mobile-card-en">{en}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Spotlight gallery — tablet & desktop only */}
           <div
             className="lp-spotlight-gallery"
             onMouseEnter={() => { isHoveredRef.current = true; }}
@@ -418,6 +435,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
                   key={id}
                   className={`lp-spotlight-thumb${activeStyle === id ? ' active' : ''}`}
                   onMouseEnter={() => { setActiveStyle(id); startCarousel(); }}
+                  onClick={() => { setActiveStyle(id); startCarousel(); }}
                 >
                   <div className="lp-spotlight-thumb-img-wrap">
                     <img src={`/gallery/${id}.png`} alt={zh} loading="lazy" className="lp-spotlight-thumb-img" />
