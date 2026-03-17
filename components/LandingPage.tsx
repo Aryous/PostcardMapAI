@@ -65,66 +65,33 @@ const MapBgSVG = () => (
 );
 
 // ─── Floating hero postcards ───────────────────────────────────────────────────
-const HeroPostcard = () => (
-  <div style={{ position: 'relative', width: 300, userSelect: 'none' }}>
+const HeroPostcard = ({ styleId }: { styleId: string }) => (
+  <div style={{ position: 'relative', width: 320, userSelect: 'none' }}>
     {/* Back postcard (peeking) */}
     <div style={{
-      position: 'absolute', top: 14, left: 18, right: -14, bottom: -10,
+      position: 'absolute', top: 16, left: 20, right: -16, bottom: -12,
       borderRadius: 4,
       background: 'linear-gradient(145deg, #e6dbc8 0%, #d8cdb8 100%)',
       transform: 'rotate(5deg)',
       boxShadow: '0 10px 32px rgba(30,24,16,0.15)',
       zIndex: 0,
     }} />
-    {/* Front postcard */}
+    {/* Front postcard — real gallery image */}
     <div style={{
       position: 'relative', zIndex: 1,
-      width: 300,
       borderRadius: 4,
-      background: 'linear-gradient(148deg, #faf4e4 0%, #f2e8d0 100%)',
       boxShadow: '0 28px 72px rgba(30,24,16,0.38), 0 8px 24px rgba(30,24,16,0.22)',
       transform: 'rotate(-3deg)',
       overflow: 'hidden',
       border: '1px solid rgba(196,168,120,0.45)',
+      aspectRatio: '4/3',
     }}>
-      {/* Map area */}
-      <div style={{ height: 180, position: 'relative', overflow: 'hidden' }}>
-        <svg viewBox="0 0 300 180" style={{ width: '100%', height: '100%', display: 'block' }} aria-hidden="true">
-          <rect width="300" height="180" fill="#ede4cc" />
-          {Array.from({ length: 10 }, (_, i) => (
-            <line key={`h${i}`} x1="0" y1={i * 20} x2="300" y2={i * 20} stroke="#c8b888" strokeWidth="0.5" opacity="0.4" />
-          ))}
-          {Array.from({ length: 16 }, (_, i) => (
-            <line key={`v${i}`} x1={i * 20} y1="0" x2={i * 20} y2="180" stroke="#c8b888" strokeWidth="0.5" opacity="0.4" />
-          ))}
-          <polygon points="28,18 88,13 94,68 38,76" fill="rgba(176,152,104,0.28)" />
-          <polygon points="108,22 182,18 188,88 118,93" fill="rgba(172,148,100,0.28)" />
-          <polygon points="208,28 272,24 278,94 212,98" fill="rgba(176,152,104,0.28)" />
-          <polygon points="22,98 78,93 86,154 28,160" fill="rgba(172,148,100,0.28)" />
-          <polygon points="112,103 194,98 198,163 118,167" fill="rgba(176,152,104,0.28)" />
-          <path d="M0,88 Q60,74 120,88 Q180,104 240,86 Q268,78 300,84" stroke="#8aA2b8" strokeWidth="6" fill="none" strokeLinecap="round" opacity="0.45" />
-          <line x1="0" y1="88" x2="300" y2="88" stroke="#bcaa78" strokeWidth="1.8" opacity="0.35" />
-          <line x1="150" y1="0" x2="150" y2="180" stroke="#bcaa78" strokeWidth="1.8" opacity="0.35" />
-        </svg>
-        <div style={{ position: 'absolute', top: 10, left: 12, background: 'rgba(42,69,53,0.88)', color: '#f0e8d0', fontFamily: '"DM Mono",monospace', fontSize: 8, padding: '3px 9px', letterSpacing: 1.5, textTransform: 'uppercase', borderRadius: 2 }}>
-          VINTAGE
-        </div>
-        <div style={{ position: 'absolute', top: 10, right: 12, fontFamily: '"DM Mono",monospace', fontSize: 9, color: 'rgba(108,92,62,0.55)', letterSpacing: 1 }}>
-          41.9°N · 12.5°E
-        </div>
-      </div>
-      {/* Postcard foot */}
-      <div style={{ padding: '12px 16px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(176,152,112,0.3)' }}>
-        <div>
-          <div style={{ fontFamily: '"Playfair Display",serif', fontSize: 19, fontWeight: 700, color: '#2a1e0a', letterSpacing: 0.3 }}>Rome, Italy</div>
-          <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 8, color: '#9a8a62', marginTop: 3, letterSpacing: 1 }}>MAPPOSTCARD AI</div>
-        </div>
-        {/* Stamp box */}
-        <div style={{ width: 44, height: 54, border: '1.5px solid #a88a5e', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, borderRadius: 1 }}>
-          <div style={{ width: 28, height: 20, background: 'rgba(42,69,53,0.12)', border: '0.5px solid rgba(42,69,53,0.25)', borderRadius: 1 }} />
-          <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 6, color: '#9a8a62', letterSpacing: 0.5 }}>POSTCARD</div>
-        </div>
-      </div>
+      <img
+        key={styleId}
+        src={`/gallery/${styleId}.png`}
+        alt="AI 生成明信片示例"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', animation: 'lp-img-fadein 0.45s ease' }}
+      />
     </div>
   </div>
 );
@@ -292,7 +259,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
 
           {/* Right column — floating postcard */}
           <div className="lp-hero-right" style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <HeroPostcard />
+            <HeroPostcard styleId={activeStyle} />
           </div>
         </div>
       </section>
