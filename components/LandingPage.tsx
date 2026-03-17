@@ -405,7 +405,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
             开始创作 →
           </button>
           <div style={{ marginTop: 36, fontFamily: '"DM Mono",monospace', fontSize: 11, color: 'rgba(240,232,200,0.3)', letterSpacing: '0.1em' }}>
-            postcard-map-ai.vercel.app
+            {window.location.hostname}
           </div>
         </div>
       </section>
