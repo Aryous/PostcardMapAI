@@ -103,7 +103,7 @@ const LuckyDice: React.FC<LuckyDiceProps> = ({ onLucky, isLoading, label }) => {
       </div>
 
       <div
-        className={`text-[10px] font-semibold text-white/90 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full shadow-lg ring-1 ring-white/10 transition-all duration-300 transform group-hover:scale-110 group-hover:bg-indigo-600/80 group-hover:ring-indigo-400/30 ${
+        className={`text-[10px] font-semibold text-white/90 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full shadow-lg ring-1 ring-white/10 transition-all duration-300 transform group-hover:scale-110 group-hover:bg-[#2a4535]/90 group-hover:ring-[#2a4535]/30 ${
           isLoading ? 'opacity-0' : 'opacity-100'
         }`}
       >

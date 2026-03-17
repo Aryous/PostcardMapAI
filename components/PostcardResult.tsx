@@ -212,7 +212,7 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
       {/* Cost Breakdown Panel - Separate UI */}
       {isExpanded && usageStats && (
         <div 
-            className="absolute top-4 left-4 z-[2100] bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl p-4 min-w-[220px] border border-white/50 animate-in slide-in-from-left-4 fade-in duration-500 cursor-default"
+            className="absolute top-4 left-4 z-[2100] shadow-2xl rounded-lg p-4 min-w-[220px] animate-in slide-in-from-left-4 fade-in duration-500 cursor-default" style={{ background: 'rgba(248,243,232,0.98)', border: '1px solid rgba(42,69,53,0.15)', fontFamily: "'DM Sans', sans-serif" }}
             onClick={(e) => e.stopPropagation()}
         >
             {/* Header */}
@@ -314,7 +314,7 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
                         {backImageUrl && (
                             <button
                                 onClick={handleFlip}
-                                className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-indigo-600 transition-transform hover:scale-110"
+                                className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-[#2a4535] transition-transform hover:scale-110"
                                 title={t.flip}
                             >
                                 <RotateCw className="w-4 h-4" />
@@ -371,7 +371,7 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
                             >
                                 <button
                                     onClick={handleFlip}
-                                    className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-indigo-600 transition-transform hover:scale-110"
+                                    className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-[#2a4535] transition-transform hover:scale-110"
                                     title={t.flip}
                                 >
                                     <RotateCw className="w-4 h-4" />

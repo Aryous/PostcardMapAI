@@ -24,13 +24,13 @@ const BKT = 16;
 const VPAD = 52;
 const HPAD = 52;
 
-// Frosted glass indigo palette
-const GLASS_BG = 'rgba(238,240,255,0.5)';
-const GLASS_BORDER = 'rgba(99,102,241,0.28)';
-const TEXT_LABEL = 'rgba(99,102,241,0.55)';   // indigo-600 dimmed (small caps)
-const TEXT_VALUE = 'rgba(55,48,163,0.80)';     // indigo-900 (values)
-const ACCENT = '#6366F1';                  // indigo-500
-const ACCENT_GEN = '#818CF8';                  // indigo-400 (generating)
+// Cartographic editorial palette
+const GLASS_BG = 'rgba(248,243,232,0.45)';
+const GLASS_BORDER = 'rgba(42,69,53,0.25)';
+const TEXT_LABEL = 'rgba(42,69,53,0.55)';     // forest green dimmed (small caps)
+const TEXT_VALUE = 'rgba(30,24,16,0.80)';      // ink (values)
+const ACCENT = '#2a4535';                      // forest green
+const ACCENT_GEN = '#c4892a';                  // ochre (generating)
 
 const TRANS = '0.38s cubic-bezier(0.4,0,0.2,1)';
 
@@ -142,11 +142,11 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <span style={{
               display: 'block', width: 6, height: 6, borderRadius: '50%',
-              backgroundColor: isGen ? '#818CF8' : 'rgba(239,68,68,0.75)',
+              backgroundColor: isGen ? ACCENT_GEN : 'rgba(239,68,68,0.75)',
             }} className={isGen ? 'animate-pulse' : ''} />
             <span style={{
               ...mono, fontSize: 10, letterSpacing: '0.10em',
-              color: isGen ? '#818CF8' : 'rgba(239,68,68,0.65)'
+              color: isGen ? ACCENT_GEN : 'rgba(239,68,68,0.65)'
             }}>
               {isGen ? 'GEN' : 'LIVE'}
             </span>
@@ -227,7 +227,7 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({
         position: 'absolute',
         left: fl, top: ft, width: fw, height: fh,
         borderRadius: VF_R,
-        background: 'rgba(186,210,255,0.10)',
+        background: 'rgba(42,69,53,0.06)',
         transition: `left ${TRANS}, top ${TRANS}, width ${TRANS}, height ${TRANS}`,
       }} />
 
@@ -239,14 +239,14 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({
 
           {/* Viewfinder border ring */}
           <rect rx={VF_R} fill="none"
-            stroke={isGen ? 'rgba(129,140,248,0.65)' : 'rgba(99,102,241,0.40)'}
+            stroke={isGen ? 'rgba(196,137,42,0.65)' : 'rgba(42,69,53,0.40)'}
             strokeWidth={1.5}
             style={{ x: fl + 0.75, y: ft + 0.75, width: fw - 1.5, height: fh - 1.5,
               transition: `x ${TRANS}, y ${TRANS}, width ${TRANS}, height ${TRANS}` }} />
 
           {/* Outer glow on viewfinder */}
           <rect rx={VF_R + 1} fill="none"
-            stroke={isGen ? 'rgba(129,140,248,0.12)' : 'rgba(99,102,241,0.08)'}
+            stroke={isGen ? 'rgba(196,137,42,0.12)' : 'rgba(42,69,53,0.08)'}
             strokeWidth={3}
             style={{ x: fl - 1, y: ft - 1, width: fw + 2, height: fh + 2,
               transition: `x ${TRANS}, y ${TRANS}, width ${TRANS}, height ${TRANS}` }} />
@@ -254,16 +254,16 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({
           {/* Corner screws — subtle on frosted glass */}
           {([[camL + 18, camT + 18], [camR - 18, camT + 18], [camL + 18, camB - 18], [camR - 18, camB - 18]] as [number, number][]).map(([x, y], i) => (
             <g key={i}>
-              <circle cx={x} cy={y} r={4} fill="rgba(99,102,241,0.10)" />
-              <circle cx={x} cy={y} r={3.5} fill="none" stroke="rgba(99,102,241,0.25)" strokeWidth={0.8} />
-              <line x1={x - 2} y1={y} x2={x + 2} y2={y} stroke="rgba(99,102,241,0.40)" strokeWidth={0.9} />
-              <line x1={x} y1={y - 2} x2={x} y2={y + 2} stroke="rgba(99,102,241,0.40)" strokeWidth={0.9} />
+              <circle cx={x} cy={y} r={4} fill="rgba(42,69,53,0.10)" />
+              <circle cx={x} cy={y} r={3.5} fill="none" stroke="rgba(42,69,53,0.25)" strokeWidth={0.8} />
+              <line x1={x - 2} y1={y} x2={x + 2} y2={y} stroke="rgba(42,69,53,0.40)" strokeWidth={0.9} />
+              <line x1={x} y1={y - 2} x2={x} y2={y + 2} stroke="rgba(42,69,53,0.40)" strokeWidth={0.9} />
             </g>
           ))}
 
           {/* Top center indicator dot */}
-          <circle cx={cx} cy={camT + BEZ_T / 2} r={2.5} fill="rgba(99,102,241,0.50)" />
-          <circle cx={cx} cy={camT + BEZ_T / 2} r={5} fill="none" stroke="rgba(99,102,241,0.18)" strokeWidth={1} />
+          <circle cx={cx} cy={camT + BEZ_T / 2} r={2.5} fill="rgba(42,69,53,0.50)" />
+          <circle cx={cx} cy={camT + BEZ_T / 2} r={5} fill="none" stroke="rgba(42,69,53,0.18)" strokeWidth={1} />
         </svg>
 
         {/* ── Corner brackets ── */}
@@ -285,8 +285,8 @@ const ViewfinderOverlay: React.FC<ViewfinderOverlayProps> = ({
         ))}
 
         {/* Center crosshair */}
-        <div className="absolute" style={{ left: cx - 12, top: cy, width: 24, height: 1, backgroundColor: 'rgba(99,102,241,0.25)' }} />
-        <div className="absolute" style={{ left: cx, top: cy - 12, width: 1, height: 24, backgroundColor: 'rgba(99,102,241,0.25)' }} />
+        <div className="absolute" style={{ left: cx - 12, top: cy, width: 24, height: 1, backgroundColor: 'rgba(42,69,53,0.25)' }} />
+        <div className="absolute" style={{ left: cx, top: cy - 12, width: 1, height: 24, backgroundColor: 'rgba(42,69,53,0.25)' }} />
 
       </>)}
     </div>

@@ -59,7 +59,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-2 text-slate-800">
             <span className="font-bold text-lg">{t.history}</span>
-            <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full font-medium">
+            <span className="px-2 py-0.5 bg-[#2a4535]/10 text-[#2a4535] text-xs rounded-full font-medium">
               {history.length}
             </span>
           </div>
@@ -85,7 +85,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
               <div 
                 key={item.id}
                 onClick={() => onSelect(item)}
-                className="group relative bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all cursor-pointer active:scale-[0.98]"
+                className="group relative bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#2a4535]/30 transition-all cursor-pointer active:scale-[0.98]"
               >
                 {/* Image Aspect Ratio Container */}
                 <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden">
@@ -123,14 +123,14 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                   {/* Location name */}
                   {item.locationName && (
                     <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 truncate">
-                      <MapPin className="w-3 h-3 text-indigo-400 flex-shrink-0" />
+                      <MapPin className="w-3 h-3 text-[#2a4535]/60 flex-shrink-0" />
                       <span className="truncate">{item.locationName}</span>
                     </div>
                   )}
 
                   {/* Style tag + cost */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-medium text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-medium text-[#2a4535] bg-[#2a4535]/5 border border-[#2a4535]/15 px-2 py-0.5 rounded-full">
                       {getStyleLabel(item.styleId)}
                     </span>
                     {item.cost && (

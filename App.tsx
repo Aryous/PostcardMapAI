@@ -261,7 +261,7 @@ export default function App() {
       {/* API Key config button — bottom-left corner */}
       <button
         onClick={() => setShowApiKeyModal(true)}
-        className="absolute bottom-4 left-4 z-[1000] p-2 rounded-full bg-black/30 hover:bg-indigo-600/70 backdrop-blur-md text-white/60 hover:text-white transition-all duration-200 shadow-lg ring-1 ring-white/10"
+        className="absolute bottom-4 left-4 z-[1000] p-2 rounded-full bg-black/30 hover:bg-[#2a4535]/80 backdrop-blur-md text-white/60 hover:text-white transition-all duration-200 shadow-lg ring-1 ring-white/10"
         title={language === 'zh' ? '配置 API Key' : 'Configure API Key'}
       >
         <Key className="w-3.5 h-3.5" />
