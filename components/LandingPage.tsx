@@ -64,37 +64,107 @@ const MapBgSVG = () => (
   </svg>
 );
 
-// ─── Floating hero postcards ───────────────────────────────────────────────────
-const HeroPostcard = ({ styleId }: { styleId: string }) => (
-  <div style={{ position: 'relative', width: 320, userSelect: 'none' }}>
-    {/* Back postcard (peeking) */}
-    <div style={{
-      position: 'absolute', top: 16, left: 20, right: -16, bottom: -12,
-      borderRadius: 4,
-      background: 'linear-gradient(145deg, #e6dbc8 0%, #d8cdb8 100%)',
-      transform: 'rotate(5deg)',
-      boxShadow: '0 10px 32px rgba(30,24,16,0.15)',
-      zIndex: 0,
-    }} />
-    {/* Front postcard — real gallery image */}
-    <div style={{
-      position: 'relative', zIndex: 1,
-      borderRadius: 4,
-      boxShadow: '0 28px 72px rgba(30,24,16,0.38), 0 8px 24px rgba(30,24,16,0.22)',
-      transform: 'rotate(-3deg)',
-      overflow: 'hidden',
-      border: '1px solid rgba(196,168,120,0.45)',
-      aspectRatio: '4/3',
-    }}>
-      <img
-        key={styleId}
-        src={`/gallery/${styleId}.png`}
-        alt="AI 生成明信片示例"
-        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', animation: 'lp-img-fadein 0.45s ease' }}
-      />
+// ─── Floating hero postcards (3-card arc carousel) ────────────────────────────
+const HeroPostcard = ({
+  activeStyle,
+  onPrev,
+  onNext,
+}: {
+  activeStyle: string;
+  onPrev: () => void;
+  onNext: () => void;
+}) => {
+  const activeIndex = GALLERY.findIndex(g => g.id === activeStyle);
+  const N = GALLERY.length;
+
+  const getPos = (cardIndex: number) => {
+    const mod = ((cardIndex - activeIndex) % N + N) % N;
+    return mod > N / 2 ? mod - N : mod;
+  };
+
+  const CARD_W = 240;
+  const CARD_H = 180; // 4:3
+
+  return (
+    <div style={{ position: 'relative', width: 420, height: 300, userSelect: 'none', flexShrink: 0 }}>
+      {GALLERY.map((card, cardIndex) => {
+        const pos = getPos(cardIndex);
+
+        let transform: string;
+        let opacity: number;
+        let zIndex: number;
+        let boxShadow: string;
+        let cursor: string;
+        let pointerEvents: 'auto' | 'none';
+
+        if (pos === 0) {
+          transform = 'translateX(0px) translateY(-8px) rotate(-2deg) scale(1)';
+          opacity = 1;
+          zIndex = 3;
+          boxShadow = '0 28px 72px rgba(30,24,16,0.38), 0 8px 24px rgba(30,24,16,0.22)';
+          cursor = 'default';
+          pointerEvents = 'auto';
+        } else if (pos === 1) {
+          transform = 'translateX(138px) translateY(24px) rotate(9deg) scale(0.78)';
+          opacity = 0.52;
+          zIndex = 2;
+          boxShadow = '0 8px 24px rgba(30,24,16,0.16)';
+          cursor = 'pointer';
+          pointerEvents = 'auto';
+        } else if (pos === -1) {
+          transform = 'translateX(-138px) translateY(24px) rotate(-9deg) scale(0.78)';
+          opacity = 0.52;
+          zIndex = 1;
+          boxShadow = '0 8px 24px rgba(30,24,16,0.16)';
+          cursor = 'pointer';
+          pointerEvents = 'auto';
+        } else {
+          // Hidden — park beyond the visible side cards
+          const side = pos > 0 ? 1 : -1;
+          transform = `translateX(${side * 200}px) translateY(24px) rotate(${side * 14}deg) scale(0.65)`;
+          opacity = 0;
+          zIndex = 0;
+          boxShadow = 'none';
+          cursor = 'default';
+          pointerEvents = 'none';
+        }
+
+        return (
+          <div
+            key={card.id}
+            onClick={pos === 1 ? onNext : pos === -1 ? onPrev : undefined}
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              width: CARD_W,
+              height: CARD_H,
+              marginLeft: -CARD_W / 2,
+              marginTop: -CARD_H / 2,
+              borderRadius: 4,
+              overflow: 'hidden',
+              border: '1px solid rgba(196,168,120,0.45)',
+              transform,
+              opacity,
+              zIndex,
+              boxShadow,
+              cursor,
+              pointerEvents,
+              transition: 'transform 0.55s cubic-bezier(0.34, 1.1, 0.64, 1), opacity 0.45s ease, box-shadow 0.45s ease',
+            }}
+          >
+            <img
+              src={`/gallery/${card.id}.png`}
+              alt={card.zh}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              loading="lazy"
+            />
+          </div>
+        );
+      })}
     </div>
-  </div>
-);
+  );
+};
 
 // ─── Style card data type ──────────────────────────────────────────────────────
 type StyleCardProps = {
@@ -174,6 +244,22 @@ export default function LandingPage({ onStart }: LandingPageProps) {
       }
     }, SLIDE_MS);
   }, []);
+
+  const goNext = useCallback(() => {
+    setActiveStyle(prev => {
+      const idx = GALLERY.findIndex(g => g.id === prev);
+      return GALLERY[(idx + 1) % GALLERY.length].id;
+    });
+    startCarousel();
+  }, [startCarousel]);
+
+  const goPrev = useCallback(() => {
+    setActiveStyle(prev => {
+      const idx = GALLERY.findIndex(g => g.id === prev);
+      return GALLERY[(idx - 1 + GALLERY.length) % GALLERY.length].id;
+    });
+    startCarousel();
+  }, [startCarousel]);
 
   useEffect(() => {
     startCarousel();
@@ -259,7 +345,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
 
           {/* Right column — floating postcard */}
           <div className="lp-hero-right" style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <HeroPostcard styleId={activeStyle} />
+            <HeroPostcard activeStyle={activeStyle} onPrev={goPrev} onNext={goNext} />
           </div>
         </div>
       </section>
