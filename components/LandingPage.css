@@ -129,6 +129,20 @@
   border-left: 3px solid transparent;
   transition: background 0.18s, border-color 0.18s;
   flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+@keyframes lp-progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+.lp-thumb-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: #c4892a;
+  animation: lp-progress 3.5s linear forwards;
 }
 .lp-spotlight-thumb:hover,
 .lp-spotlight-thumb.active {

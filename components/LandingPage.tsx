@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './LandingPage.css';
 
 interface LandingPageProps {
@@ -192,6 +192,26 @@ export default function LandingPage({ onStart }: LandingPageProps) {
 
   const [activeStyle, setActiveStyle] = useState<string>(GALLERY[0].id);
   const activeCard = GALLERY.find(g => g.id === activeStyle)!;
+  const isHoveredRef = useRef(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const SLIDE_MS = 3500;
+
+  const startCarousel = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      if (!isHoveredRef.current) {
+        setActiveStyle(prev => {
+          const idx = GALLERY.findIndex(g => g.id === prev);
+          return GALLERY[(idx + 1) % GALLERY.length].id;
+        });
+      }
+    }, SLIDE_MS);
+  }, []);
+
+  useEffect(() => {
+    startCarousel();
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [startCarousel]);
 
   const step1Ref = useReveal(0);
   const step2Ref = useReveal(140);
@@ -296,7 +316,11 @@ export default function LandingPage({ onStart }: LandingPageProps) {
           </div>
 
           {/* Spotlight gallery — hover thumbnail to switch featured */}
-          <div className="lp-spotlight-gallery">
+          <div
+            className="lp-spotlight-gallery"
+            onMouseEnter={() => { isHoveredRef.current = true; }}
+            onMouseLeave={() => { isHoveredRef.current = false; startCarousel(); }}
+          >
             {/* Featured postcard */}
             <div className="lp-spotlight-featured">
               <img
@@ -320,7 +344,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
                 <div
                   key={id}
                   className={`lp-spotlight-thumb${activeStyle === id ? ' active' : ''}`}
-                  onMouseEnter={() => setActiveStyle(id)}
+                  onMouseEnter={() => { setActiveStyle(id); startCarousel(); }}
                 >
                   <div className="lp-spotlight-thumb-img-wrap">
                     <img src={`/gallery/${id}.png`} alt={zh} loading="lazy" className="lp-spotlight-thumb-img" />
@@ -329,6 +353,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
                     <div style={{ fontFamily: '"Playfair Display",serif', fontSize: 15, fontWeight: 700, color: '#1e1810', marginBottom: 2 }}>{zh}</div>
                     <div style={{ fontFamily: '"DM Mono",monospace', fontSize: 10, color: '#9a8a72', letterSpacing: '0.06em' }}>{en.toUpperCase()} · {location}</div>
                   </div>
+                  {activeStyle === id && <div key={`p-${id}`} className="lp-thumb-progress" />}
                 </div>
               ))}
             </div>
