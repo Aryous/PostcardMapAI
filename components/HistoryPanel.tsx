@@ -70,7 +70,7 @@ interface HistoryPanelProps {
   isOpen: boolean;
   onClose: () => void;
   history: HistoryItem[];
-  onSelect: (item: HistoryItem) => void;
+  onSelect: (item: HistoryItem, originRect: DOMRect) => void;
   onDelete: (id: string, e: React.MouseEvent) => void;
   language: Language;
 }
@@ -341,7 +341,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                       >
                         {/* polaroid card */}
                         <div
-                          onClick={() => onSelect(item)}
+                          onClick={(e) => onSelect(item, e.currentTarget.getBoundingClientRect())}
                           onMouseEnter={() => setHoveredId(item.id)}
                           onMouseLeave={() => setHoveredId(null)}
                           style={{

@@ -16,6 +16,7 @@ interface PostcardResultProps {
   aspectRatio?: AspectRatio;
   locationName?: string;
   usageStats?: UsageStats;
+  originRect?: DOMRect;
 }
 
 const PostcardResult: React.FC<PostcardResultProps> = ({
@@ -26,7 +27,8 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
   skipAnimation = false,
   aspectRatio = '4:3',
   locationName = 'MapPostcard',
-  usageStats
+  usageStats,
+  originRect,
 }) => {
   const [animationStage, setAnimationStage] = useState<'envelope' | 'opening' | 'revealing' | 'settling' | 'done'>('envelope');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -35,9 +37,13 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
 
   useEffect(() => {
     if (skipAnimation) {
+      // Show mini card first, then let the existing expand transition play
       setAnimationStage('done');
-      setIsExpanded(true);
-      return;
+      const id1 = requestAnimationFrame(() => {
+        const id2 = requestAnimationFrame(() => setIsExpanded(true));
+        return () => cancelAnimationFrame(id2);
+      });
+      return () => cancelAnimationFrame(id1);
     }
 
     // Sequence the animation stages
@@ -122,6 +128,11 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
 
   const [isHovered, setIsHovered] = useState(false);
   const [isDismissing, setIsDismissing] = useState(false);
+  // Track whether the card has ever been in expanded state.
+  // Once expanded, collapsing always returns to mini (bottom-right), not the hero origin.
+  // Using a ref (updated in an effect) avoids state-batching race conditions.
+  const everExpandedRef = useRef(false);
+  useEffect(() => { if (isExpanded) everExpandedRef.current = true; }, [isExpanded]);
   const autoDismissTimer = useRef<number>();
 
   const startDismiss = useCallback(() => {
@@ -164,11 +175,26 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
     return `translate(${dx}px, ${dy}px) scale(${scale * extraScale}) rotate(${rotate}deg)`;
   }, [expandedSize, miniH, isHovered]);
 
-  // Counter-scale so buttons appear at natural size regardless of card scale
-  const miniCardScale = MINI_W / expandedSize.width;
-  const buttonCounterScale = isExpanded ? 1 : (1 / miniCardScale);
+  // Hero transform: card starts at the clicked history item's position and scale
+  const heroTransform = useMemo(() => {
+    if (!originRect) return null;
+    const scale = originRect.width / expandedSize.width;
+    const dx = originRect.left + originRect.width / 2 - window.innerWidth / 2;
+    const dy = originRect.top + originRect.height / 2 - window.innerHeight / 2;
+    return `translate(${Math.round(dx)}px, ${Math.round(dy)}px) scale(${scale.toFixed(4)}) rotate(0deg)`;
+  }, [originRect, expandedSize]);
 
-  const cardTransform = isExpanded ? 'translate(0,0) scale(1) rotate(0deg)' : miniTransform;
+  // Hero is used only for the initial entrance (before the card has ever been expanded).
+  // Once expanded (everExpandedRef=true), closing always collapses to mini (bottom-right).
+  const useHero = !!heroTransform && !everExpandedRef.current;
+  const activeScale = useHero
+    ? (originRect!.width / expandedSize.width)
+    : (MINI_W / expandedSize.width);
+  const buttonCounterScale = isExpanded ? 1 : (1 / activeScale);
+
+  const cardTransform = isExpanded
+    ? 'translate(0,0) scale(1) rotate(0deg)'
+    : (useHero ? heroTransform! : miniTransform);
 
   // Envelope Components
   if (animationStage !== 'done' && !isExpanded) {

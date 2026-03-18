@@ -45,6 +45,7 @@ export default function App() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [skipAnimation, setSkipAnimation] = useState(false);
+  const [historyOriginRect, setHistoryOriginRect] = useState<DOMRect | undefined>(undefined);
   const [pendingStyleId, setPendingStyleId] = useState<string | null>(null);
 
   // API Key modal — never block on load, only open on demand or auth error
@@ -176,14 +177,16 @@ export default function App() {
   const handleCloseResult = useCallback(() => {
     setGeneratedImage(undefined);
     setGeneratedBackImage(undefined);
+    setHistoryOriginRect(undefined);
   }, []);
 
-  const handleSelectHistory = useCallback((item: HistoryItem) => {
+  const handleSelectHistory = useCallback((item: HistoryItem, originRect: DOMRect) => {
     setGeneratedImage(item.imageUrl);
     setGeneratedBackImage(item.backImageUrl);
     setCurrentUsageStats(item.cost);
     if (item.aspectRatio) setGeneratedAspectRatio(item.aspectRatio);
     setSkipAnimation(true);
+    setHistoryOriginRect(originRect);
     setShowHistory(false);
   }, []);
 
@@ -255,6 +258,7 @@ export default function App() {
           aspectRatio={generatedAspectRatio}
           locationName={locationName}
           usageStats={currentUsageStats}
+          originRect={historyOriginRect}
         />
       )}
 
