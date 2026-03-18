@@ -179,6 +179,31 @@
         animation: wobble-compass 4.5s ease-in-out infinite;
       }
 
+      /* ── Signpost (API Key onboarding) ── */
+      @keyframes signpost-sway {
+        0%, 100% { transform: rotate(-4deg); }
+        50%       { transform: rotate(4deg); }
+      }
+      @keyframes signpost-entry {
+        from { opacity: 0; transform: translateY(6px) rotate(-4deg); }
+        to   { opacity: 1; transform: translateY(0)   rotate(-4deg); }
+      }
+      @keyframes signpost-exit {
+        from { opacity: 1; }
+        to   { opacity: 0; }
+      }
+      .signpost-sway {
+        transform-origin: bottom center;
+        animation: signpost-sway 3s ease-in-out infinite;
+      }
+      .signpost-entry {
+        transform-origin: bottom center;
+        animation: signpost-entry 0.5s ease-out forwards;
+      }
+      .signpost-exit {
+        animation: signpost-exit 0.4s ease-out forwards;
+      }
+
       /* ── Global focus-visible ring ── */
       :focus-visible {
         outline: 2px solid #c4892a;
