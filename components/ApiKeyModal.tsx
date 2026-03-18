@@ -131,7 +131,7 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose, ke
               </p>
             ) : (
               <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(30,24,16,0.62)' }}>
-                {hasEnvKey ? t.envNote : t.subtitle}
+                {t.subtitle}
               </p>
             )}
 
