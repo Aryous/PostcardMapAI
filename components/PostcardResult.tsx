@@ -258,57 +258,134 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
         onClick={() => setIsExpanded(false)}
       />
 
-      {/* Cost Breakdown Panel - Separate UI */}
-      {isExpanded && usageStats && (
-        <div
-          className={`absolute z-[2100] shadow-2xl rounded-lg p-4 min-w-[200px] animate-in fade-in duration-500 cursor-default ${isMobile ? 'top-4 right-4 slide-in-from-right-4' : 'top-4 left-4 slide-in-from-left-4'}`} style={{ background: 'rgba(248,243,232,0.98)', border: '1px solid rgba(42,69,53,0.15)', fontFamily: "'DM Sans', sans-serif" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-amber-100 text-amber-600 rounded-full shadow-sm">
-                <Coins className="w-4 h-4" />
-              </div>
-              <span className="font-bold text-slate-800 text-xs uppercase tracking-wide">{t.cost}</span>
-            </div>
-            <span className="text-[9px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">~estimated</span>
-          </div>
+      {/* Cost Breakdown Panel - Skeuomorphic Paper Receipt */}
+      {isExpanded && usageStats && (() => {
+        const receiptNo = String(usageStats.promptTokens + usageStats.candidatesTokens).padStart(6, '0').slice(-6);
+        const perfEdge = {
+          height: 13,
+          background: 'radial-gradient(circle at center, transparent 4.5px, #f1e9d8 5px)',
+          backgroundSize: '15px 13px',
+          backgroundPosition: '7.5px 50%',
+          backgroundRepeat: 'repeat-x',
+        };
+        return (
+          <>
+            <style>{`
+              @keyframes receipt-appear {
+                from { opacity: 0; transform: translateY(-18px) rotate(-2.5deg); }
+                to   { opacity: 1; transform: translateY(0)    rotate(-1.5deg); }
+              }
+              .receipt-skeu { animation: receipt-appear 0.44s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
+            `}</style>
+            <div
+              className="receipt-skeu absolute z-[2100] cursor-default"
+              style={{
+                left: isMobile ? undefined : 16,
+                right: isMobile ? 16 : undefined,
+                top: 16,
+                width: 200,
+                fontFamily: "'DM Mono', 'Courier New', monospace",
+                userSelect: 'none',
+              }}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            >
+              {/* Perforated top edge */}
+              <div style={perfEdge} />
 
-          {/* Details */}
-          <div className="space-y-3">
-            {/* Input */}
-            <div className="flex flex-col gap-0.5">
-              <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase font-medium">
-                <span>{t.input}</span>
-                <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{usageStats.promptTokens.toLocaleString()} tks</span>
-              </div>
-              <div className="text-right font-mono text-xs text-slate-700 font-medium tracking-tight">
-                ${usageStats.inputCost.toFixed(5)}
-              </div>
-            </div>
+              {/* Paper body */}
+              <div style={{
+                background: '#f1e9d8',
+                backgroundImage: 'repeating-linear-gradient(transparent 0, transparent 3px, rgba(155,135,95,0.045) 3px, rgba(155,135,95,0.045) 4px)',
+                padding: '14px 16px 13px',
+                boxShadow: '0 6px 20px rgba(30,24,16,0.22), 0 1px 4px rgba(30,24,16,0.1), inset 0 0 0 0.5px rgba(30,24,16,0.06)',
+              }}>
 
-            {/* Output */}
-            <div className="flex flex-col gap-0.5">
-              <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase font-medium">
-                <span>{t.output}</span>
-                <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">{usageStats.candidatesTokens.toLocaleString()} tks</span>
-              </div>
-              <div className="text-right font-mono text-xs text-slate-700 font-medium tracking-tight">
-                ${usageStats.outputCost.toFixed(5)}
-              </div>
-            </div>
+                {/* Receipt header */}
+                <div style={{ textAlign: 'center', marginBottom: 11 }}>
+                  <div style={{
+                    width: 30, height: 30, borderRadius: '50%',
+                    border: '1.5px solid rgba(42,69,53,0.38)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '0 auto 6px',
+                    color: 'rgba(42,69,53,0.55)',
+                  }}>
+                    <Coins style={{ width: 14, height: 14 }} />
+                  </div>
+                  <div style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: 10, fontWeight: 700, letterSpacing: '0.24em',
+                    textTransform: 'uppercase', color: '#1e1810', lineHeight: 1,
+                  }}>
+                    {language === 'zh' ? '生成账单' : 'AI RECEIPT'}
+                  </div>
+                  <div style={{ fontSize: 7.5, color: '#a8936a', letterSpacing: '0.06em', marginTop: 4 }}>
+                    No. {receiptNo}
+                  </div>
+                </div>
 
-            {/* Total */}
-            <div className="pt-2 border-t border-slate-200 flex justify-between items-end">
-              <span className="text-xs font-bold text-slate-800">{t.total}</span>
-              <span className="font-mono text-sm font-bold text-emerald-600 tracking-tight">
-                ${usageStats.totalCost.toFixed(5)}
-              </span>
+                {/* Header rule */}
+                <div style={{ borderTop: '1px solid rgba(30,24,16,0.11)', margin: '0 0 11px' }} />
+
+                {/* INPUT line item */}
+                <div style={{ marginBottom: 9 }}>
+                  <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                    fontSize: 7.5, letterSpacing: '0.13em', textTransform: 'uppercase', color: '#9a8762',
+                  }}>
+                    <span>{t.input}</span>
+                    <span style={{ letterSpacing: '0.03em' }}>{usageStats.promptTokens.toLocaleString()} tks</span>
+                  </div>
+                  <div style={{ textAlign: 'right', fontSize: 12, color: '#2a1e10', fontWeight: 500, marginTop: 2, letterSpacing: '-0.01em' }}>
+                    ${usageStats.inputCost.toFixed(5)}
+                  </div>
+                </div>
+
+                {/* OUTPUT line item */}
+                <div style={{ marginBottom: 2 }}>
+                  <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                    fontSize: 7.5, letterSpacing: '0.13em', textTransform: 'uppercase', color: '#9a8762',
+                  }}>
+                    <span>{t.output}</span>
+                    <span style={{ letterSpacing: '0.03em' }}>{usageStats.candidatesTokens.toLocaleString()} tks</span>
+                  </div>
+                  <div style={{ textAlign: 'right', fontSize: 12, color: '#2a1e10', fontWeight: 500, marginTop: 2, letterSpacing: '-0.01em' }}>
+                    ${usageStats.outputCost.toFixed(5)}
+                  </div>
+                </div>
+
+                {/* Dashed total separator */}
+                <div style={{ borderTop: '2px dashed rgba(30,24,16,0.2)', margin: '11px 0 10px' }} />
+
+                {/* TOTAL */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: 11, fontWeight: 700, color: '#1e1810',
+                    textTransform: 'uppercase', letterSpacing: '0.15em',
+                  }}>
+                    {t.total}
+                  </span>
+                  <span style={{ fontSize: 17, fontWeight: 700, color: '#c4892a', letterSpacing: '-0.02em', lineHeight: 1 }}>
+                    ${usageStats.totalCost.toFixed(5)}
+                  </span>
+                </div>
+
+                {/* Footer note */}
+                <div style={{
+                  textAlign: 'center', marginTop: 12,
+                  fontSize: 7, color: '#b09a78', fontStyle: 'italic', letterSpacing: '0.05em',
+                }}>
+                  {language === 'zh' ? '* 费用为估算值' : '* estimated cost'}
+                </div>
+              </div>
+
+              {/* Perforated bottom edge */}
+              <div style={perfEdge} />
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        );
+      })()}
 
       {/* Dismiss wrapper — circular arc to bottom-right
           ── 调参区 ──────────────────────────────────── */}
