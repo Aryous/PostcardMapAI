@@ -185,7 +185,7 @@ export default function App() {
       // Open API key modal when key is missing, invalid, or expired
       if (/API Key is missing|API_KEY_INVALID|api.?key.?invalid|api.?key.?expired/i.test(raw)) {
         setShowApiKeyModal(true);
-        setApiKeyError(true);
+        setApiKeyError(!/API Key is missing/i.test(raw));
       }
       // AI Studio pro-model flow
       if (model === 'gemini-3-pro-image-preview' && /403|PERMISSION_DENIED/i.test(raw)) {
