@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Key, Eye, EyeOff, ExternalLink, X } from 'lucide-react';
+import { Eye, EyeOff, ExternalLink, X } from 'lucide-react';
 import { Language } from '../types';
 
 interface ApiKeyModalProps {
@@ -56,100 +56,174 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose }) 
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ background: 'rgba(30,24,16,0.75)', backdropFilter: 'blur(8px)' }}>
+    <>
+      <style>{`
+        @keyframes apimodal-in {
+          from { opacity: 0; transform: translateY(12px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .apimodal-card {
+          animation: apimodal-in 0.28s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .apimodal-card { animation: none; }
+        }
+      `}</style>
       <div
-        className="relative w-full max-w-md rounded-lg p-6 shadow-2xl"
-        style={{
-          background: 'rgba(255,255,255,0.99)',
-          border: '1px solid rgba(0,0,0,0.08)',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(42,69,53,0.06)',
-          fontFamily: "'DM Sans', sans-serif",
-        }}
+        className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+        style={{ background: 'rgba(30,24,16,0.78)', backdropFilter: 'blur(6px)' }}
       >
-        {/* Close button — only when opened from settings */}
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-[#2a4535]/10 text-[#2a4535]/50 hover:text-[#2a4535] transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
-
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 rounded-lg bg-[#2a4535]/10">
-            <Key className="w-5 h-5 text-[#2a4535]" />
-          </div>
-          <div>
-            <h2 className="text-base font-bold text-[#1e1810]">{t.title}</h2>
-          </div>
-        </div>
-
-        <p className="text-sm text-slate-600 mb-4 leading-relaxed">
-          {hasEnvKey ? t.envNote : t.subtitle}
-        </p>
-
-        {/* Input */}
-        <div className="relative mb-1">
-          <input
-            type={showKey ? 'text' : 'password'}
-            value={value}
-            onChange={e => { setValue(e.target.value); setError(''); }}
-            onKeyDown={e => e.key === 'Enter' && handleSave()}
-            placeholder={t.placeholder}
-            className="w-full pr-10 pl-3 py-2.5 rounded-md text-sm bg-white/90 border border-[#2a4535]/25 focus:outline-none focus:border-[#2a4535] focus:ring-2 focus:ring-[#2a4535]/20 text-[#1e1810] placeholder-slate-400 font-mono"
-          />
-          <button
-            type="button"
-            onClick={() => setShowKey(v => !v)}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#2a4535]"
-          >
-            {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
-        </div>
-        {error && <p className="text-xs text-red-500 mb-3 pl-1">{error}</p>}
-
-        {/* Get key link */}
-        <a
-          href="https://aistudio.google.com/apikey"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-[#2a4535] hover:text-[#1a3228] mb-5 mt-2"
+        <div
+          className="apimodal-card relative w-full max-w-sm overflow-hidden"
+          style={{
+            background: '#f8f3e8',
+            border: '1px solid rgba(196,137,42,0.22)',
+            boxShadow: '0 16px 56px rgba(30,24,16,0.30), 0 2px 8px rgba(42,69,53,0.10)',
+            fontFamily: "'DM Sans', sans-serif",
+            borderRadius: 3,
+          }}
         >
-          {t.getKey} <ExternalLink className="w-3 h-3" />
-        </a>
+          {/* Top accent bar: forest → ochre */}
+          <div style={{ height: 3, background: 'linear-gradient(90deg, #2a4535 0%, #c4892a 100%)' }} />
 
-        {/* Actions */}
-        <div className="flex gap-2">
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="flex-1 py-2.5 rounded-md text-sm font-medium text-slate-500 bg-white/60 hover:bg-white border border-slate-200 transition-colors"
+          <div className="p-6">
+            {/* Close button — only when opened from settings */}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="absolute top-5 right-5 p-1 text-[#1e1810]/35 hover:text-[#2a4535] transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+
+            {/* Header */}
+            <div className="mb-5">
+              <h2
+                className="text-xl font-bold text-[#1e1810] leading-tight mb-2"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '-0.02em' }}
+              >
+                {t.title}
+              </h2>
+              <div style={{ width: 28, height: 2, background: '#c4892a', borderRadius: 1 }} />
+            </div>
+
+            <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(30,24,16,0.62)' }}>
+              {hasEnvKey ? t.envNote : t.subtitle}
+            </p>
+
+            {/* Input */}
+            <div className="relative mb-1">
+              <input
+                type={showKey ? 'text' : 'password'}
+                value={value}
+                onChange={e => { setValue(e.target.value); setError(''); }}
+                onKeyDown={e => e.key === 'Enter' && handleSave()}
+                placeholder={t.placeholder}
+                className="w-full pr-10 pl-3 py-2.5 text-sm focus:outline-none text-[#1e1810]"
+                style={{
+                  background: '#ffffff',
+                  border: `1px solid ${error ? '#b83535' : 'rgba(42,69,53,0.32)'}`,
+                  borderRadius: 2,
+                  fontFamily: "'DM Mono', 'Courier New', monospace",
+                  fontSize: 12.5,
+                  color: '#1e1810',
+                  boxShadow: 'inset 0 1px 3px rgba(30,24,16,0.05)',
+                  transition: 'border-color 0.15s',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowKey(v => !v)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: 'rgba(30,24,16,0.35)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#2a4535'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(30,24,16,0.35)'; }}
+              >
+                {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+            {error && (
+              <p className="text-xs mb-3 pl-0.5" style={{ color: '#b83535' }}>{error}</p>
+            )}
+
+            {/* Get key link */}
+            <a
+              href="https://aistudio.google.com/apikey"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 mb-5 mt-2 transition-colors"
+              style={{ fontSize: 11.5, color: '#c4892a', fontFamily: "'DM Sans', sans-serif" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#a06e1a'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#c4892a'; }}
             >
-              {t.cancel}
-            </button>
-          )}
-          <button
-            onClick={handleSave}
-            className="flex-1 py-2.5 rounded-md text-sm font-semibold text-[#f8f3e8] bg-[#2a4535] hover:bg-[#3a5f4a] transition-colors shadow-sm"
-          >
-            {t.save}
-          </button>
-        </div>
+              {t.getKey} <ExternalLink className="w-3 h-3" />
+            </a>
 
-        {/* Use env key option (only if env key exists and user wants to reset) */}
-        {hasEnvKey && onClose && (
-          <button
-            onClick={handleClearAndUseEnv}
-            className="w-full mt-2 text-xs text-slate-400 hover:text-[#2a4535] transition-colors py-1"
-          >
-            {language === 'zh' ? '恢复使用默认 Key' : 'Reset to default key'}
-          </button>
-        )}
+            {/* Divider */}
+            <div style={{ height: 1, background: 'rgba(42,69,53,0.18)', marginBottom: 16 }} />
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="flex-1 py-2.5 text-sm font-medium transition-colors"
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid rgba(42,69,53,0.22)',
+                    borderRadius: 2,
+                    color: 'rgba(30,24,16,0.65)',
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(42,69,53,0.06)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                >
+                  {t.cancel}
+                </button>
+              )}
+              <button
+                onClick={handleSave}
+                className="flex-1 py-2.5 text-sm font-semibold transition-colors"
+                style={{
+                  background: '#2a4535',
+                  borderRadius: 2,
+                  color: '#f8f3e8',
+                  fontFamily: "'DM Sans', sans-serif",
+                  border: 'none',
+                  letterSpacing: '0.01em',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#3a5f4a'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#2a4535'; }}
+              >
+                {t.save}
+              </button>
+            </div>
+
+            {/* Reset to env key option */}
+            {hasEnvKey && onClose && (
+              <button
+                onClick={handleClearAndUseEnv}
+                className="w-full mt-3 py-1 text-center transition-colors"
+                style={{ fontSize: 11, color: 'rgba(30,24,16,0.40)', fontFamily: "'DM Sans', sans-serif" }}
+                onMouseEnter={e => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.color = '#2a4535';
+                  b.style.opacity = '1';
+                }}
+                onMouseLeave={e => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.color = 'rgba(30,24,16,0.40)';
+                  b.style.opacity = '1';
+                }}
+              >
+                {language === 'zh' ? '恢复使用默认 Key' : 'Reset to default key'}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
