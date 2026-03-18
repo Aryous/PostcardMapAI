@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Eye, EyeOff, ExternalLink, X } from 'lucide-react';
+import { Key, Eye, EyeOff, ExternalLink, X } from 'lucide-react';
 import { Language } from '../types';
 
 interface ApiKeyModalProps {
@@ -99,6 +99,19 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose }) 
 
             {/* Header */}
             <div className="mb-5">
+              {/* Category label — DM Mono eyelet */}
+              <div className="flex items-center gap-1.5 mb-2">
+                <Key className="w-3 h-3" style={{ color: 'rgba(42,69,53,0.55)' }} />
+                <span style={{
+                  fontSize: 9,
+                  letterSpacing: '0.14em',
+                  fontFamily: "'DM Mono', 'Courier New', monospace",
+                  color: 'rgba(42,69,53,0.55)',
+                  textTransform: 'uppercase',
+                }}>
+                  {language === 'zh' ? 'API 配置' : 'API Configuration'}
+                </span>
+              </div>
               <h2
                 className="text-xl font-bold text-[#1e1810] leading-tight mb-2"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '-0.02em' }}
