@@ -7,22 +7,30 @@ interface LuckyDiceProps {
   label?: string;
 }
 
-const STIFFNESS = 0.10;
-const DAMPING   = 0.52;
+const STIFFNESS  = 0.10;
+const DAMPING    = 0.52;
+const SPIN_DEG   = 4;   // degrees per frame — ~240°/s at 60fps, ~1 rotation/1.5s
 
 const LuckyDice: React.FC<LuckyDiceProps> = ({ onLucky, isLoading, label }) => {
-  // true while mouse is over (spring running toward random target)
-  // false when spring has fully returned to 0 (wobble CSS re-activates)
+  // springActive=true means JS owns the transform (no CSS animation on needle)
   const [springActive, setSpringActive] = useState(false);
 
-  const needleRef   = useRef<HTMLDivElement | null>(null);
-  const angleRef    = useRef(0);
-  const velocityRef = useRef(0);
-  const targetRef   = useRef(0);
-  const rafRef      = useRef<number | null>(null);
-  const returningRef = useRef(false);   // true = animating back to 0
+  const needleRef    = useRef<HTMLDivElement | null>(null);
+  const angleRef     = useRef(0);
+  const velocityRef  = useRef(0);
+  const targetRef    = useRef(0);
+  const rafRef       = useRef<number | null>(null);
+  const returningRef = useRef(false);
+  const spinningRef  = useRef(false);   // true while JS-driven loading spin is active
 
-  // Spring tick — stored in a ref so it's always current inside RAF
+  const stopRaf = () => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  };
+
+  // Spring tick — hover wander + return-to-zero
   const tickRef = useRef<() => void>(() => {});
   tickRef.current = () => {
     velocityRef.current += (targetRef.current - angleRef.current) * STIFFNESS;
@@ -40,7 +48,7 @@ const LuckyDice: React.FC<LuckyDiceProps> = ({ onLucky, isLoading, label }) => {
     if (!settled) {
       rafRef.current = requestAnimationFrame(() => tickRef.current());
     } else if (returningRef.current) {
-      // Fully back to north — hand control back to CSS wobble animation
+      // Fully back to north — hand control to CSS wobble
       angleRef.current    = 0;
       velocityRef.current = 0;
       returningRef.current = false;
@@ -49,12 +57,34 @@ const LuckyDice: React.FC<LuckyDiceProps> = ({ onLucky, isLoading, label }) => {
     }
   };
 
-  const stopRaf = () => {
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
+  // Spin tick — continuous rotation from current angle (no snap on loading start)
+  const spinTickRef = useRef<() => void>(() => {});
+  spinTickRef.current = () => {
+    if (!spinningRef.current) return;
+    angleRef.current = (angleRef.current + SPIN_DEG) % 360;
+    if (needleRef.current) {
+      needleRef.current.style.transform = `rotate(${angleRef.current}deg)`;
     }
+    rafRef.current = requestAnimationFrame(() => spinTickRef.current());
   };
+
+  // Respond to isLoading changes — replaces CSS animation switching
+  useEffect(() => {
+    if (isLoading) {
+      stopRaf();
+      spinningRef.current  = true;
+      returningRef.current = false;
+      setSpringActive(true);   // suppress CSS wobble
+      rafRef.current = requestAnimationFrame(() => spinTickRef.current());
+    } else {
+      spinningRef.current = false;
+      stopRaf();
+      // Spring back to north then release to CSS wobble
+      returningRef.current = true;
+      targetRef.current    = 0;
+      rafRef.current = requestAnimationFrame(() => tickRef.current());
+    }
+  }, [isLoading]);
 
   const handleMouseEnter = useCallback(() => {
     if (isLoading) return;
@@ -73,13 +103,12 @@ const LuckyDice: React.FC<LuckyDiceProps> = ({ onLucky, isLoading, label }) => {
     rafRef.current = requestAnimationFrame(() => tickRef.current());
   }, [isLoading]);
 
-  // Cleanup on unmount
   useEffect(() => () => stopRaf(), []);
 
-  const needleClass = isLoading
-    ? 'compass-needle animate-spin-compass'
-    : springActive
-    ? 'compass-needle'                     // JS-driven; no CSS animation
+  // JS-driven whenever springActive (hover, return, or loading spin)
+  // CSS wobble only at rest
+  const needleClass = springActive
+    ? 'compass-needle'
     : 'compass-needle animate-wobble-compass';
 
   return (

@@ -149,6 +149,7 @@
         transform-origin: 50% 50%;
         clip-path: polygon(50% 0%, 100% 40%, 100% 60%, 50% 100%, 0% 60%, 0% 40%);
         background: linear-gradient(to bottom, #dc2626 0%, #ef4444 48%, #94a3b8 52%, #64748b 100%);
+        will-change: transform;
       }
       .compass-pin {
         position: absolute;
@@ -176,9 +177,6 @@
       }
       .animate-wobble-compass {
         animation: wobble-compass 4.5s ease-in-out infinite;
-      }
-      .animate-spin-compass {
-        animation: spin-compass 0.5s linear infinite;
       }
 
       /* ── Global focus-visible ring ── */
