@@ -13,12 +13,12 @@ const T = {
   zh: {
     title: 'Gemini API Key',
     subtitle: '需要 Google Gemini API Key 才能生成明信片。Key 仅存储在你的浏览器本地，不会上传到任何服务器。',
-    envNote: '管理员已通过环境变量配置了默认 Key，你也可以覆盖为自己的 Key。',
+    envNote: '已有默认 API Key 可用，你也可以换成自己的。',
     placeholder: '粘贴你的 API Key（AIza...）',
     save: '保存并开始',
     getKey: '获取免费 API Key →',
     cancel: '取消',
-    error: 'Key 不能为空',
+    error: '请粘贴你的 Gemini API Key',
   },
   en: {
     title: 'Gemini API Key',
@@ -28,7 +28,7 @@ const T = {
     save: 'Save & Start',
     getKey: 'Get a free API Key →',
     cancel: 'Cancel',
-    error: 'Key cannot be empty',
+    error: 'Please paste your Gemini API Key to continue',
   },
 };
 
