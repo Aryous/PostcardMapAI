@@ -37,7 +37,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   devConfig, setDevConfig, locationName, setLocationName,
   sessionCost, pendingStyleId,
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth < 640
+  );
   const [selectedStyleId, setSelectedStyleId] = useState(STYLE_DEFS[0].id);
   const [isSpinning, setIsSpinning] = useState(false);
 
@@ -188,7 +190,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           {/* Expand button */}
           <button
             onClick={() => setIsCollapsed(false)}
-            className="w-12 h-12 flex items-center justify-center hover:bg-[#e2d9cc] transition-colors active:scale-95"
+            className="w-12 h-12 flex items-center justify-center hover:bg-[#e2d9cc] transition-colors active:scale-95 rounded-t-xl"
             aria-label="Expand panel"
             style={{ animation: 'cp-item-in 0.22s cubic-bezier(0.16,1,0.3,1) 0.04s both' }}
           >
@@ -212,7 +214,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           {/* Generate / state indicator */}
           <button
             onClick={() => isAreaSelected && !isProcessing && onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
-            className={`w-12 h-12 flex items-center justify-center transition-colors active:scale-95 ${
+            className={`w-12 h-12 flex items-center justify-center transition-colors active:scale-95 rounded-b-xl ${
               isProcessing
                 ? 'text-[#2a4535]/40'
                 : isAreaSelected

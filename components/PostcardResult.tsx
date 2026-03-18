@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 const isTouch = typeof window !== 'undefined' && 'ontouchstart' in window;
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
 import { X, Download, RotateCw, Coins } from 'lucide-react';
 import { Language, AspectRatio, UsageStats } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
@@ -146,8 +147,8 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
     return () => clearTimeout(autoDismissTimer.current);
   }, [animationStage, isExpanded, isDismissing]);
 
-  // Mini card dimensions (visual size when collapsed)
-  const MINI_W = 272;
+  // Mini card dimensions — smaller on mobile to leave room for controls
+  const MINI_W = isMobile ? 200 : 272;
   const miniH = useMemo(() => {
     const [aw, ah] = (aspectRatio || '4:3').split(':').map(Number);
     return Math.round(MINI_W * ah / aw);
@@ -234,7 +235,7 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
       {/* Cost Breakdown Panel - Separate UI */}
       {isExpanded && usageStats && (
         <div
-          className="absolute top-4 left-4 z-[2100] shadow-2xl rounded-lg p-4 min-w-[220px] animate-in slide-in-from-left-4 fade-in duration-500 cursor-default" style={{ background: 'rgba(248,243,232,0.98)', border: '1px solid rgba(42,69,53,0.15)', fontFamily: "'DM Sans', sans-serif" }}
+          className={`absolute z-[2100] shadow-2xl rounded-lg p-4 min-w-[200px] animate-in fade-in duration-500 cursor-default ${isMobile ? 'top-4 right-4 slide-in-from-right-4' : 'top-4 left-4 slide-in-from-left-4'}`} style={{ background: 'rgba(248,243,232,0.98)', border: '1px solid rgba(42,69,53,0.15)', fontFamily: "'DM Sans', sans-serif" }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
