@@ -83,6 +83,7 @@ export default function App() {
   const [skipAnimation, setSkipAnimation] = useState(false);
   const [historyOriginRect, setHistoryOriginRect] = useState<DOMRect | undefined>(undefined);
   const [pendingStyleId, setPendingStyleId] = useState<string | null>(null);
+  const [isLuckyInProgress, setIsLuckyInProgress] = useState(false);
 
   // API Key modal — never block on load, only open on demand or auth error
   const hasKey = !!(sessionStorage.getItem('gemini_api_key') || process.env.API_KEY);
@@ -112,26 +113,42 @@ export default function App() {
              await (window as any).aistudio?.openSelectKey();
          }
       }
-      
-      // 1. Capture Map
-      await new Promise(resolve => setTimeout(resolve, 800)); 
+
+      // 1. Capture Map (once — shared between primary attempt and fallback)
+      await new Promise(resolve => setTimeout(resolve, 800));
       const mapBase64 = await captureMapElement('map-container');
 
       // 2. Determine Name
       const nameToUse = overrideLocationName !== undefined ? overrideLocationName : locationName;
 
-      // 3. Generate
-      const [frontResult, backResult] = await Promise.all([
-        generatePostcard(mapBase64, prompt, model, userImage, aspectRatio, devConfig, nameToUse),
-        generatePostcardBack(STYLE_DEFS.find(s => s.id === styleId)?.backPrompt ?? '', model, aspectRatio)
-      ]);
-      
-      setGeneratedImage(frontResult.imageUrl);
+      // 3. Generate — with automatic fallback from Pro → Flash 3.1 on permission errors
+      let activeModel = model;
+      let frontResult, backResult;
+      try {
+        [frontResult, backResult] = await Promise.all([
+          generatePostcard(mapBase64, prompt, activeModel, userImage, aspectRatio, devConfig, nameToUse),
+          generatePostcardBack(STYLE_DEFS.find(s => s.id === styleId)?.backPrompt ?? '', activeModel, aspectRatio)
+        ]);
+      } catch (innerErr: any) {
+        const innerRaw = innerErr.message || '';
+        if (activeModel === 'gemini-3-pro-image-preview' && /403|PERMISSION_DENIED/i.test(innerRaw)) {
+          // Pro requires a paid key — silently fall back to Flash 3.1
+          activeModel = 'gemini-3.1-flash-image-preview';
+          setModel(activeModel);
+          [frontResult, backResult] = await Promise.all([
+            generatePostcard(mapBase64, prompt, activeModel, userImage, aspectRatio, devConfig, nameToUse),
+            generatePostcardBack(STYLE_DEFS.find(s => s.id === styleId)?.backPrompt ?? '', activeModel, aspectRatio)
+          ]);
+        } else {
+          throw innerErr;
+        }
+      }
+      setGeneratedImage(frontResult!.imageUrl);
       setGeneratedBackImage(backResult?.imageUrl || undefined);
       setGeneratedAspectRatio(aspectRatio);
 
       // 4. Calculate Combined Cost (Front + Back)
-      const frontUsage = frontResult.usage;
+      const frontUsage = frontResult!.usage;
       const backUsage = backResult?.usage;
 
       const combinedStats: UsageStats = {
@@ -150,11 +167,11 @@ export default function App() {
 
       const newItem: HistoryItem = {
         id: Date.now().toString(),
-        imageUrl: frontResult.imageUrl,
+        imageUrl: frontResult!.imageUrl,
         backImageUrl: backResult?.imageUrl || undefined,
         timestamp: Date.now(),
         styleId: styleId,
-        model: model,
+        model: activeModel,
         cost: combinedStats,
         locationName: nameToUse || undefined,
         aspectRatio: aspectRatio
@@ -185,6 +202,7 @@ export default function App() {
   const handleLucky = useCallback(async () => {
     if (luckyInProgressRef.current) return;
     luckyInProgressRef.current = true;
+    setIsLuckyInProgress(true);
 
     const loc = getRandomLocation();
     setTargetLocation(loc);
@@ -204,6 +222,7 @@ export default function App() {
         setPendingStyleId(null);
         await handleGenerate(randomStyle.frontPrompt, randomStyle.id, loc.name);
         luckyInProgressRef.current = false;
+        setIsLuckyInProgress(false);
     }, 4500);
 
   }, [handleGenerate]);
@@ -266,11 +285,12 @@ export default function App() {
         setLocationName={setLocationName}
         sessionCost={sessionCost}
         pendingStyleId={pendingStyleId}
+        isLuckyInProgress={isLuckyInProgress}
       />
 
-      <LuckyDice 
-        onLucky={handleLucky} 
-        isLoading={appState === AppState.GENERATING || (appState === AppState.IDLE && targetLocation !== undefined && generatedImage === undefined)}
+      <LuckyDice
+        onLucky={handleLucky}
+        isLoading={isLuckyInProgress || appState === AppState.GENERATING}
         label={TRANSLATIONS[language].lucky}
       />
 

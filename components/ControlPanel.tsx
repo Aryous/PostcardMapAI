@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Wand2, RefreshCw, Zap, Sparkles, History, Upload, X, MousePointer2,
+import { Wand2, RefreshCw, Zap, Sparkles, History, Upload, X,
          RectangleHorizontal, RectangleVertical, Square, Settings, ChevronLeft,
          ChevronRight, Type, Loader2, Coins } from 'lucide-react';
 import { AppState, Language, ModelType, AspectRatio, DevConfig } from '../types';
@@ -28,6 +28,7 @@ interface ControlPanelProps {
   setLocationName: (name: string) => void;
   sessionCost: number;
   pendingStyleId?: string | null;
+  isLuckyInProgress?: boolean;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -35,7 +36,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   language, setLanguage, model, setModel,
   userImage, setUserImage, aspectRatio, setAspectRatio,
   devConfig, setDevConfig, locationName, setLocationName,
-  sessionCost, pendingStyleId,
+  sessionCost, pendingStyleId, isLuckyInProgress,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(
     () => typeof window !== 'undefined' && window.innerWidth < 640
@@ -72,7 +73,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   const [showDevToast, setShowDevToast] = useState(false);
   const titleClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isProcessing = appState === AppState.GENERATING;
+  const isProcessing = appState === AppState.GENERATING || !!isLuckyInProgress;
   const isAreaSelected = appState === AppState.REVIEWING || appState === AppState.GENERATING || appState === AppState.COMPLETE;
 
   const t = TRANSLATIONS[language];
@@ -214,22 +215,16 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
           {/* Generate / state indicator */}
           <button
-            onClick={() => isAreaSelected && !isProcessing && onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
+            onClick={() => !isProcessing && onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
             className={`w-12 h-12 flex items-center justify-center transition-colors active:scale-95 rounded-b-xl ${
-              isProcessing
-                ? 'text-[#2a4535]/40'
-                : isAreaSelected
-                  ? 'text-[#2a4535] hover:bg-[#e2d9cc]'
-                  : 'text-[#2a4535]/25 cursor-not-allowed'
+              isProcessing ? 'text-[#2a4535]/40' : 'text-[#2a4535] hover:bg-[#e2d9cc]'
             }`}
             aria-label={t.generate}
             style={{ animation: 'cp-item-in 0.22s cubic-bezier(0.16,1,0.3,1) 0.12s both' }}
           >
             {isProcessing
               ? <div className="w-4 h-4 border-2 border-[#2a4535]/15 border-t-[#2a4535] rounded-full animate-spin" />
-              : isAreaSelected
-                ? <Wand2 className="w-4 h-4" />
-                : <MousePointer2 className="w-4 h-4" />
+              : <Wand2 className="w-4 h-4" />
             }
           </button>
         </div>
@@ -509,21 +504,14 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           ) : (
             <button
               onClick={() => onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
-              disabled={!isAreaSelected}
-              className={`w-full py-3.5 transition-all flex items-center gap-3 px-4 ${
-                isAreaSelected
-                  ? 'bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] active:scale-[0.99]'
-                  : 'bg-[#d4c9b8] text-[#2a4535]/35 cursor-not-allowed'
-              }`}
+              className="w-full py-3.5 bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] transition-all active:scale-[0.99] flex items-center gap-3 px-4"
               style={generatePulse ? { animation: 'cp-ready-pulse 0.7s ease-out' } : undefined}
             >
-              {isAreaSelected
-                ? <Wand2 className="w-4 h-4 flex-shrink-0" />
-                : <MousePointer2 className="w-4 h-4 flex-shrink-0" />}
+              <Wand2 className="w-4 h-4 flex-shrink-0" />
               <span style={{ ...mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600 }}>
-                {isAreaSelected ? t.generate : t.drawPrompt}
+                {t.generate}
               </span>
-              {isAreaSelected && <div style={{ flex: 1, height: '0.5px', background: 'rgba(248,243,232,0.3)' }} />}
+              <div style={{ flex: 1, height: '0.5px', background: 'rgba(248,243,232,0.3)' }} />
             </button>
           )}
         </div>
