@@ -14,6 +14,41 @@ import { getRandomLocation } from './utils/locations';
 import { TRANSLATIONS } from './utils/translations';
 import { Key } from 'lucide-react';
 
+function parseGeminiError(raw: string, lang: Language): string {
+  // Extract the human-readable message buried inside raw JSON responses
+  let msg = raw;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed?.error?.message) msg = parsed.error.message;
+    else if (parsed?.message)   msg = parsed.message;
+  } catch { /* not JSON, use raw */ }
+
+  const zh = lang === 'zh';
+  if (/api.?key.?expired/i.test(msg))
+    return zh ? 'API Key 已过期，请在设置中更新。' : 'Your API key has expired. Please update it in settings.';
+  if (/api.?key.?invalid|invalid.?api.?key/i.test(msg))
+    return zh ? 'API Key 无效，请检查是否正确粘贴。' : 'Invalid API key. Please check that you pasted it correctly.';
+  if (/quota|resource.?exhausted/i.test(msg))
+    return zh ? 'API 配额已耗尽，请稍后再试或更换 Key。' : 'API quota exhausted. Try again later or use a different key.';
+  if (/too.?many.?requests|rate.?limit/i.test(msg))
+    return zh ? '请求太频繁，请稍等片刻后重试。' : 'Too many requests. Please wait a moment and try again.';
+  if (/permission.?denied|forbidden|403/i.test(msg))
+    return zh ? 'API Key 权限不足，请确认已启用 Gemini API。' : 'Permission denied. Check that the Gemini API is enabled for your key.';
+  if (/service.?unavailable|503/i.test(msg))
+    return zh ? 'Gemini 服务暂时不可用，请稍后重试。' : 'Gemini service is temporarily unavailable. Please try again.';
+  if (/network|fetch|ECONNREFUSED|ERR_/i.test(msg))
+    return zh ? '网络连接失败，请检查网络后重试。' : 'Network error. Please check your connection and try again.';
+  if (/timeout/i.test(msg))
+    return zh ? '请求超时，请重试。' : 'Request timed out. Please try again.';
+  if (/safety|content.?policy|harm/i.test(msg))
+    return zh ? '内容被安全过滤拦截，请尝试其他地图区域。' : 'Content blocked by safety filter. Try a different map area.';
+  // Trim to at most 80 chars to avoid wall-of-text fallback
+  const clean = msg.replace(/\{.*\}/, '').trim();
+  return clean.length > 0 && clean.length <= 120
+    ? clean
+    : (zh ? '生成失败，请重试。' : 'Generation failed. Please try again.');
+}
+
 export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
@@ -126,21 +161,18 @@ export default function App() {
 
     } catch (err: any) {
       console.error("Generation pipeline failed:", err);
-      const errorMessage = err.message || JSON.stringify(err);
-      if (errorMessage.includes('403') || errorMessage.includes('PERMISSION_DENIED')) {
-        if (model === 'gemini-3-pro-image-preview') {
-           setError(language === 'zh' ? "权限不足。请选择有效的付费 API Key。" : "Permission denied. Please select a valid paid API Key.");
-           setTimeout(() => { (window as any).aistudio?.openSelectKey(); }, 1500);
-        } else {
-           setError(language === 'zh' ? "API Key 权限不足。" : "Permission denied. Please check your API Key.");
-        }
-      } else {
-        // Open key modal on auth errors
-      if (errorMessage.includes('API Key is missing') || errorMessage.includes('API_KEY_INVALID')) {
+      const raw = err.message || JSON.stringify(err);
+
+      // Open API key modal when key is missing or clearly invalid
+      if (/API Key is missing|API_KEY_INVALID|api.?key.?invalid/i.test(raw)) {
         setShowApiKeyModal(true);
       }
-      setError(err.message || "Something went wrong during generation.");
+      // AI Studio pro-model flow
+      if (model === 'gemini-3-pro-image-preview' && /403|PERMISSION_DENIED/i.test(raw)) {
+        setTimeout(() => { (window as any).aistudio?.openSelectKey(); }, 1500);
       }
+
+      setError(parseGeminiError(raw, language));
       setAppState(AppState.REVIEWING);
     }
   }, [model, language, history, userImage, aspectRatio, devConfig, locationName]);
