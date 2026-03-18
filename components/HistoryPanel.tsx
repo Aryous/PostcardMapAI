@@ -382,30 +382,6 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                                 transform: isHov ? 'scale(1.06)' : 'scale(1)',
                               }}
                             />
-                            {/* model badge — image overlay top-left */}
-                            <div style={{
-                              position: 'absolute',
-                              top: 8,
-                              left: 8,
-                              background: 'rgba(0,0,0,0.45)',
-                              backdropFilter: 'blur(6px)',
-                              WebkitBackdropFilter: 'blur(6px)',
-                              color: '#fff',
-                              fontSize: 9,
-                              fontFamily: "'DM Mono', monospace",
-                              letterSpacing: '0.08em',
-                              padding: '3px 7px',
-                              borderRadius: '2px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 4,
-                            }}>
-                              {isPro
-                                ? <Sparkles size={9} style={{ color: '#f0c84a' }} />
-                                : <Zap size={9} style={{ color: '#93c5fd' }} />
-                              }
-                              <span>{isPro ? 'PRO' : 'FLASH'}</span>
-                            </div>
                           </div>
 
                           {/* polaroid info area */}
@@ -456,15 +432,37 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                                 </div>
                               )}
                             </div>
-                            {/* row 2: style */}
+                            {/* row 2: style + model */}
                             <div style={{
-                              fontFamily: "'DM Mono', monospace",
-                              fontSize: 8.5,
-                              color: 'rgba(30,24,16,0.38)',
-                              letterSpacing: '0.06em',
-                              textTransform: 'uppercase',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
                             }}>
-                              {getStyleLabel(item.styleId)}
+                              <div style={{
+                                fontFamily: "'DM Mono', monospace",
+                                fontSize: 8.5,
+                                color: 'rgba(30,24,16,0.38)',
+                                letterSpacing: '0.06em',
+                                textTransform: 'uppercase',
+                              }}>
+                                {getStyleLabel(item.styleId)}
+                              </div>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 3,
+                                fontFamily: "'DM Mono', monospace",
+                                fontSize: 8.5,
+                                color: isPro ? '#b8922a' : 'rgba(30,24,16,0.38)',
+                                letterSpacing: '0.06em',
+                                flexShrink: 0,
+                              }}>
+                                {isPro
+                                  ? <Sparkles size={8} style={{ color: '#c4892a' }} />
+                                  : <Zap size={8} style={{ color: 'rgba(30,24,16,0.38)' }} />
+                                }
+                                <span>{isPro ? 'PRO' : 'FLASH'}</span>
+                              </div>
                             </div>
                           </div>
 
