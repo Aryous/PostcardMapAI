@@ -496,7 +496,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
           ) : appState === AppState.COMPLETE ? (
             <button onClick={() => onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
-              className="w-full py-3.5 bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] transition-all active:scale-[0.99] flex items-center gap-3 px-4">
+              className="w-full py-3.5 bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] transition-all active:scale-[0.99] flex items-center gap-3 px-4 rounded-b-xl">
               <RefreshCw className="w-4 h-4 flex-shrink-0" />
               <span style={{ ...mono, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600 }}>{t.retry}</span>
               <div style={{ flex: 1, height: '0.5px', background: 'rgba(248,243,232,0.3)' }} />
@@ -504,7 +504,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           ) : (
             <button
               onClick={() => onGenerate(selectedStyle.frontPrompt, selectedStyleId)}
-              className="w-full py-3.5 bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] transition-all active:scale-[0.99] flex items-center gap-3 px-4"
+              className="w-full py-3.5 bg-[#2a4535] hover:bg-[#3a5f4a] text-[#f8f3e8] transition-all active:scale-[0.99] flex items-center gap-3 px-4 rounded-b-xl"
               style={generatePulse ? { animation: 'cp-ready-pulse 0.7s ease-out' } : undefined}
             >
               <Wand2 className="w-4 h-4 flex-shrink-0" />
