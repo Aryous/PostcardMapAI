@@ -67,7 +67,7 @@ export default function App() {
   const [locationName, setLocationName] = useState<string>("");
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   
-  const [model, setModel] = useState<ModelType>('gemini-2.5-flash-image');
+  const [model, setModel] = useState<ModelType>('gemini-3-pro-image-preview');
   const [userImage, setUserImage] = useState<string | undefined>(undefined);
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('4:3');
   

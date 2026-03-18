@@ -42,6 +42,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   );
   const [selectedStyleId, setSelectedStyleId] = useState(STYLE_DEFS[0].id);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [showModelPicker, setShowModelPicker] = useState(false);
 
   useEffect(() => {
     if (!pendingStyleId) return;
@@ -381,26 +382,44 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* ── Main content ── */}
         <div className="px-4 pt-4 pb-0 space-y-4">
 
-          {/* GRADE */}
-          <div>
-            <SectionLabel label={language === 'zh' ? '模型质量' : 'Grade'} />
-            <div className="flex gap-1.5">
-              {([
-                { id: 'gemini-2.5-flash-image',         icon: <Zap className="w-3 h-3" />,      label: t.models.flash   },
-                { id: 'gemini-3.1-flash-image-preview',  icon: <Zap className="w-3 h-3" />,      label: t.models.flash31 },
-                { id: 'gemini-3-pro-image-preview',      icon: <Sparkles className="w-3 h-3" />, label: t.models.pro     },
-              ] as const).map(m => (
-                <button key={m.id} onClick={() => setModel(m.id)}
-                  className={`flex-1 py-2 text-xs font-medium flex items-center justify-center gap-1.5 rounded transition-all ${
-                    model === m.id
-                      ? 'bg-[#2a4535] text-[#f8f3e8] shadow-sm'
-                      : 'text-[#2a4535]/45 hover:text-[#2a4535] hover:bg-[#e2d9cc]'
-                  }`}>
-                  {m.icon}{m.label}
+          {/* GRADE — collapsible */}
+          {(() => {
+            const modelDefs = [
+              { id: 'gemini-3-pro-image-preview',     icon: <Sparkles className="w-3 h-3" />, label: t.models.pro     },
+              { id: 'gemini-3.1-flash-image-preview', icon: <Zap className="w-3 h-3" />,      label: t.models.flash31 },
+              { id: 'gemini-2.5-flash-image',        icon: <Zap className="w-3 h-3" />,      label: t.models.flash   },
+            ] as const;
+            const currentLabel = modelDefs.find(m => m.id === model)?.label ?? model;
+            return (
+              <div>
+                <button
+                  onClick={() => setShowModelPicker(v => !v)}
+                  className="w-full flex items-center justify-between group"
+                >
+                  <SectionLabel label={language === 'zh' ? '模型质量' : 'Grade'} />
+                  <span className="flex items-center gap-1 text-[10px] text-[#2a4535]/55 group-hover:text-[#2a4535] transition-colors pb-1">
+                    <Sparkles className="w-2.5 h-2.5" />
+                    {currentLabel}
+                    <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${showModelPicker ? 'rotate-90' : ''}`} />
+                  </span>
                 </button>
-              ))}
-            </div>
-          </div>
+                {showModelPicker && (
+                  <div className="flex gap-1.5 mt-1.5">
+                    {modelDefs.map(m => (
+                      <button key={m.id} onClick={() => setModel(m.id)}
+                        className={`flex-1 py-2 text-xs font-medium flex items-center justify-center gap-1.5 rounded transition-all ${
+                          model === m.id
+                            ? 'bg-[#2a4535] text-[#f8f3e8] shadow-sm'
+                            : 'text-[#2a4535]/45 hover:text-[#2a4535] hover:bg-[#e2d9cc]'
+                        }`}>
+                        {m.icon}{m.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* FORMAT */}
           <div>
