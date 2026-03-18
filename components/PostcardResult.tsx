@@ -261,6 +261,36 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
       {/* Cost Breakdown Panel - Skeuomorphic Paper Receipt */}
       {isExpanded && usageStats && (() => {
         const receiptNo = String(usageStats.promptTokens + usageStats.candidatesTokens).padStart(6, '0').slice(-6);
+
+        // Safe formatters — guard against NaN / Infinity from malformed API responses
+        const fmtCost = (n: number): string => {
+          if (!Number.isFinite(n)) return '$—';
+          if (n >= 10)    return `$${n.toFixed(2)}`;
+          if (n >= 0.001) return `$${n.toFixed(4)}`;
+          return `$${n.toFixed(5)}`;
+        };
+        const fmtTks = (n: number): string =>
+          Number.isFinite(n) ? n.toLocaleString() : '—';
+
+        // Size tokens: desktop vs mobile
+        const W   = isMobile ? 190  : 230;
+        const pad = isMobile ? '13px 16px 12px' : '16px 20px 15px';
+        const iconSz   = isMobile ? 26  : 30;
+        const coinSz   = isMobile ? 12  : 14;
+        const titleSz  = isMobile ? 10.5 : 12;
+        const noSz     = isMobile ? 8   : 9;
+        const labelSz  = isMobile ? 8.5 : 9.5;
+        const amtSz    = isMobile ? 11.5 : 13;
+        const tksSz    = isMobile ? 7.5 : 8.5;
+        const totLblSz = isMobile ? 10.5 : 12;
+        const totAmtSz = isMobile ? 14  : 16;
+        const footSz   = isMobile ? 7   : 8;
+        const itemGap  = isMobile ? 7   : 9;
+        const ruleGap  = isMobile ? '0 0 9px' : '0 0 11px';
+        const sepGap   = isMobile ? '9px 0 8px' : '11px 0 10px';
+        const hdrMb    = isMobile ? 9   : 11;
+        const footMt   = isMobile ? 10  : 12;
+
         const perfEdge = {
           height: 13,
           background: 'radial-gradient(circle at center, transparent 4.5px, #f1e9d8 5px)',
@@ -275,112 +305,128 @@ const PostcardResult: React.FC<PostcardResultProps> = ({
                 from { opacity: 0; transform: translateY(-18px) rotate(-2.5deg); }
                 to   { opacity: 1; transform: translateY(0)    rotate(-1.5deg); }
               }
-              .receipt-skeu { animation: receipt-appear 0.44s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
+              @keyframes receipt-appear-up {
+                from { opacity: 0; transform: translateY(14px) rotate(-2.5deg); }
+                to   { opacity: 1; transform: translateY(0)   rotate(-1.5deg); }
+              }
+              .receipt-skeu        { animation: receipt-appear    0.44s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
+              .receipt-skeu-mobile { animation: receipt-appear-up 0.44s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
+              @media (prefers-reduced-motion: reduce) {
+                .receipt-skeu, .receipt-skeu-mobile {
+                  animation: none;
+                  opacity: 1;
+                  transform: rotate(-1.5deg);
+                }
+              }
             `}</style>
             <div
-              className="receipt-skeu absolute z-[2100] cursor-default"
+              className={`${isMobile ? 'receipt-skeu-mobile' : 'receipt-skeu'} absolute z-[2100] cursor-default`}
               style={{
-                left: isMobile ? undefined : 16,
-                right: isMobile ? 16 : undefined,
-                top: 16,
-                width: 200,
+                // Desktop: top-left (away from postcard action buttons at top-right)
+                // Mobile:  bottom-right (below the postcard, clear of top-corner buttons)
+                left:   isMobile ? undefined : 16,
+                right:  isMobile ? 16 : undefined,
+                top:    isMobile ? undefined : 16,
+                bottom: isMobile ? 20 : undefined,
+                width: W,
                 fontFamily: "'DM Mono', 'Courier New', monospace",
                 userSelect: 'none',
               }}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
-              {/* Perforated top edge */}
               <div style={perfEdge} />
 
-              {/* Paper body */}
               <div style={{
                 background: '#f1e9d8',
                 backgroundImage: 'repeating-linear-gradient(transparent 0, transparent 3px, rgba(155,135,95,0.045) 3px, rgba(155,135,95,0.045) 4px)',
-                padding: '14px 16px 13px',
+                padding: pad,
                 boxShadow: '0 6px 20px rgba(30,24,16,0.22), 0 1px 4px rgba(30,24,16,0.1), inset 0 0 0 0.5px rgba(30,24,16,0.06)',
               }}>
 
-                {/* Receipt header */}
-                <div style={{ textAlign: 'center', marginBottom: 11 }}>
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: hdrMb }}>
                   <div style={{
-                    width: 30, height: 30, borderRadius: '50%',
-                    border: '1.5px solid rgba(42,69,53,0.38)',
+                    width: iconSz, height: iconSz, borderRadius: '50%',
+                    border: '1.5px solid rgba(42,69,53,0.35)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '0 auto 6px',
-                    color: 'rgba(42,69,53,0.55)',
+                    color: 'rgba(42,69,53,0.5)',
                   }}>
-                    <Coins style={{ width: 14, height: 14 }} />
+                    <Coins style={{ width: coinSz, height: coinSz }} />
                   </div>
                   <div style={{
                     fontFamily: "'Playfair Display', Georgia, serif",
-                    fontSize: 10, fontWeight: 700, letterSpacing: '0.24em',
+                    fontSize: titleSz, fontWeight: 700, letterSpacing: '0.2em',
                     textTransform: 'uppercase', color: '#1e1810', lineHeight: 1,
                   }}>
                     {language === 'zh' ? '生成账单' : 'AI RECEIPT'}
                   </div>
-                  <div style={{ fontSize: 7.5, color: '#a8936a', letterSpacing: '0.06em', marginTop: 4 }}>
+                  <div style={{ fontSize: noSz, color: '#a8936a', letterSpacing: '0.06em', marginTop: 4 }}>
                     No. {receiptNo}
                   </div>
                 </div>
 
-                {/* Header rule */}
-                <div style={{ borderTop: '1px solid rgba(30,24,16,0.11)', margin: '0 0 11px' }} />
+                <div style={{ borderTop: '1px solid rgba(30,24,16,0.11)', margin: ruleGap }} />
 
-                {/* INPUT line item */}
-                <div style={{ marginBottom: 9 }}>
+                {/* INPUT */}
+                <div style={{ marginBottom: itemGap }}>
                   <div style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-                    fontSize: 7.5, letterSpacing: '0.13em', textTransform: 'uppercase', color: '#9a8762',
+                    gap: 6, minWidth: 0,
+                    fontSize: labelSz, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9a8762',
                   }}>
-                    <span>{t.input}</span>
-                    <span style={{ letterSpacing: '0.03em' }}>{usageStats.promptTokens.toLocaleString()} tks</span>
+                    <span style={{ flexShrink: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{t.input}</span>
+                    <span style={{ flexShrink: 0, fontSize: amtSz, fontWeight: 600, color: '#2a1e10', letterSpacing: '-0.01em', textTransform: 'none' }}>
+                      {fmtCost(usageStats.inputCost)}
+                    </span>
                   </div>
-                  <div style={{ textAlign: 'right', fontSize: 12, color: '#2a1e10', fontWeight: 500, marginTop: 2, letterSpacing: '-0.01em' }}>
-                    ${usageStats.inputCost.toFixed(5)}
+                  <div style={{ textAlign: 'right', fontSize: tksSz, color: '#b8a47e', marginTop: 2, letterSpacing: '0.04em' }}>
+                    {fmtTks(usageStats.promptTokens)} tks
                   </div>
                 </div>
 
-                {/* OUTPUT line item */}
+                {/* OUTPUT */}
                 <div style={{ marginBottom: 2 }}>
                   <div style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-                    fontSize: 7.5, letterSpacing: '0.13em', textTransform: 'uppercase', color: '#9a8762',
+                    gap: 6, minWidth: 0,
+                    fontSize: labelSz, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9a8762',
                   }}>
-                    <span>{t.output}</span>
-                    <span style={{ letterSpacing: '0.03em' }}>{usageStats.candidatesTokens.toLocaleString()} tks</span>
+                    <span style={{ flexShrink: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{t.output}</span>
+                    <span style={{ flexShrink: 0, fontSize: amtSz, fontWeight: 600, color: '#2a1e10', letterSpacing: '-0.01em', textTransform: 'none' }}>
+                      {fmtCost(usageStats.outputCost)}
+                    </span>
                   </div>
-                  <div style={{ textAlign: 'right', fontSize: 12, color: '#2a1e10', fontWeight: 500, marginTop: 2, letterSpacing: '-0.01em' }}>
-                    ${usageStats.outputCost.toFixed(5)}
+                  <div style={{ textAlign: 'right', fontSize: tksSz, color: '#b8a47e', marginTop: 2, letterSpacing: '0.04em' }}>
+                    {fmtTks(usageStats.candidatesTokens)} tks
                   </div>
                 </div>
 
-                {/* Dashed total separator */}
-                <div style={{ borderTop: '2px dashed rgba(30,24,16,0.2)', margin: '11px 0 10px' }} />
+                <div style={{ borderTop: '2px dashed rgba(30,24,16,0.18)', margin: sepGap }} />
 
                 {/* TOTAL */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, minWidth: 0 }}>
                   <span style={{
+                    flexShrink: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0,
                     fontFamily: "'Playfair Display', Georgia, serif",
-                    fontSize: 11, fontWeight: 700, color: '#1e1810',
+                    fontSize: totLblSz, fontWeight: 700, color: '#1e1810',
                     textTransform: 'uppercase', letterSpacing: '0.15em',
                   }}>
                     {t.total}
                   </span>
-                  <span style={{ fontSize: 17, fontWeight: 700, color: '#c4892a', letterSpacing: '-0.02em', lineHeight: 1 }}>
-                    ${usageStats.totalCost.toFixed(5)}
+                  <span style={{ flexShrink: 0, fontSize: totAmtSz, fontWeight: 700, color: '#c4892a', letterSpacing: '-0.01em', lineHeight: 1 }}>
+                    {fmtCost(usageStats.totalCost)}
                   </span>
                 </div>
 
-                {/* Footer note */}
                 <div style={{
-                  textAlign: 'center', marginTop: 12,
-                  fontSize: 7, color: '#b09a78', fontStyle: 'italic', letterSpacing: '0.05em',
+                  textAlign: 'center', marginTop: footMt,
+                  fontSize: footSz, color: '#b8a47e', fontStyle: 'italic', letterSpacing: '0.05em',
                 }}>
                   {language === 'zh' ? '* 费用为估算值' : '* estimated cost'}
                 </div>
               </div>
 
-              {/* Perforated bottom edge */}
               <div style={perfEdge} />
             </div>
           </>
