@@ -7,6 +7,7 @@ interface ApiKeyModalProps {
   language: Language;
   onSave: (key: string) => void;
   onClose?: () => void;   // undefined = first-time setup (can't dismiss)
+  keyError?: boolean;     // true = modal opened because existing key failed
 }
 
 const T = {
@@ -14,6 +15,7 @@ const T = {
     title: 'Gemini API Key',
     subtitle: '需要 Google Gemini API Key 才能生成明信片。Key 仅存储在你的浏览器本地，不会上传到任何服务器。',
     envNote: '已有默认 API Key 可用，你也可以换成自己的。',
+    keyError: 'API Key 已失效，请输入新的 Key 以继续。',
     placeholder: '粘贴你的 API Key（AIza...）',
     save: '保存并开始',
     getKey: '获取免费 API Key →',
@@ -24,6 +26,7 @@ const T = {
     title: 'Gemini API Key',
     subtitle: 'A Google Gemini API Key is required to generate postcards. Your key is stored locally in your browser and never sent to any server.',
     envNote: 'A default key is already configured. You can optionally override it with your own.',
+    keyError: 'Your API key is no longer valid. Please enter a new key to continue.',
     placeholder: 'Paste your API Key (AIza...)',
     save: 'Save & Start',
     getKey: 'Get a free API Key →',
@@ -32,7 +35,7 @@ const T = {
   },
 };
 
-const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose }) => {
+const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose, keyError }) => {
   const t = T[language];
   const hasEnvKey = !!process.env.API_KEY;
 
@@ -121,9 +124,16 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ language, onSave, onClose }) 
               <div style={{ width: 28, height: 2, background: '#c4892a', borderRadius: 1 }} />
             </div>
 
-            <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(30,24,16,0.62)' }}>
-              {hasEnvKey ? t.envNote : t.subtitle}
-            </p>
+            {keyError ? (
+              <p className="text-sm mb-4 leading-relaxed px-2.5 py-2"
+                style={{ color: '#8a4a10', background: 'rgba(196,137,42,0.12)', border: '1px solid rgba(196,137,42,0.28)', borderRadius: 2 }}>
+                {t.keyError}
+              </p>
+            ) : (
+              <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(30,24,16,0.62)' }}>
+                {hasEnvKey ? t.envNote : t.subtitle}
+              </p>
+            )}
 
             {/* Input */}
             <div className="relative mb-1">

@@ -58,8 +58,9 @@ export default function App() {
   const [currentUsageStats, setCurrentUsageStats] = useState<UsageStats | undefined>(undefined);
   const [sessionCost, setSessionCost] = useState<number>(0);
 
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [errorRaw, setErrorRaw] = useState<string | undefined>(undefined);
   const [language, setLanguage] = useState<Language>('zh');
+  const error = errorRaw ? parseGeminiError(errorRaw, language) : undefined;
   const [targetLocation, setTargetLocation] = useState<{lat: number, lng: number, zoom: number} | undefined>(undefined);
   
   // Stores the detected or manually entered location name
@@ -86,6 +87,7 @@ export default function App() {
   // API Key modal — never block on load, only open on demand or auth error
   const hasKey = !!(sessionStorage.getItem('gemini_api_key') || process.env.API_KEY);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState(false);
 
   const saveHistory = (newHistory: HistoryItem[]) => {
     setHistory(newHistory);
@@ -94,13 +96,13 @@ export default function App() {
   const handleMapSelection = useCallback((detectedName: string) => {
     setAppState(AppState.REVIEWING);
     setLocationName(detectedName); 
-    setError(undefined);
+    setErrorRaw(undefined);
   }, []);
 
   const handleGenerate = useCallback(async (prompt: string, styleId: string, overrideLocationName?: string) => {
     try {
       setAppState(AppState.GENERATING);
-      setError(undefined);
+      setErrorRaw(undefined);
       setSkipAnimation(false);
       setCurrentUsageStats(undefined);
 
@@ -163,16 +165,17 @@ export default function App() {
       console.error("Generation pipeline failed:", err);
       const raw = err.message || JSON.stringify(err);
 
-      // Open API key modal when key is missing or clearly invalid
-      if (/API Key is missing|API_KEY_INVALID|api.?key.?invalid/i.test(raw)) {
+      // Open API key modal when key is missing, invalid, or expired
+      if (/API Key is missing|API_KEY_INVALID|api.?key.?invalid|api.?key.?expired/i.test(raw)) {
         setShowApiKeyModal(true);
+        setApiKeyError(true);
       }
       // AI Studio pro-model flow
       if (model === 'gemini-3-pro-image-preview' && /403|PERMISSION_DENIED/i.test(raw)) {
         setTimeout(() => { (window as any).aistudio?.openSelectKey(); }, 1500);
       }
 
-      setError(parseGeminiError(raw, language));
+      setErrorRaw(raw);
       setAppState(AppState.REVIEWING);
     }
   }, [model, language, history, userImage, aspectRatio, devConfig, locationName]);
@@ -191,7 +194,7 @@ export default function App() {
     setGeneratedImage(undefined);
     setGeneratedBackImage(undefined);
     setCurrentUsageStats(undefined);
-    setError(undefined);
+    setErrorRaw(undefined);
     setAppState(AppState.IDLE);
 
     const randomStyle = STYLE_DEFS[Math.floor(Math.random() * STYLE_DEFS.length)];
@@ -310,8 +313,9 @@ export default function App() {
       {showApiKeyModal && (
         <ApiKeyModal
           language={language}
-          onSave={() => setShowApiKeyModal(false)}
-          onClose={() => setShowApiKeyModal(false)}
+          onSave={() => { setShowApiKeyModal(false); setApiKeyError(false); }}
+          onClose={() => { setShowApiKeyModal(false); setApiKeyError(false); }}
+          keyError={apiKeyError}
         />
       )}
     </div>
