@@ -7,6 +7,7 @@ import PostcardResult from './components/PostcardResult';
 import HistoryPanel from './components/HistoryPanel';
 import LuckyDice from './components/LuckyDice';
 import ApiKeyModal from './components/ApiKeyModal';
+import ApiKeySignpost from './components/ApiKeySignpost';
 import { AppState, Language, ModelType, HistoryItem, AspectRatio, DevConfig, UsageStats } from './types';
 import { generatePostcard, generatePostcardBack } from './services/geminiService';
 import { captureMapElement } from './utils/mapUtils';
@@ -319,6 +320,13 @@ export default function App() {
           originRect={historyOriginRect}
         />
       )}
+
+      {/* API Key signpost — guides first-time users to configure their key */}
+      <ApiKeySignpost
+        language={language}
+        hasKey={hasKey}
+        appState={appState}
+      />
 
       {/* API Key config button — bottom-left corner */}
       <button
