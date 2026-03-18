@@ -24,6 +24,8 @@ function parseGeminiError(raw: string, lang: Language): string {
   } catch { /* not JSON, use raw */ }
 
   const zh = lang === 'zh';
+  if (/API Key is missing/i.test(msg))
+    return zh ? '请先配置 Gemini API Key，点击左下角钥匙图标。' : 'Please configure your Gemini API Key — click the key icon at the bottom left.';
   if (/api.?key.?expired/i.test(msg))
     return zh ? 'API Key 已过期，请在设置中更新。' : 'Your API key has expired. Please update it in settings.';
   if (/api.?key.?invalid|invalid.?api.?key/i.test(msg))
