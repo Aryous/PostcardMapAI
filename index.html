@@ -179,29 +179,55 @@
         animation: wobble-compass 4.5s ease-in-out infinite;
       }
 
-      /* ── Signpost (API Key onboarding) ── */
-      @keyframes signpost-sway {
-        0%, 100% { transform: rotate(-4deg); }
-        50%       { transform: rotate(4deg); }
+      /* ── Map legend marker (API Key) ── */
+      @keyframes legend-entry {
+        /* Full-panel (no key): rise from below */
+        0%   { opacity: 0; transform: translateY(10px); }
+        65%  { opacity: 1; transform: translateY(-2px); }
+        100% { opacity: 1; transform: translateY(0); }
       }
-      @keyframes signpost-entry {
-        from { opacity: 0; transform: translateY(6px) rotate(-4deg); }
-        to   { opacity: 1; transform: translateY(0)   rotate(-4deg); }
+      @keyframes legend-entry-tab {
+        /* Tab-only (has key): slide in from left edge */
+        0%   { opacity: 0; transform: translateX(-100%); }
+        65%  { opacity: 1; transform: translateX(3px); }
+        100% { opacity: 1; transform: translateX(0); }
       }
-      @keyframes signpost-exit {
-        from { opacity: 1; }
-        to   { opacity: 0; }
+      @keyframes legend-exit {
+        from { opacity: 1; transform: translateY(0); }
+        to   { opacity: 0; transform: translateY(8px); }
       }
-      .signpost-sway {
-        transform-origin: bottom center;
-        animation: signpost-sway 3s ease-in-out infinite;
+      @keyframes legend-exit-tab {
+        from { opacity: 1; transform: translateX(0); }
+        to   { opacity: 0; transform: translateX(-100%); }
+      }
+      @keyframes legend-pulse {
+        0%   { box-shadow: 0 0 0 0 rgba(196, 137, 42, 0.4); }
+        60%  { box-shadow: 0 0 0 6px rgba(196, 137, 42, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(196, 137, 42, 0); }
       }
       .signpost-entry {
-        transform-origin: bottom center;
-        animation: signpost-entry 0.5s ease-out forwards;
+        animation: legend-entry 0.52s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .signpost-entry-tab {
+        animation: legend-entry-tab 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
       .signpost-exit {
-        animation: signpost-exit 0.4s ease-out forwards;
+        animation: legend-exit 0.28s ease-in forwards;
+      }
+      .signpost-exit-tab {
+        animation: legend-exit-tab 0.24s ease-in forwards;
+      }
+      .signpost-sway { /* no-op */ }
+      .legend-alert-pulse {
+        animation: legend-pulse 2.6s ease-out infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .signpost-entry, .signpost-entry-tab,
+        .signpost-exit, .signpost-exit-tab,
+        .legend-alert-pulse {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+        }
       }
 
       /* ── Global focus-visible ring ── */
