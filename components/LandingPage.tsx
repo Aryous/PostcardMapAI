@@ -314,7 +314,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
             MapPostcard<span style={{ color: '#2a4535' }}>.</span>AI
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-            <a href="https://github.com/Aryous/Maposter" target="_blank" rel="noopener noreferrer" className="lp-nav-link">GitHub</a>
+            <a href="https://github.com/Aryous/PostcardMapAI" target="_blank" rel="noopener noreferrer" className="lp-nav-link">GitHub</a>
             <button className="lp-btn-primary" onClick={onStart} style={{ padding: '10px 24px', fontSize: 14 }}>
               开始创作 →
             </button>
